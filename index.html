@@ -2803,7 +2803,7 @@ async function aiCall(task, args, prompt, images, signal, tier) {
 function aiErrMsg(e, fb) {
   const c = e && e.code;
   return c === "cancelled" ? "中止しました。" : c === "rate_limited" ? "混み合っています。少し待ってもう一度どうぞ。" : c === "not_granted" ? "AIの利用が許可されませんでした。手で入力できます。" : c === "bad_key" ? "APIキーが正しくないようです。設定で確かめてください。"
-    : c === "login_required" ? "AI推定はログインすると使えます（右上の設定から）。" : c === "user_limit" ? `今日のAI推定（1日${e.limit || ""}回まで）を使い切りました。明日また使えます。` : c === "global_limit" ? "今日はアプリ全体のAI推定の上限に達しました。明日また使えます。" : c === "not_configured" ? "AI推定はまだ準備中です。名前と場所は手で入力できます。" : c === "network" ? "通信できませんでした。電波を確かめてもう一度どうぞ。" : fb;
+    : c === "login_required" ? "AI推定はログインすると使えます（右上の設定から）。" : c === "user_limit" ? `今日のAI推定（1日${e.limit || ""}回まで）を使い切りました。明日また使えます。` : c === "global_limit" ? "今日はアプリ全体のAI推定の上限に達しました。明日また使えます。" : c === "month_limit" ? "今月のAI推定の枠を使い切りました。来月また使えます。名前と場所は手で入力できます。" : c === "not_configured" ? "AI推定はまだ準備中です。名前と場所は手で入力できます。" : c === "network" ? "通信できませんでした。電波を確かめてもう一度どうぞ。" : fb;
 }
 const REF_PRESETS = [{ n: "500円玉", cm: 2.65 }, { n: "100円玉", cm: 2.26 }, { n: "10円玉", cm: 2.35 }, { n: "1円玉", cm: 2.0 }, { n: "カード（横の長さ）", cm: 8.56 }, { n: "カード（縦の長さ）", cm: 5.40 }];
 async function aiIdentify(cutUrl, photoUrl, signal, digital) {
@@ -3412,7 +3412,7 @@ function startFromOrig(orig, exif) {
     if (c.exif.date && !c.queue && !(c.d.rally && c.d.date !== todayStr())) $("#f_date").value = c.exif.date;
     if (c.exif.lat != null) { if (c.d.lat == null) setLoc(c.exif.lat, c.exif.lng, "写真の位置情報"); const b = $("#exifBtn"); if (b) { b.hidden = false; b.onclick = () => setLoc(c.exif.lat, c.exif.lng, "写真の位置情報"); } }
   }
-  runAI(false);
+  if (window.PetalogCloud) { const bd = $("#aiBd"); if (bd) bd.innerHTML = `<small>「調べる」を押すと、AIが名前・場所・ジャンルを推定します。わかっている場合はそのまま入力してください。</small>`; } else runAI(false);
 }
 function prepareSrc(keepBox) {
   const c = sheetCtx; c.src = adjustCanvas(c.orig, c.adj);

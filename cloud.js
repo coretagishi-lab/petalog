@@ -280,14 +280,14 @@
     if (r.ok && j.ok) return j;
     const e = j.error;
     throw {
-      code: e === "login_required" ? "login_required" : e === "user_limit" ? "user_limit" : e === "global_limit" ? "global_limit"
+      code: e === "login_required" ? "login_required" : e === "user_limit" ? "user_limit" : e === "global_limit" ? "global_limit" : e === "month_limit" ? "month_limit"
         : e === "not_configured" || e === "bad_key" ? "not_configured" : e === "busy" ? "rate_limited" : "error",
       limit: j.limit,
     };
   }
-  async function prepImage(b) {
+  async function prepImage(b, edge) {
     // AIに送る前に小さくする（費用と通信量の節約）。透明部分は白にする。
-    try { return await fit(b, 900000, { maxEdge: 1280, flatten: true, force: true }); } catch { return b; }
+    try { return await fit(b, 400000, { maxEdge: edge || 768, flatten: true, force: true }); } catch { return b; }
   }
 
   /* ---------- sheets ---------- */
@@ -501,7 +501,8 @@
     async ai(task, args, images, signal) {
       if (!attached) throw { code: "login_required" };
       const imgs = [];
-      for (const b of images || []) { const p = await prepImage(b); imgs.push({ type: p.type || "image/jpeg", data: await toB64(p) }); }
+      // smaller pictures = fewer tokens = cheaper: the stamp at 768px, the whole photo at 512px
+      for (const [i, b] of (images || []).entries()) { const p = await prepImage(b, i === 0 ? 768 : 512); imgs.push({ type: p.type || "image/jpeg", data: await toB64(p) }); }
       const j = await callFn("ai", { task, args, images: imgs }, signal);
       return j.result;
     },
@@ -525,7 +526,7 @@
       const a = $("#acAi");
       if (a && attached) callFn("ai", { task: "status" }).then((j) => {
         if (!$("#acAi")) return;
-        $("#acAi").textContent = j.ready ? `AI推定：今日 ${j.used} / ${j.limit} 回` : "AI推定：準備中";
+        $("#acAi").textContent = j.ready ? `AI推定：今日 ${j.used} / ${j.limit} 回${j.month_limit ? `（今月のアプリ全体 ${j.month_used} / ${j.month_limit} 回）` : ""}` : "AI推定：準備中";
       }).catch(() => {});
       if ($("#acMove") && attached) localCount().then((n) => {
         const box = $("#acMove"); if (!box || !n) return;

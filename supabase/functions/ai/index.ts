@@ -1,7 +1,8 @@
 // ぺたろぐ AI function
 // - only signed-in users can call it
 // - prompts are fixed here on the server (it is not a general-purpose AI proxy)
-// - per-user and whole-app daily caps (change with the AI_USER_DAILY / AI_GLOBAL_DAILY secrets)
+// - per-user daily, whole-app daily and whole-app monthly caps (AI_USER_DAILY / AI_GLOBAL_DAILY / AI_MONTHLY secrets)
+// - uses the low-cost model by default (set AI_MODEL_MAIN=claude-sonnet-5 for higher accuracy)
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
@@ -15,9 +16,10 @@ function secretKey(): string {
 }
 const admin = createClient(SUPABASE_URL, secretKey(), { auth: { persistSession: false, autoRefreshToken: false } });
 
-const USER_DAILY = Math.max(1, Number(Deno.env.get("AI_USER_DAILY") ?? 20) || 20);
-const GLOBAL_DAILY = Math.max(1, Number(Deno.env.get("AI_GLOBAL_DAILY") ?? 200) || 200);
-const MODEL_MAIN = Deno.env.get("AI_MODEL_MAIN") ?? "claude-sonnet-5";
+const USER_DAILY = Math.max(1, Number(Deno.env.get("AI_USER_DAILY") ?? 10) || 10);
+const GLOBAL_DAILY = Math.max(1, Number(Deno.env.get("AI_GLOBAL_DAILY") ?? 100) || 100);
+const MONTHLY = Math.max(0, Number(Deno.env.get("AI_MONTHLY") ?? 600) || 0);
+const MODEL_MAIN = Deno.env.get("AI_MODEL_MAIN") ?? "claude-haiku-4-5-20251001";
 const MODEL_QUICK = Deno.env.get("AI_MODEL_QUICK") ?? "claude-haiku-4-5-20251001";
 
 const CORS = {
@@ -63,8 +65,8 @@ ${head}
 1) スタンプの文字・図柄・形式から、どこのスタンプかを推定してください。読めない文字を創作せず、わからない項目は null にします。
 ${size}
 次の形のJSONだけを返してください:
-{"name":"スタンプの名前（例: 東京駅 / 道の駅 ○○）","place":"押せる場所（駅名・施設名）","pref":"都道府県名","cat":"${GENRES.join(" | ")} のどれか","lat":数値かnull,"lng":数値かnull,"text":"読み取れた文字","confidence":0〜1,"reason":"判断の根拠を1文","size_cm":数値かnull,"size_ref":"使った基準物の名前かnull"}
-lat/lng はその施設のおおよその代表座標にしてください。`,
+{"name":"スタンプの名前（例: 東京駅 / 道の駅 ○○）","place":"押せる場所（駅名・施設名）","pref":"都道府県名","cat":"${GENRES.join(" | ")} のどれか","lat":数値かnull,"lng":数値かnull,"text":"読み取れた文字（30字まで）","confidence":0〜1,"reason":"判断の根拠を短く1文","size_cm":数値かnull,"size_ref":"使った基準物の名前かnull"}
+lat/lng はその施設のおおよその代表座標にしてください。余計な説明は書かないでください。`,
     };
   }
   if (task === "goshuin") {
@@ -122,7 +124,8 @@ Deno.serve(async (req) => {
   if (task === "status") {
     const { data } = await admin.from("ai_usage").select("count")
       .eq("user_id", uid).eq("day", new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10)).maybeSingle();
-    return json({ ok: true, used: data?.count ?? 0, limit: USER_DAILY, ready: !!Deno.env.get("ANTHROPIC_API_KEY") });
+    const { data: mu } = await admin.rpc("ai_month_used");
+    return json({ ok: true, used: data?.count ?? 0, limit: USER_DAILY, month_used: mu ?? 0, month_limit: MONTHLY, ready: !!Deno.env.get("ANTHROPIC_API_KEY") });
   }
 
   const job = buildTask(task, (body.args ?? {}) as Record<string, unknown>, cleanImages(body.images, 2));
@@ -131,8 +134,9 @@ Deno.serve(async (req) => {
   const key = Deno.env.get("ANTHROPIC_API_KEY");
   if (!key) return json({ error: "not_configured" }, 503);
 
-  const { data: left, error: qe } = await admin.rpc("ai_take", { p_user: uid, p_limit: USER_DAILY, p_global: GLOBAL_DAILY });
+  const { data: left, error: qe } = await admin.rpc("ai_take", { p_user: uid, p_limit: USER_DAILY, p_global: GLOBAL_DAILY, p_month: MONTHLY });
   if (qe) return json({ error: "server" }, 500);
+  if (left === -3) return json({ error: "month_limit" }, 429);
   if (left === -1) return json({ error: "user_limit", limit: USER_DAILY }, 429);
   if (left === -2) return json({ error: "global_limit" }, 429);
 
@@ -144,7 +148,7 @@ Deno.serve(async (req) => {
     r = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: job.model, max_tokens: 900, messages: [{ role: "user", content }] }),
+      body: JSON.stringify({ model: job.model, max_tokens: 500, messages: [{ role: "user", content }] }),
     });
   } catch {
     await admin.rpc("ai_refund", { p_user: uid });
