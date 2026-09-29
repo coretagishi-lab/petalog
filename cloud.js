@@ -28,7 +28,20 @@
     }
   } catch (e) { console.warn("supabase init", e); }
 
-  let user = null, uid = null, attached = false, recovery = false;
+  let user = null, uid = null, attached = false, recovery = false, offline = false;
+  // remember the last good copy of the records, so the app still opens when the network or server is down
+  const snap = {
+    async get(k) { return Cache.get("kv", `${k}:${uid}`); },
+    put(k, v) { Cache.put("kv", `${k}:${uid}`, v); },
+  };
+  // the Supabase library retries failed reads for a while; when there is no connection we must not wait for that
+  const within = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), ms))]);
+  const sig = ms => (typeof AbortSignal !== "undefined" && AbortSignal.timeout ? AbortSignal.timeout(ms) : undefined);
+  const noNet = () => offline || navigator.onLine === false;
+  // one quick retry of our own instead of the library's long back-off; after that, use the saved copy
+  const ask = q => within(q.retry(false).abortSignal(sig(8000)), 9000).then(r => { if (r.error) fail(r.error); return r; });
+  const twice = async mk => { try { return await ask(mk()); } catch (e) { if (noNet()) throw e; await new Promise(r => setTimeout(r, 700)); try { return await ask(mk()); } catch (e2) { offline = true; throw e2; } } };
+  const netErr = e => !navigator.onLine || /fetch|network|load failed|timed? ?out|offline/i.test(String((e && (e.message || e.name)) || e || ""));
 
   /* ---------- tiny IndexedDB cache (cut images, community rows) ---------- */
   const Cache = {
@@ -122,6 +135,7 @@
   async function cutFor(path) {
     const hit = await Cache.get("cuts", path);
     if (hit) return hit;
+    if (noNet()) return null;
     const b = await download("cuts", path);
     if (!b) return null;
     const url = await toDataUrl(b);
@@ -132,11 +146,17 @@
   /* ---------- Store methods used when logged in ---------- */
   const methods = {
     async listStamps() {
-      const rows = [];
-      for (let from = 0; ; from += 1000) {
-        const { data, error } = await sb.from("stamps").select("id,data,cut_path").eq("user_id", uid).order("id").range(from, from + 999);
-        if (error) fail(error);
-        rows.push(...data); if (data.length < 1000) break;
+      let rows = [];
+      try {
+        if (noNet()) throw new Error("offline");
+        for (let from = 0; ; from += 1000) {
+          const { data } = await twice(() => sb.from("stamps").select("id,data,cut_path").eq("user_id", uid).order("id").range(from, from + 999));
+          rows.push(...data); if (data.length < 1000) break;
+        }
+        snap.put("stamps", rows);
+      } catch (e) {
+        const old = await snap.get("stamps"); if (!old) throw e;
+        rows = old; offline = true;
       }
       const out = [];
       await pool(rows, 6, async (r) => {
@@ -182,26 +202,31 @@
       await upload("photos", `${uid}/${safeKey(key)}`, blob, true);
     },
     async getPhoto(key, legacy) {
+      if (noNet()) return null;
       let b = await download("photos", `${uid}/${safeKey(key)}`);
       if (!b && legacy) b = await download("photos", `${uid}/${safeKey(legacy)}`);
       return b ? toDataUrl(b) : null;
     },
     async delPhoto(key) { await removeFiles("photos", [`${uid}/${safeKey(key)}`]); },
     async getMeta(key) {
-      const { data, error } = await sb.from("user_meta").select("data").eq("user_id", uid).eq("key", key).maybeSingle();
-      if (error) fail(error);
-      return data ? data.data : null;
+      try {
+        if (noNet()) throw new Error("offline");
+        const { data } = await twice(() => sb.from("user_meta").select("data").eq("user_id", uid).eq("key", key).maybeSingle());
+        const v = data ? data.data : null; snap.put("meta_" + key, v); return v;
+      } catch (e) { if (netErr(e) || /timeout|abort/i.test(String(e && (e.message || e.name)))) offline = true; const old = await snap.get("meta_" + key); if (old === undefined || old === null) { if (offline) return null; throw e; } offline = true; return old; }
     },
     async putMeta(key, obj) {
-      const { error } = await sb.from("user_meta").upsert({ user_id: uid, key, data: this.clean({ ...obj, kind: key }) });
-      if (error) fail(error);
+      const body = this.clean({ ...obj, kind: key });
+      const { error } = await sb.from("user_meta").upsert({ user_id: uid, key, data: body });
+      if (error) fail(error); snap.put("meta_" + key, body);
     },
 
     /* community */
     async pubList() {
-      const { data: idx, error } = await sb.from("shares").select("id,updated_at").order("updated_at", { ascending: false }).limit(1000);
-      if (error) fail(error);
       const cached = (await Cache.get("kv", "shares")) || {};
+      let idx;
+      try { if (noNet()) throw new Error("offline"); const r = await twice(() => sb.from("shares").select("id,updated_at").order("updated_at", { ascending: false }).limit(1000)); idx = r.data; }
+      catch (e) { if (!Object.keys(cached).length) throw e; idx = Object.values(cached).sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at))).map(r => ({ id: r.id, updated_at: r.updated_at })); }
       const need = idx.filter((r) => !cached[r.id] || cached[r.id].updated_at !== r.updated_at).map((r) => r.id);
       for (let i = 0; i < need.length; i += 80) {
         const { data, error: e2 } = await sb.from("shares").select("*").in("id", need.slice(i, i + 80));
@@ -458,9 +483,14 @@
   window.PetalogCloud = {
     async attach(store) {
       if (!sb) return false;
-      const { data } = await sb.auth.getSession();
-      const session = data && data.session;
-      if (!session || !session.user) return false;
+      let session = null, err = null;
+      try { const r = await within(sb.auth.getSession(), 6000); session = r.data && r.data.session; err = r.error; } catch (e) { err = e; }
+      if (!session || !session.user) {
+        // no connection: keep showing the signed-in user's last saved records instead of an empty app
+        let saved = null; try { const j = JSON.parse(ls.get("petalog-auth") || "null"); saved = j && (j.user || (j.currentSession && j.currentSession.user)); } catch {}
+        if (!(saved && saved.id && (err || !navigator.onLine))) return false;
+        session = { user: saved }; offline = true;
+      }
       user = session.user; uid = user.id; attached = true;
       Object.assign(store, methods, { uid, mode: "cloud", pub: true, col: null });
       return true;
@@ -504,6 +534,7 @@
       });
     },
     afterBoot() {
+      if (offline) { say("電波かサーバーにつながらないので、前回の記録を表示しています。いまは保存できません。", 6000); return; }
       if (recovery && attached) { openNewPassword(); return; }
       if (attached) { offerMove(); return; }
       if (!ls.get(LS_SKIP) && !ss.get(SS_ASKED)) openLogin(true);
@@ -511,10 +542,15 @@
     openLogin,
   };
 
+  // app shell stays on the phone: opens even when the network or GitHub is unreachable
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+    addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+  }
+  addEventListener("online", () => { if (offline) { say("つながりました。読み込み直します"); setTimeout(() => location.reload(), 1200); } });
   if (sb) {
     sb.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") { recovery = true; if (typeof ready !== "undefined" && ready) openNewPassword(); }
-      if (event === "SIGNED_OUT" && attached) setTimeout(() => location.reload(), 200);
+      if (event === "SIGNED_OUT" && attached && !offline) setTimeout(() => location.reload(), 200);
     });
   }
 })();
