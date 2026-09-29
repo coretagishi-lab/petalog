@@ -49,13 +49,19 @@ function cleanImages(raw: unknown, max: number): Img[] {
 function buildTask(task: string, args: Record<string, unknown>, images: Img[]) {
   if (task === "identify") {
     if (!images.length) return null;
-    const extra = clip(args.refs, 300);
+    const extra = clip(args.refs, 300); const digital = args.digital === true;
+    const head = digital
+      ? `1枚目は、アプリやWebに表示されたデジタルスタンプ（スマホ画面のスクリーンショット）から切り抜いた画像です。${images.length > 1 ? "2枚目は切り抜く前のスクリーンショットです。アプリ名や地名などの文字も手がかりにしてください。" : ""}`
+      : `1枚目は紙に押されたスタンプを切り抜いた画像です。${images.length > 1 ? "2枚目は切り抜く前の元の写真です。" : ""}`;
+    const size = digital
+      ? "2) デジタルスタンプなので実寸はありません。size_cm と size_ref は null にします。"
+      : `2) 元の写真に大きさの基準になる物（${REFS}${extra ? "、" + extra : ""} など）が写っていれば、それとの比率からスタンプの実寸（最も長い辺または直径、cm）を見積もってください。基準物が写っていなければ size_cm は null。`;
     return {
       model: MODEL_MAIN, images,
-      prompt: `あなたは日本の記念スタンプ（駅スタンプ、イベント、観光地、道の駅、商業施設、博物館などのスタンプ）に詳しい鑑定係です。
-1枚目は紙に押されたスタンプを切り抜いた画像です。${images.length > 1 ? "2枚目は切り抜く前の元の写真です。" : ""}
-1) スタンプの文字・図柄・形式から、どこで押せるスタンプかを推定してください。読めない文字を創作せず、わからない項目は null にします。
-2) 元の写真に大きさの基準になる物（${REFS}${extra ? "、" + extra : ""} など）が写っていれば、それとの比率からスタンプの実寸（最も長い辺または直径、cm）を見積もってください。基準物が写っていなければ size_cm は null。
+      prompt: `あなたは日本の記念スタンプ（駅スタンプ、イベント、観光地、道の駅、商業施設、博物館などのスタンプ、デジタルスタンプラリーのスタンプ）に詳しい鑑定係です。
+${head}
+1) スタンプの文字・図柄・形式から、どこのスタンプかを推定してください。読めない文字を創作せず、わからない項目は null にします。
+${size}
 次の形のJSONだけを返してください:
 {"name":"スタンプの名前（例: 東京駅 / 道の駅 ○○）","place":"押せる場所（駅名・施設名）","pref":"都道府県名","cat":"${GENRES.join(" | ")} のどれか","lat":数値かnull,"lng":数値かnull,"text":"読み取れた文字","confidence":0〜1,"reason":"判断の根拠を1文","size_cm":数値かnull,"size_ref":"使った基準物の名前かnull"}
 lat/lng はその施設のおおよその代表座標にしてください。`,

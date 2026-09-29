@@ -416,6 +416,61 @@ a.btn.primary{color:var(--card)}
 #toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:13px;padding:9px 14px;border-radius:10px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:80;max-width:calc(100% - 32px);text-align:center;line-height:1.5}
 #toast.show{opacity:1}
 @media (prefers-reduced-motion: reduce){ .spin{animation:none} .card,.card::after{transition:none} }
+
+/* ---------- v7: select & save, stamp books, digital stamps ---------- */
+[hidden]{display:none!important}
+.card.digi .c-art img,.hero.digi .hi img,.tray button.digi img,.bi.nomul img{mix-blend-mode:normal}
+.card .dg{font-family:var(--f-mono);font-size:8.5px;letter-spacing:.06em;background:#1B2130;color:#fff;border-radius:4px;padding:0 4px;margin-left:5px;vertical-align:1px}
+.card .pick{position:absolute;left:8px;bottom:8px;width:26px;height:26px;border-radius:50%;border:2px solid #fff;background:rgba(27,33,48,.38);display:none;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.3);z-index:2}
+.cards.selecting .card .pick{display:flex}
+.cards.selecting .card:active{transform:none}
+.card.picked .pick{background:var(--ai)}
+.card.picked{box-shadow:0 0 0 3px var(--ai),var(--shadow)}
+.selbar{position:sticky;bottom:0;z-index:4;display:flex;gap:6px;align-items:center;flex-wrap:wrap;background:var(--card);border-top:1px solid var(--line);padding:10px 16px;box-shadow:0 -6px 18px rgba(20,30,50,.08)}
+.selbar b{font-size:13px;margin-right:auto}
+.heroacts{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.exprev{display:flex;align-items:center;justify-content:center;background:repeating-conic-gradient(#E6E8EC 0 25%,#fff 0 50%) 0 0/16px 16px;border-radius:12px;padding:12px;min-height:170px;box-shadow:inset 0 0 0 1px var(--line)}
+.exprev canvas{max-width:100%;max-height:300px;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+.exopts{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.exopts .row2{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.exopts .lab{font-size:12px;color:var(--muted);min-width:3em}
+.delthumbs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.delthumbs img{width:44px;height:44px;object-fit:contain;background:var(--page);border-radius:8px;box-shadow:inset 0 0 0 1px var(--line)}
+.res-wrap.digi{background:repeating-conic-gradient(#E6E8EC 0 25%,#fff 0 50%) 0 0/14px 14px}
+.fsz{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-left:auto}
+.fsz input{width:96px;accent-color:var(--ai)}
+.bkv{flex:1;display:flex;flex-direction:column;min-height:0}
+.shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(138px,1fr));gap:16px;padding:6px 16px 20px}
+.bcover{position:relative;aspect-ratio:3/4;border:0;border-radius:5px 12px 12px 5px;background:var(--c);color:#fff;text-align:left;padding:14px 12px 12px 20px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:inset 7px 0 0 rgba(0,0,0,.2),0 2px 4px rgba(0,0,0,.15),0 10px 22px rgba(20,30,50,.16);overflow:hidden}
+.bcover .bt{font-family:var(--f-hand);font-weight:600;font-size:17px;line-height:1.3;word-break:break-all;position:relative;z-index:1}
+.bcover small{font-family:var(--f-mono);font-size:10.5px;opacity:.85;position:relative;z-index:1}
+.bcover .bthumb{position:absolute;right:10px;bottom:30px;width:52%;aspect-ratio:3/4;border-radius:3px;background:#fff center/contain no-repeat;box-shadow:0 2px 8px rgba(0,0,0,.28);transform:rotate(5deg)}
+.bcover.new{background:transparent;border:2px dashed var(--line);color:var(--muted);box-shadow:none;align-items:center;justify-content:center;font-size:14px;text-align:center;line-height:1.8}
+.pageleaf{align-items:center;justify-content:center;gap:10px;padding:16px 16px 14px 24px}
+.pageleaf img{max-width:100%;max-height:calc(100% - 34px);min-height:0;object-fit:contain;box-shadow:0 1px 3px rgba(0,0,0,.15),0 6px 16px rgba(0,0,0,.12)}
+.pageleaf .pcap{font-family:var(--f-hand);font-size:14px;color:var(--page-ink);text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pageleaf .pcap small{font-family:var(--f-mono);font-size:11px;color:var(--page-muted)}
+.pgacts{display:flex;gap:6px;padding:0 16px 12px;flex-wrap:wrap;justify-content:center;min-height:32px;align-items:center}
+.edbar{display:flex;gap:6px;align-items:center;padding:4px 12px}
+.edbar .ttl{flex:1;min-width:0;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:7px 10px;font-size:16px;font-family:var(--f-hand);color:var(--ink)}
+.edtools{display:flex;gap:6px;overflow-x:auto;padding:4px 12px 6px;scrollbar-width:none;align-items:center}
+.edtools::-webkit-scrollbar{display:none}
+.edtools select{border:1px solid var(--line);background:var(--card);border-radius:9px;padding:6px 8px;font-size:12.5px;color:var(--ink);flex:0 0 auto}
+.edtools .btn{flex:0 0 auto}
+.edtools .sep{width:1px;align-self:stretch;background:var(--line);margin:0 2px;flex:0 0 auto}
+.papercv{position:absolute;left:0;top:0;box-shadow:0 0 0 2px var(--page-edge),0 20px 60px rgba(0,0,0,.14)}
+.bi.bt span{display:block;white-space:pre;text-align:center;pointer-events:none}
+.newpg .sizes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.newpg .sizes button{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;font-size:11.5px;min-height:78px;color:var(--ink)}
+.newpg .sizes button[aria-pressed="true"],.papers button[aria-pressed="true"],.papers .pbtn[aria-pressed="true"]{border-color:var(--ai);box-shadow:0 0 0 2px var(--ai)}
+.newpg .sizes i{display:block;background:var(--page);box-shadow:0 0 0 1px var(--line),0 1px 3px rgba(0,0,0,.12)}
+.swatches{display:flex;gap:10px;flex-wrap:wrap}
+.swatches button{width:32px;height:32px;border-radius:50%;border:3px solid var(--card);background:var(--c);box-shadow:0 0 0 1px var(--line)}
+.swatches button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--ai)}
+.papers{display:flex;gap:8px;flex-wrap:wrap}
+.papers button,.papers .pbtn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:4px 4px 3px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;width:64px;position:relative;color:var(--ink)}
+.papers i{display:block;width:54px;height:40px;border-radius:6px;background-size:cover;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.selacts{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:3;display:flex;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:5px;box-shadow:var(--shadow);white-space:nowrap}
 </style>
 
 <div id="app">
@@ -430,29 +485,22 @@ a.btn.primary{color:var(--card)}
   <main>
     <section class="view" id="v-book">
       <div class="subbar">
-        <div class="seg" role="group" aria-label="表示"><button type="button" id="mGrid" aria-pressed="true">トレカ</button><button type="button" id="mFlip" aria-pressed="false">スタンプ帳</button><button type="button" id="mGos" aria-pressed="false">御朱印帳</button></div>
+        <div class="seg" role="group" aria-label="表示"><button type="button" id="mGrid" aria-pressed="true">トレカ</button><button type="button" id="mGos" aria-pressed="false">御朱印帳</button></div>
         <span class="spacer"></span>
         <span class="stat" id="bookStat"></span>
-      </div>
-      <div id="flipMode" style="flex:1;display:flex;flex-direction:column;min-height:0" hidden>
-        <div class="book-area" id="bookArea"><div class="book" id="book"></div></div>
-        <div class="book-ctl">
-          <button class="icon-btn" id="prevPg" type="button" aria-label="前のページ">‹</button>
-          <input type="range" id="scrub" min="0" max="0" value="0" aria-label="ページ">
-          <span class="where" id="where">表紙</span>
-          <button class="icon-btn" id="nextPg" type="button" aria-label="次のページ">›</button>
-        </div>
       </div>
       <div id="gridMode" class="scroll">
         <div class="gridtools">
           <input class="search" id="gSearch" type="search" placeholder="駅・イベント・色・日付などで探す" aria-label="スタンプを探す" autocomplete="off">
           <button class="btn small" type="button" id="gFilt" aria-expanded="false">絞り込み</button>
           <button class="btn small" type="button" id="gSort">新しい順</button>
+          <button class="btn small" type="button" id="gSel">選択</button>
         </div>
         <div class="filters" id="gFilters" hidden></div>
         <div class="chips" id="gChips"></div>
         <div class="gcount" id="gCount"></div>
         <div class="cards" id="cards"></div>
+        <div class="selbar" id="selBar" hidden></div>
       </div>
       <div id="gosMode" class="scroll" hidden></div>
     </section>
@@ -461,6 +509,7 @@ a.btn.primary{color:var(--card)}
       <div class="subbar">
         <div class="seg" role="group" aria-label="期間"><button type="button" data-f="today" aria-pressed="false">今日</button><button type="button" data-f="month" aria-pressed="false">今月</button><button type="button" data-f="all" aria-pressed="true">ぜんぶ</button></div>
         <span id="mChipBox"></span>
+        <label class="fsz">大きさ<input type="range" id="fallSize" min="35" max="170" value="100" aria-label="スタンプの大きさ"></label>
       </div>
       <div class="fall-wrap washi" id="fallWrap">
         <canvas id="fallCv"></canvas>
@@ -498,16 +547,36 @@ a.btn.primary{color:var(--card)}
     </section>
 
     <section class="view" id="v-board" hidden>
-      <div class="subbar">
-        <div class="seg" role="group" aria-label="用紙"><button type="button" id="paperA4" aria-pressed="true">A4</button><button type="button" id="paperInf" aria-pressed="false">無限</button></div>
-        <button class="btn small" id="bFit" type="button">全体</button>
-        <span class="spacer"></span>
-        <button class="btn small" id="bFront" type="button" disabled>前面へ</button>
-        <button class="btn small" id="bDel" type="button" disabled>はがす</button>
+      <div class="bkv" id="shelfV">
+        <div class="subbar"><b style="font-size:15px">スタンプ帳</b><span class="spacer"></span><button class="btn small primary" type="button" id="bkNew">＋ 新しいスタンプ帳</button></div>
+        <div class="scroll" id="shelfBox"></div>
       </div>
-      <div class="hint">下のスタンプをタップで貼る · ドラッグで移動 · 青い丸で回転と拡大</div>
-      <div class="board-vp" id="boardVp"><div class="stage" id="stage"></div></div>
-      <div class="tray" id="tray"></div>
+      <div class="bkv" id="bookV" hidden>
+        <div class="subbar"><button class="btn small" type="button" id="bkBack">‹ 本棚</button><b id="bkTitle" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--f-hand);font-size:16px"></b><button class="btn small" type="button" id="bkMenu" aria-label="スタンプ帳の設定">設定</button><button class="btn small primary" type="button" id="pgNew">＋ ページ</button></div>
+        <div id="flipMode" style="flex:1;display:flex;flex-direction:column;min-height:0">
+          <div class="book-area" id="bookArea"><div class="book" id="book"></div></div>
+          <div class="book-ctl">
+          <button class="icon-btn" id="prevPg" type="button" aria-label="前のページ">‹</button>
+          <input type="range" id="scrub" min="0" max="0" value="0" aria-label="ページ">
+          <span class="where" id="where">表紙</span>
+          <button class="icon-btn" id="nextPg" type="button" aria-label="次のページ">›</button>
+        </div>
+          <div class="pgacts" id="pgActs"></div>
+        </div>
+      </div>
+      <div class="bkv" id="editV" hidden>
+        <div class="edbar"><button class="btn small" type="button" id="edDone">‹ 完了</button><input class="ttl" id="edTitle" maxlength="40" placeholder="ページのタイトル" aria-label="ページのタイトル"><button class="btn small" type="button" id="edSave">画像で保存</button></div>
+        <div class="edtools">
+          <select id="edSize" aria-label="ページの大きさ"></select>
+          <select id="edPaper" aria-label="紙"></select>
+          <label class="btn small" style="position:relative">背景に写真<input type="file" id="edBg" accept="image/*" style="position:absolute;width:1px;height:1px;opacity:0"></label>
+          <button class="btn small" type="button" id="edText">＋ 文字</button>
+          <button class="btn small" type="button" id="bFit">全体</button>
+        </div>
+        <div class="hint">下のスタンプをタップで貼る · ドラッグで移動 · 青い丸で回転と拡大 · 2本指でズーム</div>
+        <div class="board-vp" id="boardVp"><div class="stage" id="stage"><canvas class="papercv" id="paperCv"></canvas><div id="items"></div></div><div class="selacts" id="selActs" hidden><button class="btn small" type="button" id="bEdit" hidden>文字を直す</button><button class="btn small" type="button" id="bFront">前面へ</button><button class="btn small shu" type="button" id="bDel">はがす</button></div></div>
+        <div class="tray" id="tray"></div>
+      </div>
     </section>
 
     <section class="view" id="v-rally" hidden>
@@ -518,7 +587,7 @@ a.btn.primary{color:var(--card)}
     <button role="tab" data-v="fall" aria-selected="true"><svg viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><circle cx="16.5" cy="16.5" r="3.5"/><circle cx="13" cy="7" r="3.5"/></svg>ぜんぶ</button>
     <button role="tab" data-v="book" aria-selected="false"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="11" height="15" rx="1.5"/><path d="M9 4.2 17.8 3a1.5 1.5 0 0 1 1.7 1.3l1.6 12.2a1.5 1.5 0 0 1-1.3 1.7l-2.3.3"/></svg>トレカ</button>
     <button role="tab" data-v="map" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M12 21s-6-5.6-6-11a6 6 0 0 1 12 0c0 5.4-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg>地図</button>
-    <button role="tab" data-v="board" aria-selected="false"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1.5"/><circle cx="10" cy="10" r="3"/><rect x="12" y="13" width="5" height="4" rx=".8"/></svg>台紙</button>
+    <button role="tab" data-v="board" aria-selected="false"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1.5"/><circle cx="10" cy="10" r="3"/><rect x="12" y="13" width="5" height="4" rx=".8"/></svg>スタンプ帳</button>
     <button role="tab" data-v="rally" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z"/></svg>特集</button>
   </nav>
 </div>
@@ -659,9 +728,9 @@ const Store = {
   async pubReport(o) { if (!this.pub) throw new Error("no"); return this.pub.doc(this.uid + "_miss_" + Date.now().toString(36)).set(this.clean({ miss: true, type: "report", by: this.uid, nick: Profile.nick || "", rk: o.rk || "", name: o.name || "", lat: o.lat ?? null, lng: o.lng ?? null, date: todayStr(), reason: o.reason || "", spot: o.note || "", t: Date.now() })); },
   async pubDel(sid) { if (!this.pub) return; try { await this.pub.doc(this.uid + "_" + sid).delete(); } catch {} }
 };
-const Profile = { nick: "", shareDefault: false, refs: [], events: [],
-  async load() { try { const p = await Store.getMeta("profile"); if (p) Object.assign(this, { nick: p.nick || "", shareDefault: !!p.shareDefault, refs: Array.isArray(p.refs) ? p.refs : [], events: Array.isArray(p.events) ? p.events : [] }); } catch {} },
-  save() { return Store.putMeta("profile", { nick: this.nick, shareDefault: this.shareDefault, refs: this.refs, events: this.events }).catch(() => toast("設定を保存できませんでした")); },
+const Profile = { nick: "", shareDefault: false, refs: [], events: [], fallBg: "washi",
+  async load() { try { const p = await Store.getMeta("profile"); if (p) Object.assign(this, { nick: p.nick || "", shareDefault: !!p.shareDefault, refs: Array.isArray(p.refs) ? p.refs : [], events: Array.isArray(p.events) ? p.events : [], fallBg: p.fallBg || "washi" }); } catch {} },
+  save() { return Store.putMeta("profile", { nick: this.nick, shareDefault: this.shareDefault, refs: this.refs, events: this.events, fallBg: this.fallBg }).catch(() => toast("設定を保存できませんでした")); },
   allEvents() { const s = new Set(this.events); list().forEach(x => x.event && s.add(x.event)); return [...s]; }
 };
 
@@ -745,9 +814,9 @@ function refreshAll() {
   setStatus();
   const L = list(); const prefs = new Set(L.map(s => s.pref).filter(Boolean));
   $("#bookStat").innerHTML = `<b>${L.length}</b> まい · <b>${prefs.size}</b> 都道府県`;
-  Book.build(); Grid.render(); if (typeof Gos !== "undefined") Gos.render();
+  Grid.render(); if (typeof Gos !== "undefined") Gos.render();
   Fall.dirty = true; if (view === "fall") Fall.start();
-  MapV.render(); Board.renderTray(); Board.render(); Rally.render();
+  MapV.render(); Books.refresh(); Rally.render();
 }
 
 /* ================= tabs ================= */
@@ -756,39 +825,33 @@ function show(v) {
   document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", b.dataset.v === v ? "true" : "false"));
   ["book","fall","map","board","rally"].forEach(n => $("#v-" + n).hidden = n !== v);
   if (v === "fall") Fall.start(); else Fall.stop();
-  if (v === "book") Book.layout();
   if (v === "map") MapV.onShow();
-  if (v === "board") Board.onShow();
+  if (v === "board") { Books.onShow(); Book.layout(); }
 }
 document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => { if (MapV.pick) return; show(b.dataset.v); }));
 
 /* ================= BOOK (flip) ================= */
 const Book = {
   idx: 0, pages: [], busy: false, els: {},
-  build() { this.pages = byDate(true).filter(s => s.type !== "goshuin"); this.idx = clamp(this.idx, 0, this.pages.length); $("#scrub").max = this.pages.length; this.render(); this.layout(); },
+  build() { const b = Books.curBook; this.pages = b ? b.pages : []; this.idx = clamp(this.idx, 0, this.pages.length); $("#scrub").max = this.pages.length; this.render(); this.layout(); },
   layout() {
     const area = $("#bookArea"), bk = $("#book"); const aw = area.clientWidth - 32, ah = area.clientHeight - 6;
     if (aw <= 0 || ah <= 0) return; let w = Math.min(aw, 460), h = w / 0.70; if (h > ah) { h = ah; w = h * 0.70; }
     bk.style.width = w + "px"; bk.style.height = h + "px";
   },
   leafHTML(i) {
-    const n = this.pages.length;
+    const n = this.pages.length, b = Books.curBook || { title: "", color: "#1F3570" };
     if (i === 0) {
-      const L = list(); const prefs = new Set(L.map(s => s.pref).filter(Boolean)); const ds = L.map(s => s.date).filter(Boolean).sort();
-      return `<div class="face cover-face"><div class="leaf cover">
-        <div><div class="sub">STAMP LOG · No.1</div><div class="ttl" style="margin-top:14px">ぺた<br>ろぐ</div></div>
-        <div class="label"><span>スタンプ</span><b>${L.length} まい</b><span>都道府県</span><b>${prefs.size} / 47</b><span>期間</span><b>${ds.length ? fmtDate(ds[0]) + " – " + fmtDate(ds[ds.length-1]) : "—"}</b></div>
-        <div class="hint">左へスワイプしてめくる</div></div></div><div class="face back washi"></div><div class="shade"></div>`;
+      const ds = this.pages.map(p => p.created).filter(Boolean).sort((p, q) => p - q); const f = t => { const d = new Date(t); return d.getFullYear() + "." + pad2(d.getMonth() + 1); };
+      const nSt = new Set(this.pages.flatMap(p => p.items.filter(it => it.sid).map(it => it.sid))).size;
+      return `<div class="face cover-face" style="background-color:${b.color} !important"><div class="leaf cover">
+        <div><div class="sub">STAMP BOOK</div><div class="ttl" style="margin-top:14px;font-size:${b.title.length > 7 ? 30 : 42}px;word-break:break-all">${esc(b.title)}</div></div>
+        <div class="label"><span>ページ</span><b>${n}</b><span>スタンプ</span><b>${nSt} まい</b><span>期間</span><b>${ds.length ? f(ds[0]) + " – " + f(ds[ds.length - 1]) : "—"}</b></div>
+        <div class="hint">${n ? "左へスワイプしてめくる" : "「＋ ページ」から最初のページを作りましょう"}</div></div></div><div class="face back washi"></div><div class="shade"></div>`;
     }
-    if (i > n) return `<div class="face washi"><div class="leaf" style="align-items:center;justify-content:center;text-align:center;color:var(--page-muted);font-family:var(--f-hand);font-size:17px;line-height:1.9">つづきは<br>次のおでかけで。</div></div>`;
-    const s = this.pages[i - 1]; const rot = ((hash(s.id) - 0.5) * 10).toFixed(1); const g = s.cat || "その他";
-    return `<div class="face washi"><div class="leaf">
-      <div class="leaf-top"><span class="no">No.${pad2(i).padStart(3, "0")}${s.sample ? '<span class="sample-tag">サンプル</span>' : ""}</span><span class="datestamp">${esc(fmtDate(s.date))}</span></div>
-      <div class="stamp-slot"><img src="${s.cut}" alt="${esc(s.name)}のスタンプ" data-open="${s.id}" style="transform:rotate(${rot}deg)" draggable="false"></div>
-      <h3>${esc(s.name || "名前未設定")}</h3>
-      <div class="meta">${s.place && s.place !== s.name ? `<span>${esc(s.place)}</span>` : ""}${s.pref ? `<span>${esc(s.pref)}</span>` : ""}<span class="chip" style="color:${gcol(g)}">${esc(g)}</span>${s.event ? `<span class="chip" style="color:#2B4C9B">#${esc(s.event)}</span>` : ""}${s.sizeMm ? `<span>⌀ ${fmtCm(s.sizeMm)}</span>` : ""}</div>
-      ${s.note ? `<div class="note">「${esc(s.note)}」</div>` : ""}
-    </div></div><div class="face back washi"></div><div class="shade"></div>`;
+    if (i > n) return `<div class="face washi"><div class="leaf" style="align-items:center;justify-content:center;text-align:center;gap:14px"><div style="color:var(--page-muted);font-family:var(--f-hand);font-size:17px;line-height:1.9">つづきのページを<br>作りましょう。</div><button class="btn primary" type="button" data-newpg="1">＋ ページを作る</button></div></div>`;
+    const p = this.pages[i - 1]; const u = Books.thumbNow(p, 900);
+    return `<div class="face washi"><div class="leaf pageleaf">${u ? `<img src="${u}" alt="${esc(p.title || "ページ")}" data-pg="${p.id}" draggable="false">` : `<span class="spin"></span>`}<div class="pcap">${esc(p.title || "タイトルなし")}<small> · ${i}/${n}</small></div></div></div><div class="face back washi"></div><div class="shade"></div>`;
   },
   mk(i, z) { const d = document.createElement("div"); d.className = "pg"; d.style.zIndex = z; d.innerHTML = this.leafHTML(i); d.dataset.i = i; return d; },
   render() {
@@ -798,9 +861,9 @@ const Book = {
     this.prevEl = null; this.sync();
   },
   sync() {
-    $("#scrub").value = this.idx; const s = this.idx ? this.pages[this.idx - 1] : null;
-    $("#where").textContent = s ? fmtDate(s.date) : "表紙";
-    $("#prevPg").disabled = this.idx === 0; $("#nextPg").disabled = this.idx >= this.pages.length;
+    $("#scrub").value = this.idx; const n = this.pages.length;
+    $("#where").textContent = this.idx ? `${this.idx} / ${n}` : "表紙";
+    $("#prevPg").disabled = this.idx === 0; $("#nextPg").disabled = this.idx >= n; Books.renderPgActs();
   },
   setA(el, a) { el.style.transform = `rotateY(${a}deg)`; const sh = el.querySelector(".shade"); if (sh) sh.style.opacity = (Math.sin(-a / 180 * Math.PI) * 0.8).toFixed(3); },
   anim(el, from, to, dur, done) {
@@ -842,17 +905,17 @@ const Book = {
     if (dir === 1) { if (a < -60 || vx < -0.35) Book.next(a); else { Book.busy = true; Book.anim(Book.cur, a, 0, 260, () => Book.busy = false); } }
     else if (dir === -1 && Book.prevEl) { if (a > -120 || vx > 0.35) Book.prev(a); else { const p = Book.prevEl; Book.busy = true; Book.anim(p, a, -180, 260, () => { p.remove(); Book.prevEl = null; Book.busy = false; }); } }
     else if (!moved) {
-      const t = document.elementFromPoint(e.clientX, e.clientY); const op = t && t.closest("[data-open]");
-      if (op) return openStamp("edit", findStamp(op.dataset.open));
-      const r = bk.getBoundingClientRect(); const fx = (e.clientX - r.left) / r.width;
-      if (fx > 0.7) Book.next(); else if (fx < 0.3) Book.prev();
+      const t = document.elementFromPoint(e.clientX, e.clientY); const r = bk.getBoundingClientRect(); const fx = (e.clientX - r.left) / r.width;
+      const np = t && t.closest("[data-newpg]"); if (np) return Books.newPageSheet();
+      if (fx > 0.78) Book.next(); else if (fx < 0.22) Book.prev();
+      else { const pg = t && t.closest("[data-pg]"); if (pg) Books.viewPage(pg.dataset.pg); }
     }
     a = 0;
   };
   bk.addEventListener("pointerup", end); bk.addEventListener("pointercancel", end);
   $("#prevPg").onclick = () => Book.prev(); $("#nextPg").onclick = () => Book.next();
   $("#scrub").oninput = e => Book.goto(+e.target.value);
-  addEventListener("keydown", e => { if (view !== "book" || !$("#sheetWrap").hidden || Grid.on) return; if (e.key === "ArrowRight") Book.next(); if (e.key === "ArrowLeft") Book.prev(); });
+  addEventListener("keydown", e => { if (view !== "board" || Books.mode !== "book" || !$("#sheetWrap").hidden) return; if (e.key === "ArrowRight") Book.next(); if (e.key === "ArrowLeft") Book.prev(); });
 })();
 
 /* ================= color / shape detection ================= */
@@ -919,19 +982,20 @@ function hayOf(s) {
   const shw = { 丸: "丸 丸型 円 まる", 楕円: "楕円 だ円 丸", 四角: "四角 角型 四角形 しかく", 横長: "横長 四角 角型", 縦長: "縦長 四角 角型" }[sh];
   const r = rallyOf(rallyKeyOf(s));
   s._hay = [s.name, s.place, s.pref || prefAt(s.lat, s.lng), s.addr, s.note, s.memo, s.cat, s.event, (s.colors || []).join(" "), (s.colors || []).map(c => c + "色").join(" "), s.multi ? "重ね押し 多色 カラフル" : "", shw, d, fmtDate(d),
-    y ? `${y}年 ${+m}月 ${y}年${+m}月 ${y}年${+m}月${+dd}日 ${+m}月${+dd}日 ${y}/${+m}` : "", a.city, a.st ? a.st + "駅" : "", (a.lines || []).join(" "), r ? r.r.name + " " + r.st.n : "", s.sizeMm ? fmtCm(s.sizeMm) : ""].join(" ").toLowerCase();
+    isDigi(s) ? "デジタル デジタルスタンプ スクショ" : "リアル", y ? `${y}年 ${+m}月 ${y}年${+m}月 ${y}年${+m}月${+dd}日 ${+m}月${+dd}日 ${y}/${+m}` : "", a.city, a.st ? a.st + "駅" : "", (a.lines || []).join(" "), r ? r.r.name + " " + r.st.n : "", s.sizeMm ? fmtCm(s.sizeMm) : ""].join(" ").toLowerCase();
   return s._hay;
 }
 
 /* ================= GRID (トレカ) ================= */
 const Grid = {
-  on: true, g: "all", q: "", desc: true, f: {}, open: false,
+  on: true, g: "all", q: "", desc: true, f: {}, open: false, selMode: false, sel: new Set(), items: [],
   setMode(on) { setColl(on ? "grid" : "flip"); },
   facets() {
     const L = list(); const cnt = arr => { const m = new Map(); arr.forEach(v => v && m.set(v, (m.get(v) || 0) + 1)); return [...m.entries()].sort((a, b) => b[1] - a[1]); };
     const area = s => areaOf(s.lat, s.lng) || {};
     return {
       event: cnt(L.map(s => s.event)),
+      medium: [["リアル", L.filter(s => s.type !== "goshuin" && !isDigi(s)).length], ["デジタル", L.filter(isDigi).length]].filter(([, c]) => c),
       color: cnt(L.flatMap(s => s.colors || [])),
       multi: L.filter(s => s.multi).length,
       shape: cnt(L.map(shapeName)),
@@ -944,6 +1008,7 @@ const Grid = {
   match(s) {
     const f = this.f;
     if (f.event && s.event !== f.event) return false;
+    if (f.medium && (f.medium === "デジタル") !== isDigi(s)) return false;
     if (f.color && !(s.colors || []).includes(f.color)) return false;
     if (f.multi && !s.multi) return false;
     if (f.shape && shapeName(s) !== f.shape) return false;
@@ -956,7 +1021,7 @@ const Grid = {
     const F = this.facets(), f = this.f;
     const row = (k, title, items, lab = v => v, sw) => items.length ? `<div class="frow"><b>${title}</b>${items.map(([v, c]) => `<button type="button" data-fk="${k}" data-fv="${esc(v)}" aria-pressed="${f[k] === v}">${sw ? `<i style="background:${sw(v)}"></i>` : ""}${esc(lab(v))}<small>${c}</small></button>`).join("")}</div>` : "";
     $("#gFilters").innerHTML =
-      row("event", "イベント", F.event) +
+      row("event", "イベント", F.event) + (F.medium.some(([k]) => k === "デジタル") ? row("medium", "種類", F.medium) : "") +
       (F.color.length ? `<div class="frow"><b>色</b>${F.color.map(([v, c]) => `<button type="button" data-fk="color" data-fv="${esc(v)}" aria-pressed="${f.color === v}"><i style="background:${CSW[v] || "#999"}"></i>${esc(v)}<small>${c}</small></button>`).join("")}${F.multi ? `<button type="button" data-fk="multi" data-fv="1" aria-pressed="${!!f.multi}"><i style="background:conic-gradient(#D23A2E 0 33%,#2B4C9B 0 66%,#2F8F4F 0)"></i>重ね押し<small>${F.multi}</small></button>` : ""}</div>` : "") +
       row("shape", "形", F.shape) +
       row("ym", "年月", F.ym, v => v.slice(0, 4) + "年" + (+v.slice(5, 7)) + "月") +
@@ -970,14 +1035,14 @@ const Grid = {
     if (this.open) this.renderFilters();
     const toks = this.q.trim().toLowerCase().split(/[\s　]+/).filter(Boolean);
     const items = byDate(!this.desc).filter(s => (this.g === "all" || (s.cat || "その他") === this.g) && this.match(s) && (!toks.length || toks.every(t => hayOf(s).includes(t))));
-    const nf = Object.keys(this.f).length;
+    this.items = items; const nf = Object.keys(this.f).length;
     $("#gFilt").textContent = nf ? `絞り込み ${nf}` : "絞り込み"; $("#gFilt").classList.toggle("primary", nf > 0);
     $("#gCount").innerHTML = (nf || toks.length || this.g !== "all") ? `<span>${items.length} まい見つかりました</span><button type="button" id="gClear">条件をクリア</button>` : "";
     const cl = $("#gClear"); if (cl) cl.onclick = () => { this.f = {}; this.q = ""; this.g = "all"; $("#gSearch").value = ""; this.render(); };
     const now = Date.now();
     $("#cards").innerHTML = items.length ? items.map(s => { const g = s.cat || "その他"; const isNew = !s.sample && s.created && now - s.created < 3 * 864e5;
-      return `<button type="button" class="card washi${s.type === "goshuin" ? " gos" : ""}" data-open="${s.id}" style="--g:${gcol(g)}"><div class="band"></div>${isNew ? '<span class="new">NEW</span>' : ""}${s.visits && s.visits.length ? `<span class="visits">×${s.visits.length + 1}</span>` : ""}<div class="c-in">
-        <div class="c-top"><span>No.${String(numOf.get(s.id)).padStart(3, "0")}</span><span>${esc(fmtDate(s.date))}</span></div>
+      return `<button type="button" class="card washi${s.type === "goshuin" ? " gos" : ""}${isDigi(s) ? " digi" : ""}${this.sel.has(s.id) ? " picked" : ""}" data-open="${s.id}" style="--g:${gcol(g)}"><div class="band"></div><span class="pick" aria-hidden="true">✓</span>${isNew ? '<span class="new">NEW</span>' : ""}${s.visits && s.visits.length ? `<span class="visits">×${s.visits.length + 1}</span>` : ""}<div class="c-in">
+        <div class="c-top"><span>No.${String(numOf.get(s.id)).padStart(3, "0")}${isDigi(s) ? '<span class="dg">DIGITAL</span>' : ""}</span><span>${esc(fmtDate(s.date))}</span></div>
         <div class="c-art"><img src="${s.cut}" alt="" loading="lazy" draggable="false"></div>
         <div class="c-name">${esc(s.name || "名前未設定")}</div>
         ${s.event ? `<div class="c-ev">#${esc(s.event)}</div>` : ""}
@@ -986,20 +1051,20 @@ const Grid = {
     $("#gSort").textContent = this.desc ? "新しい順" : "古い順";
   }
 };
-$("#mFlip").onclick = () => Grid.setMode(false); $("#mGrid").onclick = () => Grid.setMode(true);
 $("#gChips").onclick = e => { const b = e.target.closest("[data-g]"); if (b) { Grid.g = b.dataset.g; Grid.render(); } };
 $("#gSearch").oninput = e => { Grid.q = e.target.value; Grid.render(); };
 $("#gSort").onclick = () => { Grid.desc = !Grid.desc; Grid.render(); };
 $("#gFilt").onclick = () => { Grid.open = !Grid.open; $("#gFilters").hidden = !Grid.open; $("#gFilt").setAttribute("aria-expanded", Grid.open); Grid.render(); };
 $("#gFilters").onclick = e => { const b = e.target.closest("[data-fk]"); if (!b) return; const k = b.dataset.fk, v = k === "multi" ? true : b.dataset.fv; if (Grid.f[k] === v) delete Grid.f[k]; else Grid.f[k] = v; Grid.render(); };
-$("#cards").onclick = e => { const c = e.target.closest("[data-open]"); if (c) openStamp("edit", findStamp(c.dataset.open)); };
+$("#cards").onclick = e => { const c = e.target.closest("[data-open]"); if (!c) return; if (Grid.selMode) { const id = c.dataset.open; Grid.sel.has(id) ? Grid.sel.delete(id) : Grid.sel.add(id); c.classList.toggle("picked", Grid.sel.has(id)); renderSelBar(); return; } openStamp("edit", findStamp(c.dataset.open)); };
+$("#gSel").onclick = () => setSelMode(!Grid.selMode);
 </script>
 <script>
 "use strict";
 /* ================= FALL (physics) ================= */
 const Fall = {
   running: false, dirty: true, engine: null, bodies: [], raf: 0, W: 0, H: 0, dpr: 1,
-  grav: { x: 0, y: 1 }, manualAngle: 0, sensor: false, ceilingAdded: false, filter: "all", month: null,
+  grav: { x: 0, y: 1 }, manualAngle: 0, sensor: false, ceilingAdded: false, filter: "all", month: null, scale: clamp(+(lsGet("petalog.fallSize") || 100) / 100, 0.35, 1.7), bgMul: true,
   items() {
     const t = todayStr(), m = t.slice(0, 7), L = list().filter(s => s.type !== "goshuin");
     if (this.month) return L.filter(s => (s.date || "").startsWith(this.month));
@@ -1023,7 +1088,7 @@ const Fall = {
     this.ceilingAdded = false;
     const L = this.items();
     // overflow: keep the newest as single stamps, fold older ones into month (or year) bundles
-    const minS = 42, cap = Math.max(12, Math.floor(0.5 * W * H / (minS * minS * 1.15)));
+    const k = this.scale || 1, minS = 42 * k, cap = Math.max(12, Math.floor(0.5 * W * H / (minS * minS * 1.15)));
     let singles = L, bundles = [];
     if (L.length > cap) {
       const desc = [...L].sort((p, q) => (q.date || "").localeCompare(p.date || ""));
@@ -1033,7 +1098,7 @@ const Fall = {
       bundles = [...g.entries()].map(([k, items]) => ({ key: k, label: year ? k + "年" : (+k.slice(5, 7)) + "月", sub: year ? "" : k.slice(0, 4), items }));
     }
     const n = Math.max(1, singles.length + bundles.length * 2.2);
-    const size = clamp(Math.sqrt(0.42 * W * H / n), minS, Math.min(W, H) * 0.34);
+    const size = clamp(Math.sqrt(0.42 * W * H / n), 42, Math.min(W, H) * 0.34) * k;
     const mms = singles.map(s => s.sizeMm).filter(Boolean).sort((a, b) => a - b); const med = mms.length ? mms[mms.length >> 1] : 0;
     const mk = (s, i) => {
       const f = s.sizeMm && med ? clamp(s.sizeMm / med, 0.65, 1.5) : 1; const sz = size * f;
@@ -1090,7 +1155,7 @@ const Fall = {
         x.fillStyle = "#1B2130"; x.textAlign = "center"; x.textBaseline = "middle";
         x.font = `700 ${Math.round(r * 0.42)}px 'Zen Kaku Gothic New',sans-serif`; x.fillText(p.bundle.label, 0, -r * 0.08);
         x.font = `500 ${Math.round(r * 0.26)}px 'IBM Plex Mono',monospace`; x.fillStyle = "#2B4C9B"; x.fillText("×" + p.bundle.items.length, 0, r * 0.38);
-      } else if (p.img && p.img.complete) { x.globalCompositeOperation = "multiply"; x.drawImage(p.img, -p.w / 2, -p.h / 2, p.w, p.h); x.globalCompositeOperation = "source-over"; }
+      } else if (p.img && p.img.complete) { x.globalCompositeOperation = this.bgMul && !isDigi(p.s) ? "multiply" : "source-over"; x.drawImage(p.img, -p.w / 2, -p.h / 2, p.w, p.h); x.globalCompositeOperation = "source-over"; }
       x.restore();
     }
   },
@@ -1155,6 +1220,8 @@ const Sensor = {
   $("#shakeBtn").onclick = () => Fall.shake();
   $("#dropBtn").onclick = () => { Fall.manualAngle = 0; Fall.drop(); };
   $("#tiltBtn").onclick = () => Sensor.enable();
+  const fs = $("#fallSize"); fs.value = Math.round(Fall.scale * 100); let ft = 0;
+  fs.oninput = () => { Fall.scale = +fs.value / 100; lsSet("petalog.fallSize", fs.value); clearTimeout(ft); ft = setTimeout(() => Fall.drop(), 160); };
 })();
 
 /* ================= MAP (Leaflet + real tiles, drawn fallback) ================= */
@@ -1439,56 +1506,250 @@ $("#pickCancel").onclick = () => MapV.endPick(false); $("#pickOk").onclick = () 
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { MapV.cols = null; MapV.draw(); });
 new MutationObserver(() => { MapV.cols = null; MapV.draw(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
-/* ================= BOARD ================= */
-const Board = {
-  data: { paper: "a4", items: [] }, view: { tx: 0, ty: 0, z: 0.15 }, sel: null, fitted: false, base: 420,
-  async load() {
-    let b = null; try { if (stamps.length) b = await Store.getMeta("board"); } catch {}
-    this.data = b && Array.isArray(b.items) ? { paper: b.paper || "a4", items: b.items.map(i => ({ ...i })) } : { paper: "a4", items: stamps.length ? [] : this.sampleLayout() };
+/* ================= STAMP BOOKS (スタンプ帳: 自分で作るページを集めるノート) ================= */
+const PAGE_SIZES = {
+  a4: { n: "A4", w: 2100, h: 2970, px: 1 },
+  a5: { n: "A5", w: 1480, h: 2100, px: 1.2 },
+  post: { n: "はがき", w: 1000, h: 1480, px: 1.5 },
+  sq: { n: "正方形（インスタ）", w: 2000, h: 2000, px: 1.08 },
+  story: { n: "9:16（待ち受け）", w: 1125, h: 2000, px: 0.96 },
+  inf: { n: "無限", w: 0, h: 0, px: 1 }
+};
+const PAPERS = { washi: "和紙", plain: "白", grid: "方眼", dot: "ドット", lined: "罫線", kraft: "クラフト", seigaiha: "青海波", cork: "コルク", pamph: "パンフレット", photo: "写真" };
+const TILE_PAPERS = ["washi", "plain", "grid", "dot", "lined", "kraft", "seigaiha", "cork"];
+const TFONT = { hand: ["Klee One", 600, "手書き"], goth: ["Zen Kaku Gothic New", 700, "ゴシック"], disp: ["Dela Gothic One", 400, "ふとじ"], mono: ["IBM Plex Mono", 500, "タイプ"] };
+const TCOLORS = ["#1D2230", "#C8412E", "#2B4C9B", "#2F7A4F", "#B0641A", "#6B47A6", "#C0396A", "#FFFFFF"];
+const BOOK_COLORS = ["#2B4C9B", "#C8412E", "#2F7A4F", "#B0641A", "#6B47A6", "#1F6F82", "#1B2130", "#C0396A"];
+const fontCss = (it, px) => { const [f, w] = TFONT[it.font] || TFONT.hand; return `${w} ${Math.max(1, px).toFixed(1)}px '${f}','Hiragino Sans','Noto Sans JP',sans-serif`; };
+const measCtx = mkCanvas(4, 4).getContext("2d");
+const isDigi = s => !!s && s.medium === "digital";
+function stampDims(s, it, base = 420) { const L = (s.sizeMm ? s.sizeMm * 10 : base) * (it.s || 1); const ar = (s.cw || 1) / (s.ch || 1); return ar >= 1 ? [L, L / ar] : [L * ar, L]; }
+function textDims(it) { const fs = it.fs * (it.s || 1); measCtx.font = fontCss(it, fs); const lines = String(it.text || " ").split("\n"); const w = Math.max(fs * 0.6, ...lines.map(l => measCtx.measureText(l).width)); return [w + fs * 0.4, lines.length * fs * 1.3 + fs * 0.2]; }
+function itemDims(it) { if (it.t === "text") return textDims(it); const s = findStamp(it.sid); return s ? stampDims(s, it) : [0, 0]; }
+async function fontsReady(items) { const want = new Set(["disp"]); (items || []).forEach(i => i.t === "text" && want.add(i.font || "hand")); try { await Promise.race([Promise.all([...want].map(k => document.fonts.load(fontCss({ font: k }, 40)))), sleep(1800)]); } catch {} }
+
+/* ---------- paper ---------- */
+const Paper = {
+  T: 1200, washiCv: null, tiles: new Map(), prev: new Map(),
+  washi() { return this.washiCv || (this.washiCv = makeWashi()); },
+  rnd(seed) { let s = seed || 7; return () => (s = (s * 16807) % 2147483647) / 2147483647; },
+  pat(x, img, sc, X0, Y0, W, H, op) {
+    const p = x.createPattern(img, "repeat"); if (!p) return; if (p.setTransform) p.setTransform(new DOMMatrix([sc, 0, 0, sc, 0, 0]));
+    x.save(); x.globalCompositeOperation = op || "source-over"; x.fillStyle = p; x.fillRect(X0, Y0, W, H); x.restore();
   },
-  sampleLayout() { return SAMPLES.slice(0, 6).map((s, i) => ({ k: "k" + i, sid: s.id, x: 480 + (i % 2) * 1100 + hash(s.id) * 120, y: 520 + Math.floor(i / 2) * 900 + hash(s.id + "y") * 160, s: 1, r: (hash(s.id + "r") - 0.5) * 30 })); },
-  dims(s, it) { const w = (s.sizeMm ? s.sizeMm * 10 : this.base) * it.s; return [w, w * (s.ch || 1) / (s.cw || 1)]; },
-  save() { if (!stamps.length) return; clearTimeout(this._t); this._t = setTimeout(() => Store.putMeta("board", this.data).catch(() => toast("台紙を保存できませんでした")), 700); },
-  renderTray() { $("#tray").innerHTML = byDate(false).filter(s => s.type !== "goshuin").map(s => `<button type="button" class="washi" data-add="${s.id}" aria-label="${esc(s.name)}を貼る"><img src="${s.cut}" alt="" draggable="false"></button>`).join(""); },
+  seigaiha(x, X0, Y0, W, H, col, R = 60) {
+    x.save(); x.beginPath(); x.rect(X0, Y0, W, H); x.clip(); x.lineWidth = R * 0.07;
+    const r0 = Math.floor(Y0 / (R / 2)) - 2, r1 = Math.ceil((Y0 + H) / (R / 2)) + 2, c0 = Math.floor(X0 / (R * 2)) - 1, c1 = Math.ceil((X0 + W) / (R * 2)) + 1;
+    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) {
+      const cx = c * R * 2 + (r & 1 ? R : 0), cy = r * R / 2;
+      x.fillStyle = x.__base || "#F8F4EA"; x.beginPath(); x.arc(cx, cy, R, Math.PI, 0); x.fill();
+      x.strokeStyle = col; for (let k = 1; k <= 4; k++) { x.beginPath(); x.arc(cx, cy, R * k / 4.3, Math.PI, 0); x.stroke(); }
+    }
+    x.restore();
+  },
+  // draws the paper for the rectangle (X0,Y0,W,H) in world units (10 units = 1mm)
+  draw(x, p, X0, Y0, W, H, o = {}) {
+    const paper = p.paper || "washi";
+    const base = { washi: "#FBF9F4", plain: "#FFFFFF", grid: "#FDFDFA", dot: "#FCFBF7", lined: "#FFFEFA", kraft: "#CDAE86", seigaiha: "#F8F4EA", cork: "#C39A6B", pamph: "#F7F1E4", photo: "#FFFFFF" }[paper] || "#FFFFFF";
+    x.save(); x.fillStyle = base; x.fillRect(X0, Y0, W, H);
+    if (paper === "photo") {
+      const im = o.bgImg; if (im && im.width) { const s = Math.max(W / im.width, H / im.height); x.drawImage(im, X0 + (W - im.width * s) / 2, Y0 + (H - im.height * s) / 2, im.width * s, im.height * s); }
+    } else if (paper === "washi") this.pat(x, this.washi(), this.T / 360, X0, Y0, W, H, "multiply");
+    else if (paper === "grid") {
+      for (let k = 0; k < 2; k++) { x.strokeStyle = k ? "rgba(70,120,190,.34)" : "rgba(70,120,190,.17)"; x.lineWidth = k ? 3 : 2; const st = k ? 250 : 50; x.beginPath();
+        for (let gx = Math.ceil(X0 / st) * st; gx <= X0 + W; gx += st) { if (!k && gx % 250 === 0) continue; x.moveTo(gx, Y0); x.lineTo(gx, Y0 + H); }
+        for (let gy = Math.ceil(Y0 / st) * st; gy <= Y0 + H; gy += st) { if (!k && gy % 250 === 0) continue; x.moveTo(X0, gy); x.lineTo(X0 + W, gy); } x.stroke(); }
+    } else if (paper === "dot") {
+      x.fillStyle = "rgba(110,100,85,.36)"; x.beginPath();
+      for (let gx = Math.ceil(X0 / 50) * 50; gx <= X0 + W; gx += 50) for (let gy = Math.ceil(Y0 / 50) * 50; gy <= Y0 + H; gy += 50) { x.moveTo(gx + 4.5, gy); x.arc(gx, gy, 4.5, 0, 7); }
+      x.fill();
+    } else if (paper === "lined") {
+      x.strokeStyle = "rgba(70,115,185,.3)"; x.lineWidth = 2.5; x.beginPath();
+      for (let gy = Math.ceil(Y0 / 80) * 80; gy <= Y0 + H; gy += 80) { x.moveTo(X0, gy); x.lineTo(X0 + W, gy); } x.stroke();
+      if (!o.tile) { x.strokeStyle = "rgba(215,90,90,.45)"; x.lineWidth = 3; x.beginPath(); x.moveTo(X0 + 240, Y0); x.lineTo(X0 + 240, Y0 + H); x.stroke(); }
+    } else if (paper === "kraft" || paper === "cork") {
+      const R = this.rnd(paper === "kraft" ? 11 : 23); const cnt = Math.min(60000, W * H / (paper === "kraft" ? 2600 : 900));
+      for (let i = 0; i < cnt; i++) {
+        const px = X0 + R() * W, py = Y0 + R() * H, v = R();
+        if (paper === "kraft") { x.fillStyle = v < 0.5 ? `rgba(120,85,45,${0.12 + R() * 0.2})` : `rgba(255,245,225,${0.12 + R() * 0.2})`; x.fillRect(px, py, 2 + R() * 4, 2 + R() * 4); }
+        else { x.fillStyle = v < 0.55 ? `rgba(95,60,30,${0.18 + R() * 0.3})` : `rgba(235,200,150,${0.18 + R() * 0.3})`; x.beginPath(); x.ellipse(px, py, 3 + R() * 9, 2 + R() * 6, R() * 3, 0, 7); x.fill(); }
+      }
+      if (paper === "kraft") { x.lineCap = "round"; for (let i = 0; i < cnt / 6; i++) { const px = X0 + R() * W, py = Y0 + R() * H, a = R() * 6.28, L = 20 + R() * 60; x.strokeStyle = `rgba(110,78,40,${0.08 + R() * 0.12})`; x.lineWidth = 1.5; x.beginPath(); x.moveTo(px, py); x.lineTo(px + Math.cos(a) * L, py + Math.sin(a) * L); x.stroke(); } }
+    } else if (paper === "seigaiha") { x.__base = base; this.seigaiha(x, X0, Y0, W, H, "rgba(43,76,155,.16)"); x.__base = null; }
+    else if (paper === "pamph") {
+      const band = H * 0.13, foot = H * 0.018;
+      this.pat(x, this.washi(), this.T / 360, X0, Y0, W, H, "multiply");
+      x.fillStyle = "#2B4C9B"; x.fillRect(X0, Y0, W, band);
+      x.__base = "#2B4C9B"; this.seigaiha(x, X0, Y0, W, band, "rgba(255,255,255,.14)", W / 18); x.__base = null;
+      x.fillStyle = "rgba(43,76,155,.0)"; x.fillStyle = "#C8412E"; x.fillRect(X0, Y0 + H - foot, W, foot);
+      x.strokeStyle = "rgba(43,76,155,.35)"; x.lineWidth = W * 0.002; const m = W * 0.03;
+      x.strokeRect(X0 + m, Y0 + band + m, W - m * 2, H - band - foot - m * 2); x.lineWidth = W * 0.0008; x.strokeRect(X0 + m * 1.35, Y0 + band + m * 1.35, W - m * 2.7, H - band - foot - m * 2.7);
+      const t = (o.title || "").trim() || "STAMP LOG"; let fs = Math.min(band * 0.42, W * 0.075);
+      x.font = `400 ${fs}px 'Dela Gothic One','Hiragino Sans',sans-serif`; while (x.measureText(t).width > W * 0.86 && fs > 20) { fs *= 0.92; x.font = `400 ${fs}px 'Dela Gothic One','Hiragino Sans',sans-serif`; }
+      x.fillStyle = "#fff"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(t, X0 + W / 2, Y0 + band * 0.5);
+      x.font = `500 ${band * 0.1}px 'IBM Plex Mono',monospace`; x.globalAlpha = 0.8; x.fillText("STAMP LOG · ぺたろぐ", X0 + W / 2, Y0 + band * 0.84); x.globalAlpha = 1;
+    }
+    x.restore();
+  },
+  // repeating tile (for the endless page, the ぜんぶ background and small previews)
+  tileURL(paper, q = 0.25) {
+    const key = paper + ":" + q; if (this.tiles.has(key)) return this.tiles.get(key);
+    if (!TILE_PAPERS.includes(paper)) return "";
+    const c = mkCanvas(this.T * q, this.T * q), x = c.getContext("2d"); x.scale(q, q); this.draw(x, { paper }, 0, 0, this.T, this.T, { tile: true });
+    const u = c.toDataURL("image/jpeg", 0.88); this.tiles.set(key, u); return u;
+  },
+  previewURL(paper) {
+    if (this.prev.has(paper)) return this.prev.get(paper);
+    const c = mkCanvas(104, 80), x = c.getContext("2d"); const q = 104 / 700; x.scale(q, q);
+    if (paper === "pamph") { x.scale(700 / 2100, 700 / 2100); this.draw(x, { paper, title: "TITLE" }, 0, 0, 2100, 1600); }
+    else if (paper === "photo") { x.fillStyle = "#DCE4F6"; x.fillRect(0, 0, 700, 540); x.fillStyle = "#93AAF0"; x.beginPath(); x.moveTo(0, 540); x.lineTo(230, 250); x.lineTo(400, 420); x.lineTo(520, 300); x.lineTo(700, 540); x.fill(); x.fillStyle = "#F3C969"; x.beginPath(); x.arc(520, 140, 60, 0, 7); x.fill(); }
+    else this.draw(x, { paper }, 0, 0, 700, 540, { tile: true });
+    const u = c.toDataURL("image/jpeg", 0.85); this.prev.set(paper, u); return u;
+  }
+};
+
+/* ---------- render a page to a canvas (thumbnails, lightbox, export) ---------- */
+function pageBounds(p) {
+  const sz = PAGE_SIZES[p.size] || PAGE_SIZES.a4;
+  if (p.size !== "inf") return { x0: 0, y0: 0, W: sz.w, H: sz.h };
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  for (const it of p.items) { const [w, h] = itemDims(it); const R = Math.hypot(w, h) / 2; x0 = Math.min(x0, it.x - R); y0 = Math.min(y0, it.y - R); x1 = Math.max(x1, it.x + R); y1 = Math.max(y1, it.y + R); }
+  if (x1 < x0) return { x0: -1000, y0: -1000, W: 2000, H: 2000 };
+  const m = 160; return { x0: x0 - m, y0: y0 - m, W: x1 - x0 + m * 2, H: y1 - y0 + m * 2 };
+}
+async function renderPage(p, o = {}) {
+  const b = pageBounds(p); const scale = o.px ? Math.min(o.px, 4096 / Math.max(b.W, b.H)) : Math.min(1, (o.max || 800) / Math.max(b.W, b.H));
+  const cv = mkCanvas(b.W * scale, b.H * scale), x = cv.getContext("2d");
+  await fontsReady(p.items);
+  const bgImg = p.paper === "photo" ? await Books.bgImg(p) : null;
+  x.scale(scale, scale); x.translate(-b.x0, -b.y0);
+  if (!o.transparent) Paper.draw(x, p, b.x0, b.y0, b.W, b.H, { title: p.title, bgImg });
+  for (const it of p.items) {
+    x.save(); x.translate(it.x, it.y); x.rotate((it.r || 0) * Math.PI / 180);
+    if (it.t === "text") {
+      const fs = it.fs * (it.s || 1); x.font = fontCss(it, fs); x.fillStyle = it.color || "#1D2230"; x.textAlign = "center"; x.textBaseline = "middle";
+      const lines = String(it.text || "").split("\n"); lines.forEach((l, i) => x.fillText(l, 0, (i - (lines.length - 1) / 2) * fs * 1.3));
+    } else {
+      const s = findStamp(it.sid); if (s) { let im = null; try { im = await loadImg(s.cut); } catch {} if (im) { const [w, h] = stampDims(s, it); x.globalCompositeOperation = !o.transparent && !isDigi(s) && p.paper !== "photo" ? "multiply" : "source-over"; x.drawImage(im, -w / 2, -h / 2, w, h); } }
+    }
+    x.restore();
+  }
+  return cv;
+}
+
+/* ---------- the page editor ---------- */
+const Board = {
+  data: null, book: null, view: { tx: 0, ty: 0, z: 0.15 }, sel: null, fitted: false, base: 420, bgImgs: new Map(),
+  get sz() { return PAGE_SIZES[(this.data && this.data.size) || "a4"] || PAGE_SIZES.a4; },
+  open(book, page) {
+    this.book = book; this.data = page; this.sel = null; this.fitted = false;
+    $("#edTitle").value = page.title || ""; $("#edSize").value = page.size || "a4"; $("#edPaper").value = page.paper || "washi";
+    if (page.paper === "photo") Books.bgImg(page).then(() => { if (this.data === page) this.renderPaper(); });
+  },
+  save() { if (!this.data) return; this.data.updated = Date.now(); Books.save(); },
+  renderTray() { const t = $("#tray"); if (!t) return; t.innerHTML = byDate(false).filter(s => s.type !== "goshuin").map(s => `<button type="button" class="washi${isDigi(s) ? " digi" : ""}" data-add="${s.id}" aria-label="${esc(s.name)}を貼る"><img src="${s.cut}" alt="" draggable="false"></button>`).join("") || `<span class="cap" style="padding:18px 4px">スタンプを追加すると、ここから貼れます。</span>`; },
+  mul(s) { return !isDigi(s) && this.data.paper !== "photo"; },
   render() {
-    const vp = $("#boardVp"); vp.classList.toggle("inf", this.data.paper === "inf");
-    $("#paperA4").setAttribute("aria-pressed", this.data.paper === "a4"); $("#paperInf").setAttribute("aria-pressed", this.data.paper === "inf");
-    let h = this.data.paper === "a4" ? '<div class="a4 washi"></div>' : "";
-    this.data.items = this.data.items.filter(it => findStamp(it.sid));
-    for (const it of this.data.items) { const s = findStamp(it.sid); const [w, hh] = this.dims(s, it);
-      h += `<div class="bi${this.sel === it.k ? " sel" : ""}" data-k="${it.k}" style="width:${w}px;height:${hh}px;transform:translate(${it.x - w / 2}px,${it.y - hh / 2}px) rotate(${it.r}deg)"><img src="${s.cut}" alt="" draggable="false"><div class="hdl" data-h="1"></div></div>`; }
-    $("#stage").innerHTML = h; this.applyView();
-    $("#bDel").disabled = $("#bFront").disabled = !this.sel;
+    const p = this.data; if (!p) return;
+    p.items = p.items.filter(it => it.t === "text" || findStamp(it.sid));
+    let h = "";
+    for (const it of p.items) {
+      const [w, hh] = itemDims(it); const tr = `width:${w}px;height:${hh}px;transform:translate(${it.x - w / 2}px,${it.y - hh / 2}px) rotate(${it.r || 0}deg)`; const sel = this.sel === it.k ? " sel" : "";
+      if (it.t === "text") { const fs = it.fs * (it.s || 1); h += `<div class="bi bt${sel}" data-k="${it.k}" style="${tr}"><span style="font:${fontCss(it, fs)};line-height:1.3;padding-top:${(fs * 0.1).toFixed(1)}px;color:${it.color || "#1D2230"}">${esc(it.text)}</span><div class="hdl" data-h="1"></div></div>`; }
+      else { const s = findStamp(it.sid); h += `<div class="bi${this.mul(s) ? "" : " nomul"}${sel}" data-k="${it.k}" style="${tr}"><img src="${s.cut}" alt="" draggable="false"><div class="hdl" data-h="1"></div></div>`; }
+    }
+    $("#items").innerHTML = h; this.applyView();
+    const si = p.items.find(i => i.k === this.sel);
+    $("#selActs").hidden = !si; $("#bEdit").hidden = !(si && si.t === "text");
+  },
+  renderPaper() {
+    const p = this.data; if (!p) return; const cv = $("#paperCv"), vp = $("#boardVp"); const inf = p.size === "inf";
+    vp.classList.toggle("inf", inf); cv.hidden = inf;
+    if (inf) { vp.style.backgroundImage = `url(${Paper.tileURL(TILE_PAPERS.includes(p.paper) ? p.paper : "washi")})`; this.applyView(); return; }
+    vp.style.backgroundImage = "";
+    const { w, h } = this.sz; const q = Math.min(1, 1500 / Math.max(w, h));
+    cv.width = Math.round(w * q); cv.height = Math.round(h * q); cv.style.width = w + "px"; cv.style.height = h + "px";
+    const x = cv.getContext("2d"); x.setTransform(q, 0, 0, q, 0, 0);
+    const draw = () => Paper.draw(x, p, 0, 0, w, h, { title: p.title, bgImg: this.bgImgs.get(p.bg) });
+    draw(); if (p.paper === "pamph") fontsReady([]).then(() => { if (this.data === p && p.paper === "pamph") draw(); });
   },
   applyView() {
     const v = this.view, st = $("#stage"); st.style.transform = `translate(${v.tx}px,${v.ty}px) scale(${v.z})`; st.style.setProperty("--iz", 1 / v.z);
-    const vp = $("#boardVp"); const g = 60 * v.z; vp.style.backgroundSize = this.data.paper === "inf" ? `${g}px ${g}px` : ""; vp.style.backgroundPosition = this.data.paper === "inf" ? `${v.tx}px ${v.ty}px` : "";
+    const vp = $("#boardVp"); const inf = this.data && this.data.size === "inf";
+    vp.style.backgroundSize = inf ? `${Paper.T * v.z}px ${Paper.T * v.z}px` : ""; vp.style.backgroundPosition = inf ? `${v.tx}px ${v.ty}px` : "";
   },
   fit() {
-    const vp = $("#boardVp"), W = vp.clientWidth, H = vp.clientHeight; if (!W || !H) return;
-    let x0 = 0, y0 = 0, x1 = 2100, y1 = 2970;
-    if (this.data.paper === "inf") { const I = this.data.items; if (I.length) { x0 = Math.min(...I.map(i => i.x)) - 400; x1 = Math.max(...I.map(i => i.x)) + 400; y0 = Math.min(...I.map(i => i.y)) - 400; y1 = Math.max(...I.map(i => i.y)) + 400; } else { x0 = -1000; x1 = 1000; y0 = -1000; y1 = 1000; } }
+    const vp = $("#boardVp"), W = vp.clientWidth, H = vp.clientHeight; if (!W || !H || !this.data) return;
+    let x0 = 0, y0 = 0, x1 = this.sz.w, y1 = this.sz.h;
+    if (this.data.size === "inf") { const b = pageBounds(this.data); x0 = b.x0; y0 = b.y0; x1 = b.x0 + b.W; y1 = b.y0 + b.H; }
     const z = Math.min((W - 24) / (x1 - x0), (H - 24) / (y1 - y0));
     this.view = { z, tx: (W - (x1 - x0) * z) / 2 - x0 * z, ty: (H - (y1 - y0) * z) / 2 - y0 * z }; this.render();
   },
-  onShow() { if (!this.fitted) { this.fitted = true; this.fit(); } else this.render(); },
+  onShow() { this.renderTray(); if (!this.fitted) { this.fitted = true; this.renderPaper(); this.fit(); } else this.render(); },
+  center() { const vp = $("#boardVp"), v = this.view; return [(vp.clientWidth / 2 - v.tx) / v.z, (vp.clientHeight / 2 - v.ty) / v.z]; },
+  // find an empty spot (spiral out from the start point, stay on the page)
+  spot(w, h, start) {
+    const p = this.data, inf = p.size === "inf", W = this.sz.w, H = this.sz.h; const [cx, cy] = start || (inf ? this.center() : [W / 2, H / 2]);
+    const boxes = p.items.map(it => { const [iw, ih] = itemDims(it); return [it.x - iw / 2, it.y - ih / 2, it.x + iw / 2, it.y + ih / 2]; });
+    if (!inf && p.paper === "pamph") boxes.push([0, 0, W, H * 0.13]);
+    const over = (x, y) => { let o = 0; for (const b of boxes) { const ox = Math.min(x + w / 2, b[2]) - Math.max(x - w / 2, b[0]), oy = Math.min(y + h / 2, b[3]) - Math.max(y - h / 2, b[1]); if (ox > 0 && oy > 0) o += ox * oy; } return o; };
+    let best = [cx, cy], bo = Infinity; const step = Math.max(w, h) * 0.55;
+    for (let r = 0; r <= 12; r++) {
+      const n = r ? r * 8 : 1;
+      for (let k = 0; k < n; k++) {
+        const a = k / n * Math.PI * 2 + r; const x = cx + Math.cos(a) * r * step, y = cy + Math.sin(a) * r * step;
+        if (!inf && (x - w / 2 < W * 0.02 || y - h / 2 < H * 0.02 || x + w / 2 > W * 0.98 || y + h / 2 > H * 0.98)) continue;
+        const o = over(x, y); if (o === 0) return [x, y]; if (o < bo) { bo = o; best = [x, y]; }
+      }
+    }
+    return best;
+  },
   add(sid) {
-    const vp = $("#boardVp"), v = this.view, s = findStamp(sid); const cx = (vp.clientWidth / 2 - v.tx) / v.z, cy = (vp.clientHeight / 2 - v.ty) / v.z;
-    const k = uid("k"); const sc = s.sizeMm ? 1 : clamp(vp.clientWidth / v.z * 0.3 / this.base, 0.3, 8);
-    this.data.items.push({ k, sid, x: cx + (Math.random() - 0.5) * 200, y: cy + (Math.random() - 0.5) * 200, s: sc, r: (Math.random() - 0.5) * 14 });
+    if (!this.data) return; const vp = $("#boardVp"), v = this.view, s = findStamp(sid); if (!s) return; const [cx, cy] = this.center();
+    const k = uid("k"); const pw = this.data.size === "inf" ? vp.clientWidth / v.z : this.sz.w; const sc = s.sizeMm ? 1 : clamp(pw * 0.3 / this.base, 0.3, 8);
+    const [w, h] = stampDims(s, { s: sc }); const [x, y] = this.spot(w * 1.05, h * 1.05, this.data.size === "inf" ? [cx, cy] : null);
+    this.data.items.push({ k, sid, x, y, s: sc, r: (Math.random() - 0.5) * 14 });
     this.sel = k; this.render(); this.save();
     if (s.sizeMm) toast(`実寸 ${fmtCm(s.sizeMm)} で貼りました`);
+  },
+  addText(o) {
+    const inf = this.data.size === "inf"; const W = inf ? 2000 : this.sz.w, H = this.sz.h; const k = uid("t");
+    const it = { k, t: "text", text: o.text, font: o.font, color: o.color, fs: Math.round(W * 0.075), s: 1, x: 0, y: 0, r: 0 }; const [w, h] = textDims(it);
+    const top = inf ? this.center() : [W / 2, (this.data.paper === "pamph" ? H * 0.13 : 0) + h / 2 + H * 0.05];
+    [it.x, it.y] = this.spot(w, h, top); this.data.items.push(it);
+    this.sel = k; this.render(); this.save();
   }
 };
+function openTextSheet(it) {
+  const o = it ? { text: it.text, font: it.font || "hand", color: it.color || "#1D2230" } : { text: "", font: "hand", color: "#1D2230" };
+  sheetCtx = { mode: "text" };
+  openSheet(`<div class="sheet-head"><h2>${it ? "文字を直す" : "文字を入れる"}</h2><button class="btn small ghost" type="button" data-close>閉じる</button></div>
+    <div class="sec"><textarea id="txIn" class="search" rows="3" maxlength="200" placeholder="例: 2025 夏の駅めぐり" style="font-size:16px;resize:vertical">${esc(o.text)}</textarea></div>
+    <div class="sec"><h4>書体</h4><div class="seg" id="txFont">${Object.entries(TFONT).map(([k, v]) => `<button type="button" data-tf="${k}" aria-pressed="${o.font === k}" style="font-family:'${v[0]}'">${v[2]}</button>`).join("")}</div></div>
+    <div class="sec"><h4>色</h4><div class="swatches" id="txCol">${TCOLORS.map(c => `<button type="button" data-tc="${c}" style="--c:${c}" aria-pressed="${o.color === c}" aria-label="色 ${c}"></button>`).join("")}</div></div>
+    <p class="cap">貼ったあと、青い丸をドラッグすると大きさと向きを変えられます。</p>
+    <div class="acts">${it ? `<button class="btn ghost" type="button" id="txDel">消す</button>` : ""}<button class="btn primary" type="button" id="txOk">${it ? "直す" : "貼る"}</button></div>`);
+  $("#txFont").onclick = e => { const b = e.target.closest("[data-tf]"); if (!b) return; o.font = b.dataset.tf; document.querySelectorAll("[data-tf]").forEach(x => x.setAttribute("aria-pressed", x === b)); };
+  $("#txCol").onclick = e => { const b = e.target.closest("[data-tc]"); if (!b) return; o.color = b.dataset.tc; document.querySelectorAll("[data-tc]").forEach(x => x.setAttribute("aria-pressed", x === b)); };
+  const d = $("#txDel"); if (d) d.onclick = () => { Board.data.items = Board.data.items.filter(i => i !== it); Board.sel = null; closeSheet(); Board.render(); Board.save(); };
+  $("#txOk").onclick = async () => {
+    const t = $("#txIn").value.replace(/\s+$/, ""); if (!t.trim()) { toast("文字を入れてください"); return; }
+    await fontsReady([{ t: "text", font: o.font }]);
+    if (it) Object.assign(it, { text: t, font: o.font, color: o.color }); else Board.addText({ text: t, font: o.font, color: o.color });
+    closeSheet(); Board.render(); Board.save();
+  };
+  setTimeout(() => $("#txIn") && $("#txIn").focus(), 50);
+}
 (function boardInput() {
   const vp = $("#boardVp"); const pts = new Map(); let mode = null, item = null, start = null, pinch = null;
   const toWorld = (cx, cy) => { const r = vp.getBoundingClientRect(), v = Board.view; return [(cx - r.left - v.tx) / v.z, (cy - r.top - v.ty) / v.z]; };
+  const find = el => Board.data && Board.data.items.find(i => i.k === el.dataset.k);
   vp.addEventListener("pointerdown", e => {
-    vp.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (!Board.data || e.target.closest(".selacts")) return; vp.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 }; mode = "pinch"; return; }
     const t = e.target; const bi = t.closest(".bi");
-    if (t.dataset.h && bi) { item = Board.data.items.find(i => i.k === bi.dataset.k); const [wx, wy] = toWorld(e.clientX, e.clientY); start = { a: Math.atan2(wy - item.y, wx - item.x), d: Math.hypot(wx - item.x, wy - item.y), r: item.r, s: item.s }; mode = "rot"; }
-    else if (bi) { item = Board.data.items.find(i => i.k === bi.dataset.k); if (Board.sel !== item.k) { Board.sel = item.k; Board.render(); } mode = "move"; start = { x: e.clientX, y: e.clientY, ix: item.x, iy: item.y }; }
+    if (t.dataset.h && bi) { item = find(bi); const [wx, wy] = toWorld(e.clientX, e.clientY); start = { a: Math.atan2(wy - item.y, wx - item.x), d: Math.hypot(wx - item.x, wy - item.y), r: item.r || 0, s: item.s || 1 }; mode = "rot"; }
+    else if (bi) { item = find(bi); const was = Board.sel === item.k; if (!was) { Board.sel = item.k; Board.render(); } mode = "move"; start = { x: e.clientX, y: e.clientY, ix: item.x, iy: item.y, was, moved: false }; }
     else { if (Board.sel) { Board.sel = null; Board.render(); } mode = "pan"; start = { x: e.clientX, y: e.clientY, tx: Board.view.tx, ty: Board.view.ty }; }
   });
   vp.addEventListener("pointermove", e => {
@@ -1498,24 +1759,390 @@ const Board = {
       const nz = clamp(v.z * d / pinch.d, 0.03, 3); const px = mx - r.left, py = my - r.top;
       v.tx = px - (px - v.tx) * nz / v.z + (mx - pinch.mx); v.ty = py - (py - v.ty) * nz / v.z + (my - pinch.my); v.z = nz; pinch = { d, mx, my }; Board.applyView();
     } else if (mode === "pan") { v.tx = start.tx + e.clientX - start.x; v.ty = start.ty + e.clientY - start.y; Board.applyView(); }
-    else if (mode === "move" && item) { item.x = start.ix + (e.clientX - start.x) / v.z; item.y = start.iy + (e.clientY - start.y) / v.z; moveEl(item); }
+    else if (mode === "move" && item) { if (Math.hypot(e.clientX - start.x, e.clientY - start.y) > 4) start.moved = true; item.x = start.ix + (e.clientX - start.x) / v.z; item.y = start.iy + (e.clientY - start.y) / v.z; moveEl(item); }
     else if (mode === "rot" && item) { const [wx, wy] = toWorld(e.clientX, e.clientY); item.r = start.r + (Math.atan2(wy - item.y, wx - item.x) - start.a) * 180 / Math.PI; item.s = clamp(start.s * Math.hypot(wx - item.x, wy - item.y) / start.d, 0.1, 12); moveEl(item, true); }
   });
   function moveEl(it, resize) {
-    const el = $("#stage").querySelector(`[data-k="${it.k}"]`); if (!el) return; const [w, h] = Board.dims(findStamp(it.sid), it);
-    if (resize) { el.style.width = w + "px"; el.style.height = h + "px"; }
-    el.style.transform = `translate(${it.x - w / 2}px,${it.y - h / 2}px) rotate(${it.r}deg)`;
+    const el = $("#items").querySelector(`[data-k="${it.k}"]`); if (!el) return; const [w, h] = itemDims(it);
+    if (resize) { el.style.width = w + "px"; el.style.height = h + "px"; if (it.t === "text") { const sp = el.querySelector("span"); const fs = it.fs * it.s; sp.style.font = fontCss(it, fs); sp.style.lineHeight = "1.3"; sp.style.paddingTop = (fs * 0.1) + "px"; } }
+    el.style.transform = `translate(${it.x - w / 2}px,${it.y - h / 2}px) rotate(${it.r || 0}deg)`;
   }
-  const up = e => { pts.delete(e.pointerId); if (pts.size === 0) { if (mode === "move" || mode === "rot") Board.save(); mode = null; item = null; } else if (pts.size === 1 && mode === "pinch") mode = null; };
+  const up = e => {
+    pts.delete(e.pointerId);
+    if (pts.size === 0) {
+      if (mode === "move" && item && !start.moved && start.was && item.t === "text") { const it = item; mode = null; item = null; openTextSheet(it); return; }
+      if (mode === "move" || mode === "rot") Board.save(); mode = null; item = null;
+    } else if (pts.size === 1 && mode === "pinch") mode = null;
+  };
   vp.addEventListener("pointerup", up); vp.addEventListener("pointercancel", up);
   vp.addEventListener("wheel", e => { e.preventDefault(); const v = Board.view, r = vp.getBoundingClientRect(); const nz = clamp(v.z * Math.exp(-e.deltaY * 0.0015), 0.03, 3); const px = e.clientX - r.left, py = e.clientY - r.top; v.tx = px - (px - v.tx) * nz / v.z; v.ty = py - (py - v.ty) * nz / v.z; v.z = nz; Board.applyView(); }, { passive: false });
   $("#tray").addEventListener("click", e => { const b = e.target.closest("[data-add]"); if (b) Board.add(b.dataset.add); });
-  $("#paperA4").onclick = () => { Board.data.paper = "a4"; Board.fit(); Board.save(); };
-  $("#paperInf").onclick = () => { Board.data.paper = "inf"; Board.fit(); Board.save(); };
   $("#bFit").onclick = () => Board.fit();
   $("#bDel").onclick = () => { Board.data.items = Board.data.items.filter(i => i.k !== Board.sel); Board.sel = null; Board.render(); Board.save(); };
-  $("#bFront").onclick = () => { const i = Board.data.items.findIndex(x => x.k === Board.sel); if (i >= 0) { Board.data.items.push(Board.data.items.splice(i, 1)[0]); Board.render(); Board.save(); } };
+  $("#bFront").onclick = () => { const I = Board.data.items, i = I.findIndex(x => x.k === Board.sel); if (i >= 0) { I.push(I.splice(i, 1)[0]); Board.render(); Board.save(); } };
+  $("#bEdit").onclick = () => { const it = Board.data.items.find(i => i.k === Board.sel); if (it) openTextSheet(it); };
+  $("#edText").onclick = () => openTextSheet(null);
+  $("#edSize").innerHTML = Object.entries(PAGE_SIZES).map(([k, v]) => `<option value="${k}">${v.n}</option>`).join("");
+  $("#edPaper").innerHTML = Object.entries(PAPERS).map(([k, v]) => `<option value="${k}">紙: ${v}</option>`).join("");
+  let tt = 0;
+  $("#edTitle").oninput = e => { const p = Board.data; if (!p) return; p.title = e.target.value.slice(0, 40); clearTimeout(tt); tt = setTimeout(() => { if (p.paper === "pamph") Board.renderPaper(); Board.save(); }, 350); };
+  $("#edSize").onchange = e => {
+    const p = Board.data, old = p.size, nz = e.target.value, a = PAGE_SIZES[old], b = PAGE_SIZES[nz];
+    if (old !== "inf" && nz !== "inf") p.items.forEach(it => { it.x *= b.w / a.w; it.y *= b.h / a.h; });
+    else if (old === "inf" && nz !== "inf" && p.items.length) { const bb = pageBounds(p); const f = Math.min(1, b.w / bb.W, b.h / bb.H); p.items.forEach(it => { it.x = b.w / 2 + (it.x - (bb.x0 + bb.W / 2)) * f; it.y = b.h / 2 + (it.y - (bb.y0 + bb.H / 2)) * f; if (f < 1) it.s = (it.s || 1) * f; }); }
+    p.size = nz; if (p.size === "inf" && !TILE_PAPERS.includes(p.paper)) { p.paper = "washi"; $("#edPaper").value = "washi"; toast("無限の紙では、写真とパンフレットは使えないので和紙にしました", 3600); } Board.renderPaper(); Board.fit(); Board.save(); };
+  $("#edPaper").onchange = e => {
+    const p = Board.data, v = e.target.value;
+    if (v === "photo" && !p.bg) { e.target.value = p.paper; toast("「背景に写真」から写真を選んでください", 3200); return; }
+    if (p.size === "inf" && !TILE_PAPERS.includes(v)) { e.target.value = p.paper; toast("無限の紙では使えない紙です。サイズを選んでからどうぞ", 3600); return; }
+    p.paper = v; Board.renderPaper(); Board.render(); Board.save();
+  };
+  $("#edBg").onchange = async e => {
+    const f = e.target.files[0]; e.target.value = ""; if (!f) return; const p = Board.data;
+    if (p.size === "inf") { toast("写真の背景は、無限以外のサイズで使えます", 3400); return; }
+    try {
+      const cv = await fileToCanvas(f, 2000); const ph = makePhoto(cv, [[1600, 0.84], [1300, 0.8], [1000, 0.76]]); if (!ph) throw 0;
+      const key = "bg_" + p.id; if (!Books.sample) await Store.putPhoto(key, ph.url);
+      Board.bgImgs.set(key, await loadImg(ph.url)); p.bg = key; p.paper = "photo"; $("#edPaper").value = "photo"; Board.renderPaper(); Board.render(); Board.save();
+    } catch { toast("この写真は使えませんでした。JPEGかPNGでどうぞ", 3600); }
+  };
+  $("#edDone").onclick = () => Books.closeEditor();
+  $("#edSave").onclick = () => { if (Board.data) openExport({ page: Board.data }); };
 })();
+
+/* ---------- books, pages, shelf ---------- */
+const Books = {
+  data: { books: [] }, mode: "shelf", cur: null, thumbs: new Map(), sample: false,
+  sampleData() {
+    const L = SAMPLES.filter(s => s.type !== "goshuin");
+    const a = L.slice(0, 5).map((s, i) => ({ k: "k" + i, sid: s.id, x: 560 + (i % 2) * 1000 + hash(s.id) * 80, y: 960 + Math.floor(i / 2) * 640 + hash(s.id + "y") * 100, s: 1, r: (hash(s.id + "r") - 0.5) * 24 }));
+    const b = L.slice(1, 5).map((s, i) => ({ k: "q" + i, sid: s.id, x: 560 + (i % 2) * 880, y: 520 + Math.floor(i / 2) * 760, s: 1, r: (hash(s.id + "q") - 0.5) * 20 }));
+    b.push({ k: "qt", t: "text", text: "週末のおでかけ", font: "hand", color: "#C8412E", fs: 120, s: 1, x: 1000, y: 1800, r: -3 });
+    return { books: [{ id: "sbook", title: "サンプルのスタンプ帳", color: "#2B4C9B", created: 0, pages: [
+      { id: "spg1", title: "はじめての駅めぐり", size: "a4", paper: "pamph", items: a, created: 0, updated: 1 },
+      { id: "spg2", title: "週末", size: "sq", paper: "grid", items: b, created: 0, updated: 1 }] }] };
+  },
+  async load() {
+    this.thumbs.clear(); this.cur = null; this.mode = "shelf"; Board.data = null;
+    if (!stamps.length) { this.data = this.sampleData(); this.sample = true; return; }
+    this.sample = false; let d = null; try { d = await Store.getMeta("books"); } catch {}
+    if (d && Array.isArray(d.books)) { this.data = { books: d.books }; return; }
+    this.data = { books: [] };
+    let old = null; try { old = await Store.getMeta("board"); } catch {}
+    if (old && Array.isArray(old.items) && old.items.length) {
+      const b = this.mkBook("わたしのスタンプ帳"); b.pages.push(this.mkPage({ size: old.paper === "inf" ? "inf" : "a4", paper: "washi", items: old.items.map(i => ({ ...i })) }));
+      this.data.books.push(b); this.save(true);
+    }
+  },
+  mkBook(title, color) { return { id: uid("b"), title: title || "スタンプ帳", color: color || BOOK_COLORS[this.data.books.length % BOOK_COLORS.length], created: Date.now(), pages: [] }; },
+  mkPage(o = {}) { return { id: uid("p"), title: "", size: "a4", paper: "washi", bg: null, items: [], created: Date.now(), updated: Date.now(), ...o }; },
+  save(now) {
+    if (!stamps.length || this.sample) return; clearTimeout(this._t);
+    const go = () => Store.putMeta("books", { books: this.data.books }).catch(() => toast("スタンプ帳を保存できませんでした"));
+    if (now) return go(); this._t = setTimeout(go, 700);
+  },
+  book(id) { return this.data.books.find(b => b.id === id); },
+  get curBook() { return this.book(this.cur); },
+  async bgImg(p) {
+    if (!p.bg) return null; if (Board.bgImgs.has(p.bg)) return Board.bgImgs.get(p.bg);
+    try { const u = await Store.getPhoto(p.bg); if (!u) return null; const im = await loadImg(u); Board.bgImgs.set(p.bg, im); return im; } catch { return null; }
+  },
+  thumbKey(p, max) { return `${p.id}:${p.updated || 0}:${max}:${stamps.length}`; },
+  async thumb(p, max) {
+    const k = this.thumbKey(p, max); if (this.thumbs.has(k)) return this.thumbs.get(k);
+    const pr = renderPage(p, { max }).then(cv => cv.toDataURL("image/jpeg", 0.86)).catch(() => ""); this.thumbs.set(k, pr);
+    const u = await pr; this.thumbs.set(k, u); return u;
+  },
+  thumbNow(p, max) { const v = this.thumbs.get(this.thumbKey(p, max)); return typeof v === "string" ? v : ""; },
+  setMode(m) { this.mode = m; $("#shelfV").hidden = m !== "shelf"; $("#bookV").hidden = m !== "book"; $("#editV").hidden = m !== "edit"; },
+  onShow() {
+    if (this.mode === "edit" && Board.data) { this.setMode("edit"); Board.onShow(); }
+    else if (this.mode === "book" && this.curBook) this.openBook(this.cur);
+    else { this.setMode("shelf"); this.renderShelf(); }
+  },
+  refresh() {
+    if (this.mode === "edit") { Board.renderTray(); Board.render(); }
+    else if (this.mode === "book" && this.curBook) { Book.build(); this.prepThumbs(this.curBook).then(() => this.mode === "book" && Book.render()); }
+    else this.renderShelf();
+  },
+  renderShelf() {
+    const box = $("#shelfBox"); if (!box) return; const B = this.data.books;
+    box.innerHTML = `${this.sample ? `<p class="cap" style="margin:0 16px 10px">いま見えているのはサンプルです。スタンプを追加すると、自分のスタンプ帳が作れます。</p>` : ""}
+      <div class="shelf">${B.map(b => `<button type="button" class="bcover" data-book="${b.id}" style="--c:${b.color}"><span class="bt">${esc(b.title)}</span>${b.pages[0] ? `<span class="bthumb" data-bthumb="${b.id}"></span>` : ""}<small>${b.pages.length} ページ</small></button>`).join("")}
+      <button type="button" class="bcover new" data-newbook="1">＋<br>新しいスタンプ帳</button></div>
+      ${B.length && !this.sample ? "" : `<p class="cap" style="margin:4px 16px 20px">スタンプ帳は、好きな紙に好きなスタンプや文字を貼って作る「自分だけのページ」を集めるノートです。「2025年」「謎解き」など、テーマごとにいくつでも作れます。</p>`}`;
+    B.forEach(b => { const p = b.pages[0]; if (p) this.thumb(p, 360).then(u => { const el = document.querySelector(`[data-bthumb="${b.id}"]`); if (el && u) el.style.backgroundImage = `url(${u})`; }); });
+  },
+  async openBook(id) {
+    this.cur = id; const b = this.curBook; if (!b) { this.setMode("shelf"); this.renderShelf(); return; }
+    this.setMode("book"); $("#bkTitle").textContent = b.title; Book.build();
+    await this.prepThumbs(b); if (this.cur === id && this.mode === "book") Book.render();
+  },
+  prepThumbs(b) { return Promise.all(b.pages.map(p => this.thumb(p, 900))); },
+  renderPgActs() {
+    const el = $("#pgActs"); if (!el) return; const b = this.curBook; const p = b && Book.idx ? b.pages[Book.idx - 1] : null;
+    el.innerHTML = p ? `<button class="btn small" type="button" data-pa="edit">このページを編集</button><button class="btn small" type="button" data-pa="save">画像で保存</button><button class="btn small ghost" type="button" data-pa="del">削除</button>`
+      : b && b.pages.length ? `<span class="cap" style="margin:0">左へスワイプしてめくる</span>` : `<button class="btn small primary" type="button" data-pa="new">＋ 最初のページを作る</button>`;
+  },
+  newBookSheet(b) {
+    const edit = !!b; let color = edit ? b.color : BOOK_COLORS[this.data.books.length % BOOK_COLORS.length];
+    sheetCtx = { mode: "book" };
+    openSheet(`<div class="sheet-head"><h2>${edit ? "スタンプ帳の設定" : "新しいスタンプ帳"}</h2><button class="btn small ghost" type="button" data-close>閉じる</button></div>
+      <div class="sec"><h4>名前</h4><input id="bkName" class="search" maxlength="30" value="${edit ? esc(b.title) : ""}" placeholder="例: 2025年のスタンプ / 謎解きの記録" style="font-size:16px"></div>
+      <div class="sec"><h4>表紙の色</h4><div class="swatches" id="bkCol">${BOOK_COLORS.map(c => `<button type="button" data-tc="${c}" style="--c:${c}" aria-pressed="${c === color}" aria-label="色 ${c}"></button>`).join("")}</div></div>
+      <div class="acts">${edit ? `<button class="btn ghost" type="button" id="bkDel">このスタンプ帳を削除</button>` : ""}<button class="btn primary" type="button" id="bkOk">${edit ? "保存" : "つくる"}</button></div><div id="bkConfirm"></div>`);
+    $("#bkCol").onclick = e => { const x = e.target.closest("[data-tc]"); if (!x) return; color = x.dataset.tc; document.querySelectorAll("#bkCol [data-tc]").forEach(y => y.setAttribute("aria-pressed", y === x)); };
+    $("#bkOk").onclick = () => {
+      const t = $("#bkName").value.trim() || (edit ? b.title : "わたしのスタンプ帳");
+      if (this.sample) { toast("スタンプを追加すると、自分のスタンプ帳が作れます", 3400); return; }
+      if (edit) { b.title = t; b.color = color; this.save(); closeSheet(); this.openBook(b.id); return; }
+      const nb = this.mkBook(t, color); this.data.books.push(nb); this.save(); closeSheet(); Book.idx = 0; this.openBook(nb.id);
+    };
+    const del = $("#bkDel"); if (del) del.onclick = () => {
+      $("#bkConfirm").innerHTML = `<div class="confirm"><span style="flex:1">「${esc(b.title)}」と中の ${b.pages.length} ページを削除します。スタンプの記録は消えません。</span><button class="btn small" type="button" id="bkNo">やめる</button><button class="btn small shu" type="button" id="bkYes">削除する</button></div>`;
+      $("#bkNo").onclick = () => $("#bkConfirm").innerHTML = "";
+      $("#bkYes").onclick = () => { b.pages.forEach(p => p.bg && Store.delPhoto(p.bg).catch(() => {})); this.data.books = this.data.books.filter(x => x !== b); this.save(); closeSheet(); this.cur = null; this.setMode("shelf"); this.renderShelf(); toast("削除しました"); };
+    };
+  },
+  newPageSheet() {
+    const b = this.curBook; if (!b) return; let size = lsGet("petalog.pgSize") || "a4", paper = lsGet("petalog.pgPaper") || "washi";
+    if (!PAGE_SIZES[size]) size = "a4"; if (!PAPERS[paper] || paper === "photo") paper = "washi";
+    sheetCtx = { mode: "newpage" };
+    const sizeBtn = ([k, v]) => { const w = v.w || 1, h = v.h || 1, s = 42 / Math.max(w, h); return `<button type="button" data-ps="${k}" aria-pressed="${k === size}"><i style="width:${k === "inf" ? 42 : w * s}px;height:${k === "inf" ? 30 : h * s}px;${k === "inf" ? "background-image:radial-gradient(rgba(120,110,90,.4) 1px,transparent 1.2px);background-size:6px 6px;" : ""}"></i>${v.n}</button>`; };
+    openSheet(`<div class="sheet-head"><h2>新しいページ</h2><button class="btn small ghost" type="button" data-close>閉じる</button></div>
+      <div class="newpg"><div class="sec"><h4>タイトル（あとで変えられます）</h4><input id="npTitle" class="search" maxlength="40" placeholder="例: 夏の駅めぐり" style="font-size:16px"></div>
+      <div class="sec"><h4>大きさ</h4><div class="sizes" id="npSize">${Object.entries(PAGE_SIZES).map(sizeBtn).join("")}</div></div>
+      <div class="sec"><h4>紙</h4><div class="papers" id="npPaper">${Object.keys(PAPERS).filter(k => k !== "photo").map(k => `<button type="button" data-pp="${k}" aria-pressed="${k === paper}"><i style="background-image:url(${Paper.previewURL(k)})"></i>${PAPERS[k]}</button>`).join("")}</div>
+        <p class="cap">自分の写真を背景にするときは、作ったあとの画面の「背景に写真」からどうぞ。</p></div>
+      <div class="acts"><button class="btn primary" type="button" id="npOk">つくる</button></div></div>`);
+    $("#npSize").onclick = e => { const x = e.target.closest("[data-ps]"); if (!x) return; size = x.dataset.ps; document.querySelectorAll("[data-ps]").forEach(y => y.setAttribute("aria-pressed", y === x)); };
+    $("#npPaper").onclick = e => { const x = e.target.closest("[data-pp]"); if (!x) return; paper = x.dataset.pp; document.querySelectorAll("[data-pp]").forEach(y => y.setAttribute("aria-pressed", y === x)); };
+    $("#npOk").onclick = () => {
+      if (size === "inf" && !TILE_PAPERS.includes(paper)) paper = "washi";
+      lsSet("petalog.pgSize", size); lsSet("petalog.pgPaper", paper);
+      const p = this.mkPage({ size, paper, title: $("#npTitle").value.trim().slice(0, 40) }); b.pages.push(p); this.save(); closeSheet();
+      if (this.sample) toast("サンプルなので、このページは保存されません", 3200);
+      this.editPage(b.id, p.id);
+    };
+  },
+  editPage(bid, pid) {
+    const b = this.book(bid), p = b && b.pages.find(x => x.id === pid); if (!p) return;
+    this.cur = bid; show("board"); this.setMode("edit"); Board.open(b, p); requestAnimationFrame(() => Board.onShow());
+  },
+  closeEditor() {
+    const b = Board.book, p = Board.data; if (p) { clearTimeout(this._t); this.save(true); }
+    Board.data = null; Board.sel = null;
+    if (b && this.book(b.id)) { Book.idx = Math.max(0, b.pages.indexOf(p) + 1); this.openBook(b.id); } else { this.setMode("shelf"); this.renderShelf(); }
+  },
+  async viewPage(pid) {
+    const b = this.curBook, p = b && b.pages.find(x => x.id === pid); if (!p) return;
+    lightbox(this.thumbNow(p, 900)); const cv = await renderPage(p, { max: 1800 }); if (!$("#lightbox").hidden) $("#lbImg").src = cv.toDataURL("image/jpeg", 0.9);
+  },
+  delPage(p) {
+    const b = this.curBook; if (!b) return;
+    sheetCtx = { mode: "delpage" };
+    openSheet(`<div class="sheet-head"><h2>ページを削除</h2><button class="btn small ghost" type="button" data-close>やめる</button></div>
+      <div class="sec"><p style="margin:0">「${esc(p.title || "タイトルなしのページ")}」を削除します。貼ってあるスタンプの記録は消えません。</p>
+      <div class="acts"><button class="btn" type="button" data-close>やめる</button><button class="btn shu" type="button" id="dpYes">削除する</button></div></div>`);
+    $("#dpYes").onclick = () => { if (p.bg) Store.delPhoto(p.bg).catch(() => {}); b.pages = b.pages.filter(x => x !== p); this.save(); closeSheet(); Book.idx = Math.min(Book.idx, b.pages.length); this.openBook(b.id); toast("ページを削除しました"); };
+  },
+  addStamp(sid) {
+    if (this.sample) { toast("スタンプを追加すると、自分のスタンプ帳が作れます", 3400); return; }
+    closeSheet();
+    let b = Board.book && this.book(Board.book.id), p = b && Board.data && b.pages.includes(Board.data) ? Board.data : null;
+    if (!p) {
+      b = [...this.data.books].sort((x, y) => Math.max(0, ...y.pages.map(q => q.updated || 0)) - Math.max(0, ...x.pages.map(q => q.updated || 0)))[0];
+      if (!b) { b = this.mkBook("わたしのスタンプ帳"); this.data.books.push(b); }
+      p = b.pages[b.pages.length - 1]; if (!p) { p = this.mkPage(); b.pages.push(p); }
+      this.save();
+    }
+    this.editPage(b.id, p.id); setTimeout(() => Board.add(sid), 120);
+  },
+  removeStamps(ids) { const gone = new Set(ids); for (const b of this.data.books) for (const p of b.pages) { const n = p.items.length; p.items = p.items.filter(i => i.t === "text" || !gone.has(i.sid)); if (p.items.length !== n) p.updated = Date.now(); } this.save(); }
+};
+(function booksInput() {
+  $("#shelfBox").onclick = e => { const n = e.target.closest("[data-newbook]"); if (n) return Books.newBookSheet(null); const b = e.target.closest("[data-book]"); if (b) { Book.idx = 0; Books.openBook(b.dataset.book); } };
+  $("#bkNew").onclick = () => Books.newBookSheet(null);
+  $("#bkBack").onclick = () => { Books.cur = null; Books.setMode("shelf"); Books.renderShelf(); };
+  $("#bkMenu").onclick = () => Books.curBook && Books.newBookSheet(Books.curBook);
+  $("#pgNew").onclick = () => Books.newPageSheet();
+  $("#pgActs").onclick = e => {
+    const a = e.target.closest("[data-pa]"); if (!a) return; const b = Books.curBook; const p = b && Book.idx ? b.pages[Book.idx - 1] : null;
+    if (a.dataset.pa === "new") return Books.newPageSheet();
+    if (!p) return;
+    if (a.dataset.pa === "edit") Books.editPage(b.id, p.id);
+    if (a.dataset.pa === "save") openExport({ page: p });
+    if (a.dataset.pa === "del") Books.delPage(p);
+  };
+})();
+
+/* ---------- 「ぜんぶ」の背景 ---------- */
+async function applyFallBg() {
+  const w = $("#fallWrap"), k = Profile.fallBg || "washi"; Fall.bgMul = k !== "photo";
+  w.classList.toggle("washi", k === "washi"); w.style.backgroundImage = ""; w.style.backgroundSize = ""; w.style.backgroundPosition = ""; w.style.backgroundColor = "";
+  if (k === "photo") {
+    const u = await Store.getPhoto("fallbg").catch(() => null);
+    if (u && Profile.fallBg === "photo") { w.style.backgroundImage = `url(${u})`; w.style.backgroundSize = "cover"; w.style.backgroundPosition = "center"; }
+    else { w.classList.add("washi"); Fall.bgMul = true; }
+  } else if (k !== "washi") { const t = Paper.tileURL(k, 0.5); if (t) { w.style.backgroundImage = `url(${t})`; w.style.backgroundSize = "600px 600px"; } }
+}
+
+/* ================= 画像で保存（トレカ・スタンプだけ・スタンプ帳のページ） ================= */
+const MM = 300 / 25.4; // px per mm at 300dpi
+function wrapLines(x, text, maxW, maxLines) {
+  const out = []; let cur = "";
+  for (const ch of String(text)) {
+    if (ch === "\n") { out.push(cur); cur = ""; continue; }
+    if (x.measureText(cur + ch).width > maxW && cur) { out.push(cur); cur = ch; } else cur += ch;
+  }
+  if (cur) out.push(cur);
+  if (out.length > maxLines) { const keep = out.slice(0, maxLines); let last = keep[maxLines - 1]; while (last && x.measureText(last + "…").width > maxW) last = last.slice(0, -1); keep[maxLines - 1] = last + "…"; return keep; }
+  return out;
+}
+function roundRect(x, X, Y, W, H, r) { x.beginPath(); x.moveTo(X + r, Y); x.arcTo(X + W, Y, X + W, Y + H, r); x.arcTo(X + W, Y + H, X, Y + H, r); x.arcTo(X, Y + H, X, Y, r); x.arcTo(X, Y, X + W, Y, r); x.closePath(); }
+// トレカ: 63×88mm at 300dpi, same design as the card grid
+async function renderCard(s, no) {
+  const W = Math.round(63 * MM), H = Math.round(88 * MM), K = W / 160;
+  const cv = mkCanvas(W, H), x = cv.getContext("2d"); const g = s.cat || "その他", gc = gcol(g);
+  await fontsReady([{ t: "text", font: "hand" }, { t: "text", font: "mono" }, { t: "text", font: "goth" }]);
+  x.fillStyle = "#FFFFFF"; x.fillRect(0, 0, W, H); Paper.pat(x, Paper.washi(), K, 0, 0, W, H, "multiply");
+  const band = 5 * K; x.fillStyle = gc; x.fillRect(0, 0, W, band);
+  const px = 10 * K, top = band + 8 * K, bottomPad = 9 * K;
+  x.textBaseline = "alphabetic"; x.font = `500 ${10 * K}px 'IBM Plex Mono',monospace`; x.fillStyle = "#6B7079";
+  x.textAlign = "left"; x.fillText("No." + String(no).padStart(3, "0"), px, top + 9 * K); x.textAlign = "right"; x.fillText(fmtDate(s.date), W - px, top + 9 * K);
+  // bottom block (name / event / meta), measured from the bottom up
+  x.font = `600 ${15 * K}px 'Klee One',serif`; const nameLines = wrapLines(x, s.name || "名前未設定", W - px * 2, 2);
+  const metaY = H - bottomPad - 2.5 * K, evY = metaY - 10.5 * K * 1.5;
+  const lastNameY = (s.event ? evY : metaY) - 10.5 * K * 1.6, nameY0 = lastNameY - (nameLines.length - 1) * 15 * K * 1.25;
+  const artTop = top + 12 * K + 6 * K, artBot = nameY0 - 15 * K * 0.95 - 6 * K;
+  // art box
+  x.save(); roundRect(x, px, artTop, W - px * 2, artBot - artTop, 6 * K); x.strokeStyle = "rgba(60,50,30,.08)"; x.lineWidth = K; x.stroke(); x.restore();
+  if (isDigi(s)) { x.save(); x.textAlign = "left"; x.font = `500 ${8 * K}px 'IBM Plex Mono',monospace`; const lw = x.measureText("DIGITAL").width + 6 * K; x.fillStyle = "#1B2130"; roundRect(x, px + 4 * K, artTop + 4 * K, lw, 10 * K, 2.5 * K); x.fill(); x.fillStyle = "#fff"; x.fillText("DIGITAL", px + 7 * K, artTop + 11.6 * K); x.restore(); }
+  try {
+    const im = await loadImg(s.cut); const mw = (W - px * 2) * 0.88, mh = artBot - artTop - 12 * K; const sc = Math.min(mw / im.width, mh / im.height);
+    const iw = im.width * sc, ih = im.height * sc; x.save(); x.globalCompositeOperation = isDigi(s) || s.type === "goshuin" ? "source-over" : "multiply";
+    if (s.type === "goshuin") { x.shadowColor = "rgba(0,0,0,.18)"; x.shadowBlur = 4 * K; x.shadowOffsetY = K; }
+    x.imageSmoothingQuality = "high"; x.drawImage(im, (W - iw) / 2, artTop + (artBot - artTop - ih) / 2, iw, ih); x.restore();
+  } catch {}
+  x.fillStyle = "#1D2230"; x.textAlign = "left"; x.font = `600 ${15 * K}px 'Klee One',serif`; nameLines.forEach((l, i) => x.fillText(l, px, nameY0 + i * 15 * K * 1.25));
+  if (s.event) { x.font = `700 ${10.5 * K}px 'Zen Kaku Gothic New',sans-serif`; x.fillStyle = "#2B4C9B"; x.fillText(wrapLines(x, "#" + s.event, W - px * 2, 1)[0], px, evY); }
+  x.font = `700 ${10.5 * K}px 'Zen Kaku Gothic New',sans-serif`; x.fillStyle = gc; x.fillText(g, px, metaY);
+  x.font = `500 ${10.5 * K}px 'Zen Kaku Gothic New',sans-serif`; x.fillStyle = "#6B7079"; x.textAlign = "right"; x.fillText((s.pref || "") + (s.sizeMm ? " · " + fmtCm(s.sizeMm) : ""), W - px, metaY);
+  if (s.visits && s.visits.length) { x.font = `500 ${10 * K}px 'IBM Plex Mono',monospace`; const t = "×" + (s.visits.length + 1); const tw = x.measureText(t).width + 14 * K; x.fillStyle = "#C8412E"; roundRect(x, W - 8 * K - tw, 28 * K, tw, 14 * K, 7 * K); x.fill(); x.fillStyle = "#fff"; x.textAlign = "center"; x.fillText(t, W - 8 * K - tw / 2, 38.5 * K); }
+  return cv;
+}
+// スタンプだけ: real size at 300dpi when the size is known
+async function renderStampOnly(s, bg) {
+  const im = await loadImg(s.cut); const L = s.sizeMm ? Math.round(s.sizeMm * MM) : 1000; const ar = im.width / im.height;
+  const w = Math.round(ar >= 1 ? L : L * ar), h = Math.round(ar >= 1 ? L / ar : L); const m = bg === "white" ? Math.round(Math.max(w, h) * 0.04) : 0;
+  const cv = mkCanvas(w + m * 2, h + m * 2), x = cv.getContext("2d");
+  if (bg === "white") { x.fillStyle = "#fff"; x.fillRect(0, 0, cv.width, cv.height); }
+  x.imageSmoothingQuality = "high"; x.drawImage(im, m, m, w, h); return cv;
+}
+const toBlob = (cv, type, q) => new Promise((res, rej) => cv.toBlob(b => b ? res(b) : rej(new Error("blob")), type, q));
+const safeName = t => String(t || "").replace(/[\\/:*?"<>|\s]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 32) || "petalog";
+function numbering() { return new Map(byDate(true).map((s, i) => [s.id, i + 1])); }
+async function deliverFiles(files, box) {
+  const canShare = !!(navigator.canShare && navigator.share && (() => { try { return navigator.canShare({ files }); } catch { return false; } })());
+  box.innerHTML = `${canShare ? `<button class="btn primary" type="button" id="exShare">写真に保存・共有（${files.length}まい）</button>` : ""}<button class="btn${canShare ? "" : " primary"}" type="button" id="exDl">${files.length > 1 ? `${files.length}まいダウンロード` : "ダウンロード"}</button>
+    <p class="cap" style="flex-basis:100%;margin:6px 0 0">${canShare ? "「写真に保存・共有」から「画像を保存」を選ぶと、1まいずつ写真アプリに入ります。" : files.length > 1 ? "1まいずつ別のファイルで保存されます。ブラウザに「複数のダウンロード」を聞かれたら許可してください。" : ""}</p>`;
+  const sh = $("#exShare"); if (sh) sh.onclick = async () => { try { await navigator.share({ files }); toast("保存しました"); } catch (e) { if (!e || e.name !== "AbortError") toast("共有できませんでした。「ダウンロード」を試してください", 3600); } };
+  $("#exDl").onclick = async () => {
+    for (const f of files) { const a = document.createElement("a"); a.href = URL.createObjectURL(f); a.download = f.name; document.body.appendChild(a); a.click(); const u = a.href; setTimeout(() => { URL.revokeObjectURL(u); a.remove(); }, 4000); await sleep(400); }
+    toast(files.length > 1 ? `${files.length}まい保存しました` : "保存しました");
+  };
+}
+function openExport(o) {
+  const isPage = !!o.page; const S = isPage ? [] : (o.ids || []).map(findStamp).filter(Boolean); if (!isPage && !S.length) return;
+  const st = { fmt: lsGet("petalog.exFmt") || "card", bg: lsGet("petalog.exBg") || "clear", pbg: "paper" };
+  sheetCtx = { mode: "export" }; const ctx = sheetCtx;
+  const sz = isPage ? PAGE_SIZES[o.page.size] || PAGE_SIZES.a4 : null;
+  openSheet(`<div class="sheet-head"><h2>画像で保存${isPage ? "" : S.length > 1 ? `（${S.length}まい）` : ""}</h2><button class="btn small ghost" type="button" data-close>閉じる</button></div>
+    <div class="exprev" id="exPrev"><span class="spin"></span></div>
+    <div class="exopts">${isPage
+      ? `<div class="row2"><span class="lab">背景</span><div class="seg" id="exPbg"><button type="button" data-v="paper" aria-pressed="true">紙もいっしょに</button><button type="button" data-v="clear" aria-pressed="false">透明にする</button></div></div>`
+      : `<div class="row2"><span class="lab">形</span><div class="seg" id="exFmt"><button type="button" data-v="card">トレカ</button><button type="button" data-v="stamp">スタンプだけ</button></div></div>
+         <div class="row2" id="exBgRow"><span class="lab">背景</span><div class="seg" id="exBg"><button type="button" data-v="clear">透明</button><button type="button" data-v="white">白</button></div></div>`}
+      <p class="cap" id="exNote" style="margin:0"></p></div>
+    <div class="acts" id="exActs"><button class="btn primary" type="button" id="exGo">画像をつくる</button></div>`);
+  const nums = numbering();
+  const make = async (s, small) => {
+    if (isPage) { const p = o.page; return renderPage(p, small ? { max: 640, transparent: st.pbg === "clear" } : { px: (PAGE_SIZES[p.size] || PAGE_SIZES.a4).px, transparent: st.pbg === "clear" }); }
+    return st.fmt === "card" ? renderCard(s, nums.get(s.id) || 1) : renderStampOnly(s, st.bg);
+  };
+  const sync = () => {
+    const mark = (id, v) => { const g = $(id); if (g) g.querySelectorAll("[data-v]").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === v)); };
+    mark("#exFmt", st.fmt); mark("#exBg", st.bg); mark("#exPbg", st.pbg);
+    const row = $("#exBgRow"); if (row) row.hidden = st.fmt !== "stamp";
+    const b = isPage ? pageBounds(o.page) : null;
+    $("#exNote").textContent = isPage
+      ? `${sz.n}${o.page.size === "inf" ? "（貼ったところ全体）" : ""}・${Math.round(b.W * Math.min(sz.px, 4096 / Math.max(b.W, b.H)))}×${Math.round(b.H * Math.min(sz.px, 4096 / Math.max(b.W, b.H)))}px の画像を作ります。${st.pbg === "clear" ? "紙を消して、スタンプと文字だけを透明な背景（PNG）で保存します。" : ""}`
+      : st.fmt === "card" ? "トレカの大きさ（63×88mm・300dpi）の画像を、1まいずつ作ります。そのまま印刷すればトレカサイズになります。"
+      : (st.bg === "clear" ? "スタンプだけを、背景を透明にした画像（PNG）で作ります。" : "スタンプの大きさに合わせた、白い背景の画像を作ります。") + (S.some(s => s.sizeMm) ? " 大きさが記録されているスタンプは、300dpiで印刷すると実物と同じ大きさになります。" : "");
+    $("#exActs").innerHTML = `<button class="btn primary" type="button" id="exGo">画像をつくる</button>`; $("#exGo").onclick = go;
+    preview();
+  };
+  let pv = 0;
+  const preview = async () => {
+    const my = ++pv; const box = $("#exPrev"); if (!box) return; box.innerHTML = `<span class="spin"></span>`;
+    try { const cv = await make(S[0], true); if (my !== pv || sheetCtx !== ctx) return; box.innerHTML = ""; cv.style.maxHeight = "300px"; box.appendChild(cv); } catch { if (my === pv) box.textContent = "プレビューを作れませんでした"; }
+  };
+  const go = async () => {
+    const btn = $("#exGo"); btn.disabled = true; const files = []; const used = new Map();
+    try {
+      const list = isPage ? [null] : S;
+      for (let i = 0; i < list.length; i++) {
+        if (sheetCtx !== ctx) return; btn.innerHTML = `<span class="spin"></span> 作成中 ${i + 1}/${list.length}`;
+        const s = list[i]; const cv = await make(s, false);
+        const png = isPage ? st.pbg === "clear" : st.fmt === "stamp";
+        const blob = await toBlob(cv, png ? "image/png" : "image/jpeg", 0.92);
+        let base = isPage ? `petalog-${safeName(o.page.title || "page")}` : `petalog-${(s.date || "").replace(/-/g, "")}-${safeName(s.name)}${st.fmt === "card" ? "" : "-stamp"}`;
+        const n = (used.get(base) || 0) + 1; used.set(base, n); if (n > 1) base += "-" + n;
+        files.push(new File([blob], base + (png ? ".png" : ".jpg"), { type: blob.type }));
+        await sleep(0);
+      }
+    } catch { toast("画像を作れませんでした。もう一度どうぞ", 3600); btn.disabled = false; btn.textContent = "画像をつくる"; return; }
+    if (sheetCtx !== ctx) return; lsSet("petalog.exFmt", st.fmt); lsSet("petalog.exBg", st.bg);
+    deliverFiles(files, $("#exActs"));
+  };
+  const on = (id, k) => { const g = $(id); if (g) g.onclick = e => { const b = e.target.closest("[data-v]"); if (b) { st[k] = b.dataset.v; sync(); } }; };
+  on("#exFmt", "fmt"); on("#exBg", "bg"); on("#exPbg", "pbg");
+  sync();
+}
+
+/* ================= 選んで保存・削除（トレカ一覧） ================= */
+function setSelMode(on) {
+  Grid.selMode = on; if (!on) Grid.sel.clear();
+  const b = $("#gSel"); b.textContent = on ? "選択をやめる" : "選択"; b.classList.toggle("primary", on);
+  $("#cards").classList.toggle("selecting", on); Grid.render(); renderSelBar();
+}
+function renderSelBar() {
+  const bar = $("#selBar"); bar.hidden = !Grid.selMode; if (!Grid.selMode) return;
+  const n = Grid.sel.size, samp = !stamps.length;
+  bar.innerHTML = `<b>${n} まい選択中</b><button class="btn small" type="button" id="sAll">${Grid.items && Grid.items.length && Grid.items.every(s => Grid.sel.has(s.id)) ? "全部はずす" : "表示中を全部"}</button><button class="btn small primary" type="button" id="sSave"${n ? "" : " disabled"}>画像で保存</button>${samp ? "" : `<button class="btn small shu" type="button" id="sDel"${n ? "" : " disabled"}>削除</button>`}`;
+  $("#sAll").onclick = () => { const all = Grid.items.every(s => Grid.sel.has(s.id)); Grid.items.forEach(s => all ? Grid.sel.delete(s.id) : Grid.sel.add(s.id)); Grid.render(); renderSelBar(); };
+  $("#sSave").onclick = () => openExport({ ids: [...Grid.sel] });
+  const d = $("#sDel"); if (d) d.onclick = () => confirmDelete([...Grid.sel].map(findStamp).filter(Boolean), () => setSelMode(false));
+}
+function confirmDelete(L, after) {
+  if (!L.length) return; sheetCtx = { mode: "confirmdel" };
+  openSheet(`<div class="sheet-head"><h2>削除</h2><button class="btn small ghost" type="button" data-close>やめる</button></div>
+    <div class="sec"><p style="margin:0 0 10px">${L.length > 1 ? `${L.length}まいの` : `「${esc(L[0].name)}」の`}記録と写真を削除します。スタンプ帳のページからもはがれます。<b>元には戻せません。</b></p>
+    <div class="delthumbs">${L.slice(0, 24).map(s => `<img src="${s.cut}" alt="">`).join("")}${L.length > 24 ? `<span>ほか${L.length - 24}まい</span>` : ""}</div>
+    <div class="acts"><button class="btn" type="button" data-close>やめる</button><button class="btn shu" type="button" id="cdYes">削除する</button></div></div>`);
+  $("#cdYes").onclick = async () => { const b = $("#cdYes"); b.disabled = true; b.innerHTML = `<span class="spin"></span> 削除中`; const n = await deleteStamps(L); closeSheet(); toast(`${n}まい削除しました`); after && after(); };
+}
+async function deleteStamps(L) {
+  let n = 0; const done = [];
+  for (const s of L) {
+    if (s.sample) continue;
+    try { await Store.removeStamp(s); if (s.share) await Store.pubDel(s.id); done.push(s.id); n++; } catch { toast("削除できないものがありました。通信を確かめてください", 3600); break; }
+  }
+  const gone = new Set(done); stamps = stamps.filter(x => !gone.has(x.id)); Grid.sel && done.forEach(id => Grid.sel.delete(id));
+  Books.removeStamps(done); MapV.pubs = null;
+  if (!stamps.length) { await Books.load(); Fall.setFilter("all"); }
+  refreshAll(); return n;
+}
 
 /* ================= RALLY: every line in Japan ================= */
 const SRC_WIKI = "https://ja.wikipedia.org/wiki/%E9%A7%85%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%97";
@@ -1872,12 +2499,12 @@ const Gos = {
   }
 };
 function setColl(m) {
-  Grid.on = m !== "flip"; Grid.mode = m;
-  $("#flipMode").hidden = m !== "flip"; $("#gridMode").hidden = m !== "grid"; $("#gosMode").hidden = m !== "gos";
-  $("#mFlip").setAttribute("aria-pressed", m === "flip"); $("#mGrid").setAttribute("aria-pressed", m === "grid"); $("#mGos").setAttribute("aria-pressed", m === "gos");
-  if (m === "flip") Book.layout(); else if (m === "grid") Grid.render(); else Gos.render();
+  if (m !== "gos") m = "grid"; Grid.on = true; Grid.mode = m;
+  $("#gridMode").hidden = m !== "grid"; $("#gosMode").hidden = m !== "gos";
+  $("#mGrid").setAttribute("aria-pressed", m === "grid"); $("#mGos").setAttribute("aria-pressed", m === "gos");
+  if (m === "grid") Grid.render(); else { if (Grid.selMode) setSelMode(false); Gos.render(); }
 }
-$("#mFlip").onclick = () => setColl("flip"); $("#mGrid").onclick = () => setColl("grid"); $("#mGos").onclick = () => setColl("gos");
+$("#mGrid").onclick = () => setColl("grid"); $("#mGos").onclick = () => setColl("gos");
 
 </script>
 <script>
@@ -1960,7 +2587,8 @@ function inkIsMulti(d, D, n, t) {
   return second / tot > 0.13;
 }
 function makeCut(src, box, paper, t, mode, opts = {}) {
-  for (const maxS of [380, 300, 230]) {
+  const SZ = window.PetalogCloud ? [640, 480, 380] : [380, 300, 230], LIM = window.PetalogCloud ? 700000 : 175000;
+  for (const maxS of SZ) {
     const sc = Math.min(1, maxS / Math.max(box.w, box.h));
     const W = Math.max(8, Math.round(box.w * sc)), H = Math.max(8, Math.round(box.h * sc));
     const c = mkCanvas(W, H), x = c.getContext("2d", { willReadFrequently: true }); x.drawImage(src, box.x, box.y, box.w, box.h, 0, 0, W, H);
@@ -1993,7 +2621,7 @@ function makeCut(src, box, paper, t, mode, opts = {}) {
     const shape = Math.abs(W / H - 1) < 0.15 && cornerA / Math.max(1, cornerN) < 0.05 ? "circle" : "rect";
     const hex = "#" + ink.map(v => Math.round(v).toString(16).padStart(2, "0")).join("");
     const inkPx = ax1 >= 0 ? { w: (ax1 - ax0 + 1) / sc, h: (ay1 - ay0 + 1) / sc } : { w: box.w, h: box.h };
-    if (url.length < 175000 || maxS === 230) return { url, w: W, h: H, ink: hex, shape, multi, color, inkPx, colors, corner: cornerA / Math.max(1, cornerN), canvas: c, faint };
+    if (url.length < LIM || maxS === SZ[SZ.length - 1]) return { url, w: W, h: H, ink: hex, shape, multi, color, inkPx, colors, corner: cornerA / Math.max(1, cornerN), canvas: c, faint };
   }
 }
 function makePhoto(src, sizes = [[1000, 0.8], [800, 0.74], [600, 0.66]]) {
@@ -2001,6 +2629,89 @@ function makePhoto(src, sizes = [[1000, 0.8], [800, 0.74], [600, 0.66]]) {
   return null;
 }
 async function thumbOf(url) { try { const im = await loadImg(url); const s = 128 / Math.max(im.width, im.height); const c = mkCanvas(im.width * s, im.height * s); c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); return c.toDataURL("image/png"); } catch { return ""; } }
+
+/* ================= デジタルスタンプ（アプリ画面のスクショ） ================= */
+function modeColor(d, idxs) {
+  const m = new Map();
+  for (const i of idxs) { const r = d[i * 4], g = d[i * 4 + 1], b = d[i * 4 + 2]; const k = (r >> 4) << 8 | (g >> 4) << 4 | (b >> 4); let e = m.get(k); if (!e) m.set(k, e = [0, 0, 0, 0]); e[0]++; e[1] += r; e[2] += g; e[3] += b; }
+  let best = null; for (const e of m.values()) if (!best || e[0] > best[0]) best = e;
+  return best ? { c: [best[1] / best[0], best[2] / best[0], best[3] / best[0]], share: best[0] / Math.max(1, idxs.length) } : { c: [255, 255, 255], share: 0 };
+}
+function borderIdx(w, h, ring) { const a = []; for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (x < ring || y < ring || x >= w - ring || y >= h - ring) a.push(y * w + x); return a; }
+function analyzeDigital(src, tol) {
+  const S = 360, sc = Math.min(1, S / Math.max(src.width, src.height));
+  const w = Math.max(1, Math.round(src.width * sc)), h = Math.max(1, Math.round(src.height * sc));
+  const c = mkCanvas(w, h), x = c.getContext("2d", { willReadFrequently: true }); x.drawImage(src, 0, 0, w, h);
+  const d = x.getImageData(0, 0, w, h).data, n = w * h;
+  const bm = modeColor(d, borderIdx(w, h, Math.max(2, Math.round(Math.min(w, h) * 0.02)))); const bg = bm.c;
+  const D = new Float32Array(n); for (let i = 0; i < n; i++) D[i] = Math.hypot(d[i * 4] - bg[0], d[i * 4 + 1] - bg[1], d[i * 4 + 2] - bg[2]);
+  return { paper: bg, t: tol, share: bm.share, small: { w, h, D, sc }, digital: true };
+}
+// the stamp often sits on a plain card inside the app screen: look inside such a card once or twice
+function refineDigital(src, box, tol, depth) {
+  if (depth <= 0 || box.w < 80 || box.h < 80) return box;
+  const inset = Math.round(Math.min(box.w, box.h) * 0.06); const iw = Math.round(box.w - inset * 2), ih = Math.round(box.h - inset * 2); if (iw < 40 || ih < 40) return box;
+  const inner = mkCanvas(iw, ih); inner.getContext("2d").drawImage(src, box.x + inset, box.y + inset, iw, ih, 0, 0, iw, ih);
+  const an = analyzeDigital(inner, tol); if (an.share < 0.85) return box;
+  const bs = findBoxes(inner, an, tol); if (!bs.length) return box;
+  const b = bs.sort((p, q) => q.w * q.h - p.w * p.h)[0]; if (b.w * b.h > iw * ih * 0.6) return box;
+  return refineDigital(src, { x: box.x + inset + b.x, y: box.y + inset + b.y, w: b.w, h: b.h }, tol, depth - 1);
+}
+function digitalBoxes(src, an, tol) {
+  let boxes = findBoxes(src, an, tol); if (!boxes.length) boxes = [findBox(src, an, tol)];
+  return boxes.map(b => refineDigital(src, b, tol, 2));
+}
+function makeDigitalCut(src, box, o = {}) {
+  const tol = o.tol || 36, mode = o.mode || "auto"; const big = !!window.PetalogCloud;
+  const sizes = big ? [720, 560, 420] : [380, 300, 230], lim = big ? 900000 : 175000;
+  for (const maxS of sizes) {
+    const sc = Math.min(1, maxS / Math.max(box.w, box.h));
+    const W = Math.max(8, Math.round(box.w * sc)), H = Math.max(8, Math.round(box.h * sc)), n = W * H;
+    const c = mkCanvas(W, H), x = c.getContext("2d", { willReadFrequently: true }); x.imageSmoothingQuality = "high"; x.drawImage(src, box.x, box.y, box.w, box.h, 0, 0, W, H);
+    const im = x.getImageData(0, 0, W, H), d = im.data;
+    const bg = modeColor(d, borderIdx(W, H, Math.max(1, Math.round(Math.min(W, H) * 0.015)))).c;
+    const D = new Float32Array(n); for (let i = 0; i < n; i++) D[i] = Math.hypot(d[i * 4] - bg[0], d[i * 4 + 1] - bg[1], d[i * 4 + 2] - bg[2]);
+    const A = new Float32Array(n).fill(1);
+    if (mode === "auto") {
+      // flood the background in from the edges; anything enclosed by the stamp (white inside a ring etc.) stays
+      const vis = new Uint8Array(n), st = [];
+      const chk = k => { if (!vis[k] && D[k] < tol) { vis[k] = 1; st.push(k); } };
+      for (const i of borderIdx(W, H, 1)) chk(i);
+      while (st.length) { const i = st.pop(), px = i % W, py = (i / W) | 0; if (px > 0) chk(i - 1); if (px < W - 1) chk(i + 1); if (py > 0) chk(i - W); if (py < H - 1) chk(i + W); }
+      const lo = tol * 0.35; for (let i = 0; i < n; i++) if (vis[i]) { const s = clamp((D[i] - lo) / (tol - lo), 0, 1); A[i] = s * s * (3 - 2 * s); }
+    } else if (mode === "circle") {
+      const cx = W / 2, cy = H / 2, rx = W / 2, ry = H / 2, rm = Math.min(rx, ry);
+      for (let i = 0; i < n; i++) { const px = i % W + 0.5, py = ((i / W) | 0) + 0.5; const r = Math.hypot((px - cx) / rx, (py - cy) / ry); A[i] = clamp((1 - r) * rm + 0.5, 0, 1); }
+    }
+    if (o.erase && o.erase.length) {
+      const ec = mkCanvas(W, H), ex = ec.getContext("2d", { willReadFrequently: true }); ex.lineCap = ex.lineJoin = "round"; ex.strokeStyle = ex.fillStyle = "#000"; const M = Math.max(W, H);
+      for (const s of o.erase) { if (!s.length) continue; ex.lineWidth = s[0].r * 2 * M; ex.beginPath(); ex.moveTo(s[0].x * W, s[0].y * H); for (const p of s) ex.lineTo(p.x * W, p.y * H); ex.stroke(); ex.beginPath(); ex.arc(s[0].x * W, s[0].y * H, s[0].r * M, 0, 7); ex.fill(); }
+      const em = ex.getImageData(0, 0, W, H).data; for (let i = 0; i < n; i++) A[i] *= 1 - em[i * 4 + 3] / 255;
+    }
+    let ax0 = W, ay0 = H, ax1 = -1, ay1 = -1, r = 0, g = 0, b = 0, ws = 0;
+    for (let i = 0; i < n; i++) {
+      const a = A[i] * d[i * 4 + 3] / 255;
+      if (a < 0.02) { d[i * 4] = d[i * 4 + 1] = d[i * 4 + 2] = d[i * 4 + 3] = 0; continue; }
+      if (mode === "auto" && A[i] < 0.98) { const k = Math.max(A[i], 0.3); for (let ch = 0; ch < 3; ch++) d[i * 4 + ch] = clamp(bg[ch] + (d[i * 4 + ch] - bg[ch]) / k, 0, 255); }
+      d[i * 4 + 3] = a * 255;
+      if (a > 0.35) { const px = i % W, py = (i / W) | 0; if (px < ax0) ax0 = px; if (px > ax1) ax1 = px; if (py < ay0) ay0 = py; if (py > ay1) ay1 = py; const sat = Math.max(d[i * 4], d[i * 4 + 1], d[i * 4 + 2]) - Math.min(d[i * 4], d[i * 4 + 1], d[i * 4 + 2]); const wv = 1 + sat; r += d[i * 4] * wv; g += d[i * 4 + 1] * wv; b += d[i * 4 + 2] * wv; ws += wv; }
+    }
+    x.putImageData(im, 0, 0);
+    const test = i4 => d[i4 + 3] > 128;
+    const colors = colorNames(d, test); const multi = colors.length >= 2 || hueMulti(d, test);
+    // trim to what is left
+    let out = c, cw = W, ch = H;
+    if (mode === "auto" && ax1 >= 0) { const x0 = Math.max(0, ax0 - 1), y0 = Math.max(0, ay0 - 1); cw = Math.min(W, ax1 + 2) - x0; ch = Math.min(H, ay1 + 2) - y0; out = mkCanvas(cw, ch); out.getContext("2d").drawImage(c, x0, y0, cw, ch, 0, 0, cw, ch); }
+    let cornerA = 0, cornerN = 0;
+    { const od = out.getContext("2d", { willReadFrequently: true }).getImageData(0, 0, cw, ch).data; const cz = Math.round(Math.min(cw, ch) * 0.1);
+      for (let y = 0; y < ch; y++) for (let X = 0; X < cw; X++) if ((X < cz || X >= cw - cz) && (y < cz || y >= ch - cz)) { cornerA += od[(y * cw + X) * 4 + 3] / 255; cornerN++; } }
+    const corner = cornerA / Math.max(1, cornerN);
+    const shape = mode === "circle" || (Math.abs(cw / ch - 1) < 0.15 && corner < 0.05) ? "circle" : "rect";
+    const ink = ws ? [r / ws, g / ws, b / ws] : [40, 50, 90]; const hex = "#" + ink.map(v => Math.round(v).toString(16).padStart(2, "0")).join("");
+    const url = out.toDataURL("image/png");
+    if (url.length < lim || maxS === sizes[sizes.length - 1]) return { url, w: cw, h: ch, ink: hex, shape, multi, color: true, inkPx: { w: cw / sc, h: ch / sc }, colors, corner, canvas: out, faint: 0, digital: true };
+  }
+}
 
 /* ================= EXIF (date + GPS) ================= */
 function readExif(buf) {
@@ -2064,18 +2775,18 @@ function aiErrMsg(e, fb) {
     : c === "login_required" ? "AI推定はログインすると使えます（右上の設定から）。" : c === "user_limit" ? `今日のAI推定（1日${e.limit || ""}回まで）を使い切りました。明日また使えます。` : c === "global_limit" ? "今日はアプリ全体のAI推定の上限に達しました。明日また使えます。" : c === "not_configured" ? "AI推定はまだ準備中です。名前と場所は手で入力できます。" : c === "network" ? "通信できませんでした。電波を確かめてもう一度どうぞ。" : fb;
 }
 const REF_PRESETS = [{ n: "500円玉", cm: 2.65 }, { n: "100円玉", cm: 2.26 }, { n: "10円玉", cm: 2.35 }, { n: "1円玉", cm: 2.0 }, { n: "カード（横の長さ）", cm: 8.56 }, { n: "カード（縦の長さ）", cm: 5.40 }];
-async function aiIdentify(cutUrl, photoUrl, signal) {
+async function aiIdentify(cutUrl, photoUrl, signal, digital) {
   if (!(await aiReady())) throw { code: "unavailable" };
   const imgs = [dataUrlToBlob(cutUrl)]; if (photoUrl && (!aiState.ok || (aiState.lim.images.maxCount || 1) > 1)) imgs.push(dataUrlToBlob(photoUrl));
   const refs = [...REF_PRESETS, ...Profile.refs].map(r => `${r.n}=${r.cm}cm`).join("、");
   const prompt = `あなたは日本の記念スタンプ（駅スタンプ、イベント、観光地、道の駅、商業施設、博物館などのスタンプ）に詳しい鑑定係です。
-1枚目は紙に押されたスタンプを切り抜いた画像です。${imgs.length > 1 ? "2枚目は切り抜く前の元の写真です。" : ""}
+${digital ? "1枚目は、アプリやWebに表示されたデジタルスタンプ（スマホ画面のスクリーンショット）から切り抜いた画像です。" : "1枚目は紙に押されたスタンプを切り抜いた画像です。"}${imgs.length > 1 ? (digital ? "2枚目は切り抜く前のスクリーンショットです。アプリ名や地名などの文字も手がかりにしてください。" : "2枚目は切り抜く前の元の写真です。") : ""}
 1) スタンプの文字・図柄・形式から、どこで押せるスタンプかを推定してください。読めない文字を創作せず、わからない項目は null にします。
 2) 元の写真に大きさの基準になる物（${refs} など）が写っていれば、それとの比率からスタンプの実寸（最も長い辺または直径、cm）を見積もってください。基準物が写っていなければ size_cm は null。
 次の形のJSONだけを返してください:
 {"name":"スタンプの名前（例: 東京駅 / 道の駅 ○○）","place":"押せる場所（駅名・施設名）","pref":"都道府県名","cat":"${GENRES.join(" | ")} のどれか","lat":数値かnull,"lng":数値かnull,"text":"読み取れた文字","confidence":0〜1,"reason":"判断の根拠を1文","size_cm":数値かnull,"size_ref":"使った基準物の名前かnull"}
 lat/lng はその施設のおおよその代表座標にしてください。`;
-  return aiCall("identify", { refs: Profile.refs.map(r => `${r.n}=${r.cm}cm`).join("、") }, prompt, imgs, signal, "default");
+  return aiCall("identify", { refs: Profile.refs.map(r => `${r.n}=${r.cm}cm`).join("、"), digital: !!digital }, prompt, imgs, signal, "default");
 }
 async function aiGoshuin(url, signal) {
   if (!(await aiReady())) throw { code: "unavailable" };
@@ -2224,7 +2935,7 @@ async function runAI(force) {
   try {
     const cut = c.mode === "add" ? c.cut.url : c.d.cut;
     const photo = c.photoUrl || (c.mode === "edit" && c.d.hasPhoto ? await Store.getPhoto("ph_" + c.d.id, c.d.id).catch(() => null) : null);
-    const r = c.type === "goshuin" ? await aiGoshuin(cut, ac.signal) : await aiIdentify(cut, photo, ac.signal);
+    const r = c.type === "goshuin" ? await aiGoshuin(cut, ac.signal) : await aiIdentify(cut, photo, ac.signal, !!(c.digital || c.d.medium === "digital"));
     if (sheetCtx !== c || ac.signal.aborted) return;
     c.ai = r; aiRender(r); applyAI(r, force);
   } catch (e) {
@@ -2489,9 +3200,9 @@ function CropView(cv, src, o) {
 
 /* ================= the record sheet ================= */
 function formHTML(d, ro) {
-  const dis = ro ? " disabled" : ""; const gos = d.type === "goshuin";
+  const dis = ro ? " disabled" : ""; const gos = d.type === "goshuin"; const digi = !gos && d.medium === "digital";
   return `
-  ${gos ? "" : `<div class="sec"><h4>大きさ（実寸）</h4>
+  ${gos || digi ? "" : `<div class="sec"><h4>大きさ（実寸）</h4>
     <div class="sizebox"><input id="f_size" inputmode="decimal" placeholder="例 4.5" value="${d.sizeMm ? (d.sizeMm / 10).toFixed(1) : ""}" aria-label="スタンプの大きさ（cm）"${dis}><span>cm（いちばん長い所・丸なら直径）</span><span class="src" id="sizeSrc"${d.sizeSrc ? "" : " hidden"}>${d.sizeSrc === "ref" ? "基準物で測定" : d.sizeSrc === "ai" ? "AIの見積もり" : "手入力"}</span>
       ${ro ? "" : `<button class="btn small" type="button" id="measureBtn">写真で測る</button>`}</div>
     <div class="measure" id="measureBox" hidden>
@@ -2503,11 +3214,11 @@ function formHTML(d, ro) {
       <details><summary style="cursor:pointer;color:var(--muted)">よく使う基準物を登録する</summary><div class="row2" style="margin-top:8px"><input id="refNewN" class="grow" placeholder="例: 5cmのキーホルダー"><input id="refNewCm" inputmode="decimal" placeholder="cm" style="width:70px"><button class="btn small" type="button" id="refAdd">登録</button></div></details>
     </div>
   </div>`}
-  ${ro ? "" : `<div class="sec ai-box" id="aiBox"><div class="hd"><span>AIで${gos ? "どこの御朱印か" : "どこのスタンプか"}調べる</span><span class="spacer"></span><button class="btn small" type="button" id="aiRun">調べる</button></div><div class="bd" id="aiBd"><small>${gos ? "墨書きや印から寺社名と場所を推定します。" : "文字や図柄から、名前・場所・ジャンル・地図の位置を推定します。基準物が写っていれば大きさも見積もります。"}</small></div></div>`}
+  ${ro ? "" : `<div class="sec ai-box" id="aiBox"><div class="hd"><span>AIで${gos ? "どこの御朱印か" : "どこのスタンプか"}調べる</span><span class="spacer"></span><button class="btn small" type="button" id="aiRun">調べる</button></div><div class="bd" id="aiBd"><small>${gos ? "墨書きや印から寺社名と場所を推定します。" : digi ? "文字や図柄から、名前・場所・ジャンル・地図の位置を推定します。" : "文字や図柄から、名前・場所・ジャンル・地図の位置を推定します。基準物が写っていれば大きさも見積もります。"}</small></div></div>`}
   <div class="sec"><h4>記録</h4><div class="form">
     <label class="fld full"><span>${gos ? "寺社名" : "スタンプの名前"}</span><input id="f_name" class="hand" value="${esc(d.name)}" placeholder="${gos ? "例: ○○神社" : "例: 東京駅"}"${dis}></label>
-    ${gos ? "" : `<label class="fld"><span>ジャンル</span><input id="f_cat" list="genreList" value="${esc(d.cat || "")}" placeholder="駅"${dis}><datalist id="genreList">${GENRES.map(g => `<option value="${g}">`).join("")}</datalist></label>`}
-    <label class="fld${gos ? " full" : ""}"><span>${gos ? "参拝した日" : "押した日"}</span><input id="f_date" type="date" value="${esc(d.date || "")}"${dis}></label>
+    ${gos ? "" : `<label class="fld"><span>ジャンル</span><input id="f_cat" list="genreList" value="${esc(d.cat || "")}" placeholder="駅"${dis}><datalist id="genreList">${GENRES.map(g => `<option value="${g}">`).join("")}</datalist></label><label class="fld"><span>種類</span><select id="f_medium" aria-label="リアルかデジタルか"${dis}><option value="real"${digi ? "" : " selected"}>リアルスタンプ</option><option value="digital"${digi ? " selected" : ""}>デジタルスタンプ</option></select></label>`}
+    <label class="fld full"><span>${gos ? "参拝した日" : "押した日"}</span><input id="f_date" type="date" value="${esc(d.date || "")}"${dis}></label>
     <div class="fld full"><span>きっかけ・イベント</span><select id="f_event" aria-label="きっかけ・イベント"${dis}>${eventOptions(d.event)}</select>
       <div class="row2" id="evNewBox" style="margin-top:6px" hidden><input id="f_evNew" class="grow" maxlength="30" placeholder="例: 謎解き" style="border:1px solid var(--line);background:var(--card);border-radius:10px;padding:9px 10px;font-size:16px"><button class="btn small primary" type="button" id="evAdd">追加</button></div>
       <div class="evsug" id="evSug" hidden>${["謎解き", "デート", "旅行", "ひとり旅", "スタンプラリー", "ドライブ", "推し活", "御朱印めぐり"].filter(e => !Profile.allEvents().includes(e)).map(e => `<button type="button" data-evs="${e}">${e}</button>`).join("")}</div></div>
@@ -2540,19 +3251,22 @@ function refreshRallySel() {
   el.innerHTML = rallySelectHTML({ ...c.d, name: $("#f_name").value, place: $("#f_place").value, memo: $("#f_memo").value, event: $("#f_event").value, rally: el.value });
 }
 function addStepHTML(c) {
-  const g = c.type === "goshuin";
-  return `${c.queue ? `<div class="qbar">この写真の <b>${c.queue.i + 1} / ${c.queue.boxes.length}</b> 個目。日付・場所・イベントは前の入力を引き継いでいます。</div>` : c.fixedType ? "" : `<div class="seg typeseg" role="group" aria-label="種類"><button type="button" data-type="stamp" aria-pressed="${!g}">スタンプ</button><button type="button" data-type="goshuin" aria-pressed="${g}">御朱印</button></div>`}
-  <label class="drop" id="drop"${c.queue ? " hidden" : ""}><input type="file" id="fileIn" accept="image/*,application/pdf"><strong>${g ? "御朱印の写真を選ぶ" : "スタンプの写真かPDFを選ぶ"}</strong><span>${g ? "斜めから撮っても、ページの四隅を見つけてまっすぐに整えます。<br>影や紙の色むらも白く補正します。" : "範囲を自動で見つけて切り抜きます。斜めから撮った丸や四角もまっすぐに直します。<br>1枚に複数のスタンプが写っていても、1つずつ登録できます。<br>硬貨やカードを横に置いて撮ると、大きさも測れます。"}</span></label>
+  const g = c.type === "goshuin", dg = !g && !!c.digital;
+  return `${c.queue ? `<div class="qbar">この写真の <b>${c.queue.i + 1} / ${c.queue.boxes.length}</b> 個目。日付・場所・イベントは前の入力を引き継いでいます。</div>` : c.fixedType ? "" : `<div class="seg typeseg" role="group" aria-label="種類"><button type="button" data-type="stamp" aria-pressed="${!g && !dg}">スタンプ</button><button type="button" data-type="digital" aria-pressed="${dg}">デジタル</button><button type="button" data-type="goshuin" aria-pressed="${g}">御朱印</button></div>`}
+  <label class="drop" id="drop"${c.queue ? " hidden" : ""}><input type="file" id="fileIn" accept="image/*,application/pdf"><strong>${g ? "御朱印の写真を選ぶ" : dg ? "デジタルスタンプのスクショを選ぶ" : "スタンプの写真かPDFを選ぶ"}</strong><span>${dg ? "アプリなどに表示されたスタンプの画面を撮ったスクリーンショットから、スタンプの部分だけを色そのままで切り抜きます。<br>まわりの背景の色は自動で抜きます。1枚に複数あっても、1つずつ登録できます。" : g ? "斜めから撮っても、ページの四隅を見つけてまっすぐに整えます。<br>影や紙の色むらも白く補正します。" : "範囲を自動で見つけて切り抜きます。斜めから撮った丸や四角もまっすぐに直します。<br>1枚に複数のスタンプが写っていても、1つずつ登録できます。<br>硬貨やカードを横に置いて撮ると、大きさも測れます。"}</span></label>
   <div id="cropStep" hidden>
     <div class="multibar" id="multiBar" hidden></div>
     <div class="crop-wrap"><canvas id="cropCv"></canvas></div>
-    <div class="toolrow">${g ? `<span class="cap" style="margin:0">黄色い四隅をページの角に合わせてください</span>` : `<div class="seg" role="group" aria-label="操作"><button type="button" data-tool="box" aria-pressed="true">範囲</button><button type="button" data-tool="corners" aria-pressed="false">四隅でゆがみ補正</button></div><label class="mini"><input type="checkbox" id="warpAuto" checked>ゆがみ自動補正</label>`}</div>
+    <div class="toolrow">${g ? `<span class="cap" style="margin:0">黄色い四隅をページの角に合わせてください</span>` : dg ? `<span class="cap" style="margin:0">青い枠をスタンプに合わせてください</span>` : `<div class="seg" role="group" aria-label="操作"><button type="button" data-tool="box" aria-pressed="true">範囲</button><button type="button" data-tool="corners" aria-pressed="false">四隅でゆがみ補正</button></div><label class="mini"><input type="checkbox" id="warpAuto" checked>ゆがみ自動補正</label>`}</div>
     <p class="cap" id="cropCap"></p>
     <div class="adjrow"><label>明るさ<input type="range" id="adjB" min="-60" max="60" value="0"></label><label>コントラスト<input type="range" id="adjC" min="-40" max="80" value="0"></label><label class="mini"><input type="checkbox" id="adjAuto" checked>自動補正</label></div>
     <div class="result">
-      <div class="res-wrap${g ? " gos" : " washi"}"><canvas id="resCv"></canvas></div>
+      <div class="res-wrap${g ? " gos" : dg ? " digi" : " washi"}"><canvas id="resCv"></canvas></div>
       <div class="ctl-col">
-        ${g ? `<label class="mini"><input type="checkbox" id="whiten" checked>紙を白く・影を消す</label>` : `<label>切り抜きの強さ<input type="range" id="thr" min="-50" max="60" value="0"></label>
+        ${g ? `<label class="mini"><input type="checkbox" id="whiten" checked>紙を白く・影を消す</label>` : dg ? `<div class="seg" role="group" aria-label="背景"><button type="button" data-dm="auto" aria-pressed="${c.dmode === "auto"}">背景を抜く</button><button type="button" data-dm="circle" aria-pressed="${c.dmode === "circle"}">丸く切る</button><button type="button" data-dm="none" aria-pressed="${c.dmode === "none"}">四角のまま</button></div>
+        <label id="dTolL"${c.dmode === "auto" ? "" : " hidden"}>背景の抜き具合<input type="range" id="dTol" min="8" max="120" value="${c.dtol}"></label>
+        <div class="row2"><button class="btn small" type="button" id="eraseBtn" aria-pressed="false">消しゴム</button><button class="btn small" type="button" id="eraseUndo" disabled>1つ戻す</button></div>
+        <label id="eraseSizeL" hidden>消しゴムの太さ<input type="range" id="eraseSize" min="3" max="30" value="10"></label>` : `<label>切り抜きの強さ<input type="range" id="thr" min="-50" max="60" value="0"></label>
         <div class="seg" role="group" aria-label="色"><button type="button" data-cm="auto" aria-pressed="true">自動</button><button type="button" data-cm="mono" aria-pressed="false">1色</button><button type="button" data-cm="color" aria-pressed="false">元の色</button></div>
         <label class="mini"><input type="checkbox" id="ghost">裏写り・うすい影を消す</label>
         <div class="row2"><button class="btn small" type="button" id="eraseBtn" aria-pressed="false">消しゴム</button><button class="btn small" type="button" id="eraseUndo" disabled>1つ戻す</button></div>
@@ -2569,22 +3283,31 @@ function openStamp(mode, s, preset, extra = {}) {
   const type = mode === "edit" ? (s.type || "stamp") : (extra.type || (preset && preset.type) || "stamp");
   const d = mode === "add" ? { id: uid(), type, name: "", place: "", addr: "", pref: "", cat: type === "goshuin" ? "御朱印" : "駅", date: todayStr(), lat: null, lng: null, note: "", memo: "", spot: "", sizeMm: null, sizeSrc: null, rally: "", share: Profile.shareDefault, scenes: [], created: Date.now(), ...(preset || {}) } : JSON.parse(JSON.stringify(s));
   if (!Array.isArray(d.scenes)) d.scenes = [];
-  sheetCtx = { mode, d, orig: s, ro, type, newScenes: [], delScenes: [], sceneUrls: new Map(), colorMode: "auto", offset: 0, erase: [], ghost: false, whiten: true, adj: extra.adj || { auto: true, bright: 0, contrast: 0 }, warp: { auto: true, manual: false, quad: null }, queue: extra.queue || null, fixedType: !!(preset && preset.rally) };
+  sheetCtx = { mode, d, orig: s, ro, type, newScenes: [], delScenes: [], sceneUrls: new Map(), colorMode: "auto", offset: 0, erase: [], ghost: false, whiten: true, digital: type !== "goshuin" && d.medium === "digital", dmode: "auto", dtol: 36, adj: extra.adj || { auto: d.medium !== "digital", bright: 0, contrast: 0 }, warp: { auto: true, manual: false, quad: null }, queue: extra.queue || null, fixedType: !!(preset && preset.rally) };
   const c = sheetCtx; const g = d.cat || "その他";
   const rk = rallyOf(rallyKeyOf(d));
-  const hero = mode === "edit" ? `<div class="hero washi${type === "goshuin" ? " gos" : ""}"><div class="hi"><img src="${d.cut}" alt="${esc(d.name)}" data-lb="1"></div><div><span class="datestamp" style="display:inline-block">${esc(fmtDate(d.date))}</span><h3>${esc(d.name || "名前未設定")}</h3>
-      <div class="meta">${d.pref ? `<span>${esc(d.pref)}${(areaOf(d.lat, d.lng) || {}).city ? esc(areaOf(d.lat, d.lng).city) : ""}</span>` : ""}<span class="chip" style="color:${gcol(g)}">${esc(g)}</span>${d.event ? `<span class="chip" style="color:#2B4C9B">#${esc(d.event)}</span>` : ""}${d.sizeMm ? `<span>⌀ ${fmtCm(d.sizeMm)}</span>` : ""}${rk ? `<span>${esc(rk.r.name)}</span>` : ""}</div>
+  const hero = mode === "edit" ? `<div class="hero washi${type === "goshuin" ? " gos" : isDigi(d) ? " digi" : ""}"><div class="hi"><img src="${d.cut}" alt="${esc(d.name)}" data-lb="1"></div><div><span class="datestamp" style="display:inline-block">${esc(fmtDate(d.date))}</span><h3>${esc(d.name || "名前未設定")}</h3>
+      <div class="meta">${d.pref ? `<span>${esc(d.pref)}${(areaOf(d.lat, d.lng) || {}).city ? esc(areaOf(d.lat, d.lng).city) : ""}</span>` : ""}<span class="chip" style="color:${gcol(g)}">${esc(g)}</span>${isDigi(d) ? `<span class="chip">デジタル</span>` : ""}${d.event ? `<span class="chip" style="color:#2B4C9B">#${esc(d.event)}</span>` : ""}${d.sizeMm ? `<span>⌀ ${fmtCm(d.sizeMm)}</span>` : ""}${rk ? `<span>${esc(rk.r.name)}</span>` : ""}</div>
       ${d.visits && d.visits.length ? `<div class="meta" style="margin-top:4px">押した回数 ${d.visits.length + 1}回（${[...d.visits.map(v => v.date), d.date].filter(Boolean).map(fmtDate).join("・")}）</div>` : ""}
       ${d.note ? `<div class="note">「${esc(d.note)}」</div>` : ""}${d.spot || (d.spotTags && d.spotTags.length) ? `<div class="meta" style="margin-top:4px">置き場所: ${esc([...(d.spotTags || []), d.spot].filter(Boolean).join("・"))}</div>` : ""}${d.lat != null ? `<div class="meta" style="margin-top:6px"><a href="${gmapsDir(d.lat, d.lng)}" target="_blank" rel="noopener">ここへ行く（Googleマップ）</a></div>` : ""}${ro ? `<div class="meta" style="margin-top:6px">サンプルは編集できません。</div>` : ""}</div></div>` : "";
   const title = mode === "add" ? (preset && preset.rally ? esc(preset.name) + " を追加" : "追加") : ro ? "サンプル" : type === "goshuin" ? "御朱印の記録" : "スタンプの記録";
   openSheet(`<div class="sheet-head"><h2>${title}</h2><button class="btn small ghost" type="button" data-close>閉じる</button></div>
-    ${mode === "add" ? `<div id="addStep">${addStepHTML(c)}</div>` : hero}
+    ${mode === "add" ? `<div id="addStep">${addStepHTML(c)}</div>` : hero + `<div class="heroacts"><button class="btn small" type="button" id="hExport">画像で保存</button>${ro ? "" : `${type === "goshuin" ? "" : `<button class="btn small" type="button" id="hBoard">スタンプ帳に貼る</button>`}<button class="btn small ghost" type="button" id="hDel">削除</button>`}</div><div id="heroConfirm"></div>`}
     <div id="formArea"${mode === "add" ? " hidden" : ""}>${formHTML(d, ro)}
-    ${ro ? "" : `<div class="acts">${mode === "edit" ? `<button class="btn ghost" type="button" id="delBtn">削除</button>${type === "goshuin" ? "" : `<button class="btn" type="button" id="toBoard">台紙に貼る</button>`}` : ""}<button class="btn primary" type="button" id="saveBtn">${mode === "add" ? (type === "goshuin" ? "御朱印帳に入れる" : "スタンプ帳に入れる") : "保存"}</button></div><div id="confirmArea"></div>`}</div>`);
+    ${ro ? "" : `<div class="acts">${mode === "edit" ? `<button class="btn ghost" type="button" id="delBtn">削除</button>${type === "goshuin" ? "" : `<button class="btn" type="button" id="toBoard">スタンプ帳に貼る</button>`}` : ""}<button class="btn primary" type="button" id="saveBtn">${mode === "add" ? (type === "goshuin" ? "御朱印帳に入れる" : "スタンプ帳に入れる") : "保存"}</button></div><div id="confirmArea"></div>`}</div>`);
   wireForm();
   if (mode === "add") { wireAdd(); if (c.queue) startFromOrig(c.queue.orig, c.queue.exif); }
   if (mode === "edit" && !ro) wireEdit();
-  if (mode === "edit") loadEditPhotos();
+  if (mode === "edit") {
+    loadEditPhotos();
+    $("#hExport").onclick = () => openExport({ ids: [d.id] });
+    const hb = $("#hBoard"); if (hb) hb.onclick = () => Books.addStamp(d.id);
+    const hd = $("#hDel"); if (hd) hd.onclick = () => {
+      $("#heroConfirm").innerHTML = `<div class="confirm"><span style="flex:1">この記録と写真を削除します。${type === "goshuin" ? "" : "スタンプ帳のページからもはがれます。"}元には戻せません。</span><button class="btn small" type="button" id="hNo">やめる</button><button class="btn small shu" type="button" id="hYes">削除する</button></div>`;
+      $("#hNo").onclick = () => $("#heroConfirm").innerHTML = "";
+      $("#hYes").onclick = async () => { $("#hYes").disabled = true; const n = await deleteStamps([s]); if (n) { closeSheet(); toast("削除しました"); } };
+    };
+  }
 }
 async function loadEditPhotos() {
   const c = sheetCtx, d = c.d; if (d.sample) return;
@@ -2594,7 +3317,7 @@ async function loadEditPhotos() {
 function wireAdd() {
   const c = sheetCtx;
   const typeBtns = document.querySelectorAll("[data-type]");
-  typeBtns.forEach(b => b.onclick = () => { if (c.src) return; c.type = c.d.type = b.dataset.type; c.d.cat = c.type === "goshuin" ? "御朱印" : "駅"; $("#addStep").innerHTML = addStepHTML(c); $("#formArea").outerHTML; rebuildForm(); wireAdd(); });
+  typeBtns.forEach(b => b.onclick = () => { if (c.src) return; const t = b.dataset.type; c.digital = t === "digital"; c.type = c.d.type = t === "goshuin" ? "goshuin" : "stamp"; if (c.digital) { c.d.medium = "digital"; c.adj = { auto: false, bright: 0, contrast: 0 }; } else { delete c.d.medium; c.adj = { auto: true, bright: 0, contrast: 0 }; } c.d.cat = c.type === "goshuin" ? "御朱印" : "駅"; $("#addStep").innerHTML = addStepHTML(c); $("#formArea").outerHTML; rebuildForm(); wireAdd(); });
   const drop = $("#drop");
   ["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("hover"); }));
   ["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("hover"); }));
@@ -2604,6 +3327,8 @@ function wireAdd() {
   const aiB = $("#aiRun"); if (aiB) aiB.onclick = () => runAI(true);
   document.querySelectorAll("[data-cm]").forEach(b => b.onclick = () => { c.colorMode = b.dataset.cm; document.querySelectorAll("[data-cm]").forEach(x => x.setAttribute("aria-pressed", x === b)); recut(); });
   const thr = $("#thr"); if (thr) thr.oninput = e => { c.offset = +e.target.value; clearTimeout(c.rt); c.rt = setTimeout(recut, 120); };
+  document.querySelectorAll("[data-dm]").forEach(b => b.onclick = () => { c.dmode = b.dataset.dm; document.querySelectorAll("[data-dm]").forEach(x => x.setAttribute("aria-pressed", x === b)); $("#dTolL").hidden = c.dmode !== "auto"; recut(); });
+  const dtl = $("#dTol"); if (dtl) dtl.oninput = e => { c.dtol = +e.target.value; clearTimeout(c.rt); c.rt = setTimeout(recut, 120); };
   const gh = $("#ghost"); if (gh) gh.onchange = e => { c.ghost = e.target.checked; c.ghostTouched = true; recut(); };
   const wh = $("#whiten"); if (wh) wh.onchange = e => { c.whiten = e.target.checked; refresh("quad"); };
   const wa = $("#warpAuto"); if (wa) wa.onchange = e => { c.warp.auto = e.target.checked; c.warp.manual = false; setTool("box"); refresh("box"); };
@@ -2659,12 +3384,14 @@ function startFromOrig(orig, exif) {
   runAI(false);
 }
 function prepareSrc(keepBox) {
-  const c = sheetCtx; c.src = adjustCanvas(c.orig, c.adj); c.an = analyze(c.src);
+  const c = sheetCtx; c.src = adjustCanvas(c.orig, c.adj);
+  if (c.digital) { c.an = analyzeDigital(c.src, c.dtol); if (!keepBox) { c.boxes = digitalBoxes(c.src, c.an, c.dtol); c.box = (c.queue ? c.queue.boxes[c.queue.i] : null) || c.boxes[0]; } return; }
+  c.an = analyze(c.src);
   if (c.type === "goshuin") { if (!c.warp.manual) { const p = detectPage(c.src); c.warp.quad = p.quad; c.warp.found = p.found; } return; }
   if (!keepBox) { c.boxes = findBoxes(c.src, c.an, c.an.t); c.box = (c.queue ? c.queue.boxes[c.queue.i] : null) || c.boxes[0] || findBox(c.src, c.an, c.an.t); }
 }
 function detectWarp() {
-  const c = sheetCtx; if (c.type === "goshuin" || c.warp.manual) return;
+  const c = sheetCtx; if (c.digital) { c.warp.kind = "off"; c.warp.quad = null; return; } if (c.type === "goshuin" || c.warp.manual) return;
   if (!c.warp.auto) { c.warp.kind = "off"; c.warp.quad = null; return; }
   const r = detectShape(c.src, c.box, c.an, clamp(c.an.t + c.offset, 12, 220));
   c.warp.kind = r.kind; c.warp.quad = r.quad || null; c.warp.W = r.W; c.warp.H = r.H;
@@ -2684,6 +3411,7 @@ function refresh(level, first) {
 }
 function warpCaption() {
   const c = sheetCtx; const el = $("#cropCap"); if (!el) return;
+  if (c.digital) { el.textContent = "青い枠がスタンプの範囲です。まわりの背景の色を抜いて、スタンプの色はそのまま残します。カードごと切り抜かれたときは、枠をスタンプに合わせて小さくしてください。"; return; }
   if (c.type === "goshuin") { el.textContent = c.warp.manual ? "四隅に合わせてまっすぐに整えました。" : c.warp.found ? "ページの四隅を見つけて、まっすぐに整えました。ずれていたら黄色い角を動かしてください。" : "ページの角が見つからなかったので、黄色い角をページの四隅に合わせてください。"; return; }
   const k = c.warp.manual ? "manual" : c.warp.kind;
   el.textContent = "青い枠がスタンプの範囲です。 " + ({ circle: "丸型（ゆがみなし）", ellipse: "斜めの丸を、真円に直しました（緑の点線）", quad: "斜めの四角を、まっすぐに直しました（緑の点線）", rect: "四角型（ゆがみなし）", none: "形が複雑なので、ゆがみ補正はしていません。必要なら「四隅でゆがみ補正」で合わせてください", off: "ゆがみ補正はオフです", manual: "四隅に合わせて直しました" }[k] || "");
@@ -2695,6 +3423,7 @@ function pageCut(cv) {
 function recut() {
   const c = sheetCtx; if (!c || !c.src) return;
   if (c.type === "goshuin") { c.cut = pageCut(c.rect); drawResult(); $("#cutCap").textContent = `${c.cut.w}×${c.cut.h}px のページとして保存します。`; return; }
+  if (c.digital) { c.cut = makeDigitalCut(c.src, c.box, { tol: c.dtol, mode: c.dmode, erase: c.erase }); drawResult(); const cp = $("#cutCap"); if (cp) cp.textContent = `色そのままで切り抜き${c.cut.colors.length ? " · 色: " + c.cut.colors.join("・") : ""}${c.cut.multi ? "（多色）" : ""}`; return; }
   const t = clamp(c.an.t + c.offset, 12, 220);
   const src = c.rect || c.src, box = c.rect ? { x: 0, y: 0, w: c.rect.width, h: c.rect.height } : c.box;
   c.cut = makeCut(src, box, c.an.paper, t, c.colorMode, { ghost: c.ghost, erase: c.erase });
@@ -2721,13 +3450,12 @@ function wireEdit() {
   const c = sheetCtx;
   const ai = $("#aiRun"); if (ai) ai.onclick = () => runAI(false);
   $("#saveBtn").onclick = saveStampForm;
-  const tb = $("#toBoard"); if (tb) tb.onclick = () => { const id = c.d.id; closeSheet(); show("board"); Board.add(id); };
+  const tb = $("#toBoard"); if (tb) tb.onclick = () => Books.addStamp(c.d.id);
   $("#delBtn").onclick = () => {
-    $("#confirmArea").innerHTML = `<div class="confirm"><span style="flex:1">この記録と写真を削除します。${c.type === "goshuin" ? "" : "台紙からもはがれます。"}</span><button class="btn small" type="button" id="noDel">やめる</button><button class="btn small shu" type="button" id="yesDel">削除する</button></div>`;
+    $("#confirmArea").innerHTML = `<div class="confirm"><span style="flex:1">この記録と写真を削除します。${c.type === "goshuin" ? "" : "スタンプ帳のページからもはがれます。"}</span><button class="btn small" type="button" id="noDel">やめる</button><button class="btn small shu" type="button" id="yesDel">削除する</button></div>`;
     $("#noDel").onclick = () => $("#confirmArea").innerHTML = "";
     $("#yesDel").onclick = async () => {
-      try { await Store.removeStamp(c.orig); if (c.orig.share) await Store.pubDel(c.orig.id); } catch { toast("削除できませんでした"); return; }
-      stamps = stamps.filter(x => x.id !== c.orig.id); Board.data.items = Board.data.items.filter(i => i.sid !== c.orig.id); Board.save(); closeSheet(); refreshAll(); toast("削除しました");
+      $("#yesDel").disabled = true; const n = await deleteStamps([c.orig]); if (n) { closeSheet(); toast("削除しました"); }
     };
   };
 }
@@ -2736,7 +3464,7 @@ function readForm(d) {
   const num = s => { const n = parseFloat(s); return isFinite(n) ? n : null; };
   const gos = d.type === "goshuin";
   Object.assign(d, { name: v("#f_name") || (gos ? "名前未設定の御朱印" : "名前未設定のスタンプ"), cat: gos ? "御朱印" : (v("#f_cat") || "その他"), date: $("#f_date").value, note: v("#f_note"), memo: v("#f_memo"), place: v("#f_place"), pref: v("#f_pref"), addr: v("#f_addr"), spot: v("#f_spot") || "", spotTags: [...document.querySelectorAll("#spotTags [data-spt][aria-pressed=true]")].map(b => b.dataset.spt), share: $("#f_share").checked, event: $("#f_event").value === "__new" ? (d.event || "") : $("#f_event").value });
-  if (!gos) { d.rally = $("#f_rally") ? $("#f_rally").value : d.rally; const cm = num(v("#f_size")); d.sizeMm = cm && cm > 0 ? Math.round(cm * 100) / 10 : null; if (!d.sizeMm) d.sizeSrc = null; }
+  if (!gos) { const md = $("#f_medium"); if (md) { if (md.value === "digital") d.medium = "digital"; else delete d.medium; } d.rally = $("#f_rally") ? $("#f_rally").value : d.rally; const cm = num(v("#f_size")); d.sizeMm = cm && cm > 0 ? Math.round(cm * 100) / 10 : null; if (!d.sizeMm) d.sizeSrc = null; }
 }
 async function saveStampForm() {
   const c = sheetCtx; if (!c) return; const d = c.d;
@@ -2787,11 +3515,11 @@ async function commitSave(c, d) {
   if (Profile.shareDefault !== d.share) { Profile.shareDefault = d.share; Profile.save(); }
   const first = !stamps.length;
   if (c.mode === "add") stamps.push(d); else stamps = stamps.map(x => x.id === d.id ? d : x);
-  if (first) { Board.data = { paper: "a4", items: [] }; Board.sel = null; Fall.setFilter("all"); }
+  if (first) { await Books.load(); Fall.setFilter("all"); }
   const mode = c.mode, q = c.queue, adj = c.adj;
   closeSheet(); refreshAll();
   if (q && mode !== "edit" && q.i + 1 < q.boxes.length) {
-    const carry = { date: d.date, event: d.event, lat: d.lat, lng: d.lng, locSrc: d.locSrc, pref: d.pref, addr: d.addr, place: d.place, share: d.share, cat: d.cat };
+    const carry = { medium: d.medium, date: d.date, event: d.event, lat: d.lat, lng: d.lng, locSrc: d.locSrc, pref: d.pref, addr: d.addr, place: d.place, share: d.share, cat: d.cat };
     toast(`${q.i + 1}個目を保存しました。次のスタンプへ`); openStamp("add", null, carry, { queue: { ...q, i: q.i + 1 }, type: "stamp", adj }); return;
   }
   if (mode === "add") { const r = rallyOf(rallyKeyOf(d)); toast(d.type === "goshuin" ? "御朱印帳に入れました" : r ? `${r.r.name} ${r.st.n}駅 をゲット！` : "スタンプ帳に入れました"); }
@@ -2807,6 +3535,7 @@ function openSettings() {
     ${window.PetalogCloud ? PetalogCloud.settingsHTML() : ""}
     <div class="sec"><h4>きっかけ・イベント</h4><div id="setEv"></div><div class="row2" style="margin-top:8px"><input id="setEvIn" class="search grow" maxlength="30" placeholder="例: 謎解き"><button class="btn small primary" type="button" id="setEvAdd">追加</button></div></div>
     <div class="sec"><h4>大きさの基準物</h4><div id="setRef"></div><p class="cap">「写真で測る」の画面から追加できます。</p></div>
+    <div class="sec"><h4>「ぜんぶ」の背景</h4><div class="papers" id="setFall">${["washi", "plain", "grid", "dot", "kraft", "cork", "seigaiha"].map(k => `<button type="button" data-fb="${k}" aria-pressed="${(Profile.fallBg || "washi") === k}"><i style="background-image:url(${Paper.previewURL(k)})"></i>${PAPERS[k]}</button>`).join("")}<label class="pbtn" aria-pressed="${Profile.fallBg === "photo"}"><i style="background-image:url(${Paper.previewURL("photo")})"></i>写真<input type="file" id="setFallPh" accept="image/*" style="position:absolute;width:1px;height:1px;opacity:0"></label></div></div>
     <div class="sec"><h4>バックアップ</h4><p class="cap">${Store.mode === "cloud" ? "記録はあなたのアカウントに保存されています。念のためファイルにも書き出せます。" : "記録はこの端末（このブラウザ）の中だけに保存されています。機種変更やブラウザのデータ削除に備えて、ときどき書き出してください。"}</p>
       <div class="row2"><button class="btn small" type="button" id="bkOut">ファイルに書き出す</button><label class="btn small" style="position:relative">ファイルから読み込む<input type="file" id="bkIn" accept="application/json,.json" style="position:absolute;width:1px;height:1px;opacity:0"></label></div></div>
     ${inClaude || window.PetalogCloud ? "" : `<div class="sec"><h4>AI判定（任意）</h4><p class="cap">AnthropicのAPIキーを入れると、スタンプの場所の推定と大きさの見積もりが使えます。キーはこの端末の中だけに保存されます。共用の端末では入れないでください。</p>
@@ -2822,6 +3551,8 @@ function openSettings() {
   };
   $("#setEvAdd").onclick = () => { const v = $("#setEvIn").value.trim(); if (!v) return; if (!Profile.events.includes(v)) { Profile.events.push(v); Profile.save(); } $("#setEvIn").value = ""; lists(); };
   $("#bkOut").onclick = exportBackup;
+  $("#setFall").onclick = e => { const b = e.target.closest("[data-fb]"); if (!b) return; Profile.fallBg = b.dataset.fb; Profile.save(); applyFallBg(); document.querySelectorAll("#setFall [data-fb], #setFall .pbtn").forEach(x => x.setAttribute("aria-pressed", x === b)); };
+  $("#setFallPh").onchange = async e => { const f = e.target.files[0]; if (!f) return; try { const cv = await fileToCanvas(f, 2000); const ph = makePhoto(cv, [[1600, 0.84], [1300, 0.8], [1000, 0.76]]); if (!ph) throw 0; await Store.putPhoto("fallbg", ph.url); Profile.fallBg = "photo"; await Profile.save(); await applyFallBg(); openSettings(); toast("「ぜんぶ」の背景を変えました"); } catch { toast("この写真は使えませんでした", 3200); } };
   $("#bkIn").onchange = e => { const f = e.target.files[0]; if (f) importBackup(f); };
   const ks = $("#keySave"); if (ks) ks.onclick = () => { const v = $("#keyIn").value.trim(); if (!/^sk-ant-/.test(v)) { toast("sk-ant- で始まるキーを入れてください"); return; } lsSet("petalog.apikey", v); toast("APIキーを保存しました"); openSettings(); };
   const kd = $("#keyDel"); if (kd) kd.onclick = () => { try { localStorage.removeItem("petalog.apikey"); } catch {} toast("APIキーを消しました"); openSettings(); };
@@ -2836,7 +3567,9 @@ async function exportBackup() {
     if (s.hasPhoto) { const u = await Store.getPhoto("ph_" + s.id, s.id).catch(() => null); if (u) photos["ph_" + s.id] = u; }
     for (const k of s.scenes || []) { const u = await Store.getPhoto("sc_" + s.id + "_" + k).catch(() => null); if (u) photos["sc_" + s.id + "_" + k] = u; }
   }
-  const data = JSON.stringify({ app: "petalog", v: 1, at: new Date().toISOString(), stamps: stamps.map(s => Store.clean(s)), photos, profile: { events: Profile.events, refs: Profile.refs, nick: Profile.nick }, board: Board.data });
+  const books = Books.sample ? [] : Books.data.books;
+  for (const bk of books) for (const p of bk.pages) if (p.bg) { const u = await Store.getPhoto(p.bg).catch(() => null); if (u) photos[p.bg] = u; }
+  const data = JSON.stringify({ app: "petalog", v: 1, at: new Date().toISOString(), stamps: stamps.map(s => Store.clean(s)), photos, profile: { events: Profile.events, refs: Profile.refs, nick: Profile.nick }, books });
   const filename = `petalog-${todayStr()}.json`;
   if (b) { b.disabled = false; b.textContent = "ファイルに書き出す"; }
   if (inClaude) { try { const dl = await claude.use("downloads"); if (dl) { await dl.save({ filename, data }); return; } } catch (e) { if (e && e.code && e.code !== "unavailable") return; } }
@@ -2853,7 +3586,14 @@ async function importBackup(file) {
     catch { toast("途中で保存できなくなりました（容量の上限かもしれません）", 4000); break; }
   }
   const p = j.profile || {}; (p.events || []).forEach(e => Profile.events.includes(e) || Profile.events.push(e)); (p.refs || []).forEach(r => Profile.refs.some(x => x.n === r.n) || Profile.refs.push(r)); await Profile.save();
-  if (j.board && Array.isArray(j.board.items) && !Board.data.items.length) { Board.data = { paper: j.board.paper || "a4", items: j.board.items }; Board.save(); }
+  if (Books.sample && stamps.length) await Books.load();
+  if (!Books.sample && Array.isArray(j.books) && j.books.length) {
+    const hb = new Set(Books.data.books.map(b => b.id));
+    for (const b of j.books) { if (!b || !b.id || hb.has(b.id) || !Array.isArray(b.pages)) continue; Books.data.books.push(b); for (const p of b.pages) if (p.bg && j.photos && j.photos[p.bg]) await Store.putPhoto(p.bg, j.photos[p.bg]).catch(() => {}); }
+    Books.save(true);
+  } else if (!Books.sample && j.board && Array.isArray(j.board.items) && j.board.items.length) {
+    const b = Books.mkBook("読み込んだスタンプ帳"); b.pages.push(Books.mkPage({ size: j.board.paper === "inf" ? "inf" : "a4", items: j.board.items })); Books.data.books.push(b); Books.save(true);
+  }
   closeSheet(); refreshAll(); toast(`${n} まい読み込みました`);
 }
 
@@ -2862,15 +3602,15 @@ addEventListener("resize", () => { Book.layout(); if (view === "fall") { Fall.di
 document.addEventListener("visibilitychange", () => { if (document.hidden) Fall.stop(); else if (view === "fall") Fall.start(); });
 document.addEventListener("contextmenu", e => { if (!e.target.closest("input,textarea")) e.preventDefault(); });
 (async function boot() {
-  makeWashi();
+  Paper.washiCv = makeWashi();
   try { await Promise.race([Promise.all([document.fonts.load("700 40px 'Zen Kaku Gothic New'"), document.fonts.load("500 17px 'IBM Plex Mono'")]), sleep(1500)]); } catch {}
-  buildSamples(); Board.data = { paper: "a4", items: Board.sampleLayout() };
+  buildSamples(); Books.data = Books.sampleData(); Books.sample = true;
   setColl("grid"); refreshAll(); show("fall");
   Promise.all(SAMPLES.map(fillStats)).then(() => { if (!stamps.length) Grid.render(); });
-  await Store.init(); await Profile.load();
+  await Store.init(); await Profile.load(); applyFallBg();
   try { stamps = await Store.listStamps(); stamps.forEach(s => { if (!Array.isArray(s.scenes)) s.scenes = []; }); } catch { stamps = []; toast("記録を読み込めませんでした。開き直してみてください。", 4000); }
-  await Board.load();
-  ready = true; Book.idx = 0; Board.fitted = false; MapV.shown = false;
+  await Books.load();
+  ready = true; Book.idx = 0; MapV.shown = false;
   refreshAll(); show(view);
   if (window.PetalogCloud) PetalogCloud.afterBoot();
   (async () => { let n = 0; for (const s of stamps) { if (await fillStats(s)) n++; } if (n) Grid.render(); })();
