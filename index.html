@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="description" content="押した記念スタンプを写真から切り抜いて、トレカ・スタンプ帳・地図で集めるアプリ">
 <meta name="theme-color" content="#ECEDEF">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="ぺたろぐ">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -1509,12 +1507,8 @@ const MapV = {
     m.attributionControl.addAttribution("駅・路線: 駅データ.jp");
     m.setView([36.6, 137.8], 5);
     this.map = m; this.layer = new RailLayer().addTo(m);
-    const t = baseTiles();
-    let ok = 0, bad = 0;
-    t.on("tileload", () => { if (!ok++) this.setReal(true); });
-    t.on("tileerror", () => { bad++; if (!ok && bad >= 3) this.setReal(false); });
-    t.addTo(m); this.tiles = t;
-    setTimeout(() => { if (!ok) this.setReal(false); }, 4500);
+    const t = null;
+    void t; this.tiles = null; addBaseMap(m, layer => { this.tiles = layer; this.setReal(true); }, () => this.setReal(false));
     m.on("click", e => { clearTimeout(this._tt); const p = e.containerPoint; this._tt = setTimeout(() => this.tap(p.x, p.y), 240); });
     m.on("dblclick", () => clearTimeout(this._tt));
     m.on("movestart", () => { if (!this.pick) this.closeCard(); $("#mapResults").hidden = true; });
@@ -3844,10 +3838,42 @@ async function importBackup(file) {
 
 /* ================= v10: 場所ピッカー・イベントと路線・公開設定・みんなのコレクション・白い紙で拡大・達成のお祝い ================= */
 const BLANK = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-// the base map: a clean, Google-like street map (OpenStreetMap data, CARTO "Voyager" style)
-function baseTiles() {
-  return L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", { subdomains: "abcd", maxZoom: 19, maxNativeZoom: 19, minZoom: 4, detectRetina: false,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>' });
+// the base map: a clean, Google-like street map (OpenFreeMap "Liberty" vector style, free, no key) — plain OpenStreetMap pictures if that cannot start
+const OFM_STYLE = "https://tiles.openfreemap.org/styles/liberty";
+let mapLibP = null;
+function loadMapLib() {
+  if (mapLibP) return mapLibP;
+  const v = !!window.PetalogCloud, css = v ? "vendor/maplibre-gl.css" : "https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css";
+  mapLibP = (async () => {
+    if (!document.querySelector("link[data-ml]")) { const l = document.createElement("link"); l.rel = "stylesheet"; l.href = css; l.dataset.ml = "1"; document.head.appendChild(l); }
+    if (!window.maplibregl) await loadScript(v ? "vendor/maplibre-gl.js" : "https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js");
+    if (!L.maplibreGL) await loadScript(v ? "vendor/leaflet-maplibre-gl.js" : "https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.4/leaflet-maplibre-gl.js");
+    if (!window.maplibregl || !L.maplibreGL) throw new Error("maplibre");
+  })();
+  mapLibP.catch(() => { mapLibP = null; });
+  return mapLibP;
+}
+const OSM_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>';
+function jaLabels(g) {
+  for (const l of g.getStyle().layers || []) {
+    const tf = l.layout && l.layout["text-field"]; if (l.type !== "symbol" || !tf || !/name/.test(JSON.stringify(tf))) continue;
+    try { g.setLayoutProperty(l.id, "text-field", ["coalesce", ["get", "name:ja"], ["get", "name"]]); } catch {}
+  }
+}
+function addBaseMap(m, ok, bad) {
+  let settled = false; const good = l => { if (!settled) { settled = true; ok && ok(l); } }, fail = () => { if (!settled) { settled = true; bad && bad(); } };
+  const raster = () => {
+    if (settled) return; const t = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: OSM_ATTR }); let n = 0, e = 0;
+    t.on("tileload", () => { if (!n++) good(t); }); t.on("tileerror", () => { if (!n && ++e >= 4) { m.removeLayer(t); fail(); } }); t.addTo(m);
+    setTimeout(() => { if (!n) { try { m.removeLayer(t); } catch {} fail(); } }, 7000);
+  };
+  loadMapLib().then(() => {
+    if (!m._loaded && !m.getContainer().isConnected) return;
+    let gl; try { gl = L.maplibreGL({ style: OFM_STYLE, attribution: '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> ' + OSM_ATTR }).addTo(m); } catch { raster(); return; }
+    const g = gl.getMaplibreMap && gl.getMaplibreMap(); if (!g) { raster(); return; }
+    const timer = setTimeout(() => { if (!settled) { try { m.removeLayer(gl); } catch {} raster(); } }, 9000);
+    g.once("load", () => { clearTimeout(timer); jaLabels(g); good(gl); });
+  }).catch(raster);
 }
 const fmtKm = km => km < 1 ? Math.max(10, Math.round(km * 100) * 10) + "m" : km.toFixed(1) + "km";
 
@@ -3925,7 +3951,7 @@ const PlacePick = {
     const d = c.d, has = d.lat != null && d.lng != null;
     const m = L.map(el, { zoomControl: false, attributionControl: true, minZoom: 4, maxZoom: 18, zoomSnap: 0.5, tap: false, scrollWheelZoom: "center", maxBounds: [[17, 115], [49, 160]], maxBoundsViscosity: 0.7, bounceAtZoomLimits: false });
     m.attributionControl.setPrefix(false);
-    baseTiles().addTo(m);
+    addBaseMap(m);
     L.control.zoom({ position: "bottomright", zoomInTitle: "拡大", zoomOutTitle: "縮小" }).addTo(m);
     const g = has ? null : this.guess(c);
     m.setView(has ? [d.lat, d.lng] : g ? [g.lat, g.lng] : [36.3, 138.3], has ? 16 : g ? 15 : 5);
