@@ -4020,7 +4020,7 @@ const PlacePick = {
     const seen = new Set(); let top = res.filter(r => { const k = norm(r.t); if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 8);
     this.show(top, deep);
     const more = [];
-    const ctr = this.map ? this.map.getCenter() : null; const ovP = overpassSearch(v, ctr && this.map.getZoom() >= 8 ? ctr : (() => { const g = this.c && this.guess(this.c); return g ? { lat: +g.lat, lng: +g.lng } : { lat: 35.681, lng: 139.767 }; })()).catch(() => []);
+    const ctr = this.map ? this.map.getCenter() : null; const ovP = overpassSearch(v, ctr && this.map.getZoom() >= 8 ? { lat: ctr.lat, lng: ctr.lng } : (() => { const g = this.c && this.guess(this.c); return g ? { lat: +g.lat, lng: +g.lng } : null; })()).catch(() => []);
     const [ph, g] = await Promise.all([placeSearch(v, ctr).catch(() => []), MapV.gsi(v).catch(() => [])]);
     if (my !== this.seq) return;
     more.push(...ph); g.forEach(x => more.push({ ...x, sub: "住所・地名" }));
@@ -4529,7 +4529,7 @@ function queryVariants(v) {
 const PH_CAT = { aerodrome: "空港", terminal: "空港", station: "駅", halt: "駅", rest_area: "道の駅", services: "インターチェンジ", motorway_junction: "インターチェンジ" };
 async function placeSearch(v, ctr) {
   const qs = queryVariants(v); const seen = new Set(); const out = [];
-  const bias = ctr && isFinite(ctr.lat) ? `&lat=${ctr.lat.toFixed(4)}&lon=${ctr.lng.toFixed(4)}&location_bias_scale=0.3&zoom=12` : "";
+  const bias = ctr && isFinite(ctr.lat) ? `&lat=${ctr.lat.toFixed(4)}&lon=${ctr.lng.toFixed(4)}&location_bias_scale=0.1&zoom=8` : "";
   const lists = await Promise.all(qs.map(q => fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=10&bbox=122,24,154,46${bias}`).then(r => r.ok ? r.json() : { features: [] }).catch(() => ({ features: [] }))));
   for (const j of lists) for (const f of j.features || []) {
     const p = f.properties || {}; if (p.countrycode && p.countrycode !== "JP") continue; const c = f.geometry && f.geometry.coordinates; if (!c) continue;
@@ -4580,25 +4580,42 @@ function unrotPt(c, x, y) {
 /* ---------- お店の名前と支店名で探す（OpenStreetMap / Overpass）: 「スタバ丸の内オアゾ」など ---------- */
 const nz = t => toKata(String(t || "")).toLowerCase().replace(/[\s・･　]/g, "");
 async function overpassSearch(v, ctr) {
-  if (!ctr) return []; const toks = queryVariants(v)[0].split(" ").map(t => t.replace(/店$/, "")).filter(t => t && (t.length >= 2 || /[一-鿿]/.test(t))); if (!toks.length) return [];
-  const lead = [...toks].sort((a, b) => b.length - a.length)[0].replace(/[.*+?^${}()|[\]\\"]/g, "\\$&");
-  const A = `(around:30000,${ctr.lat.toFixed(5)},${ctr.lng.toFixed(5)})`;
-  const q = `[out:json][timeout:12];(${["name", "name:ja", "name:en", "branch", "brand"].map(k => `nwr${A}["${k}"~"${lead}",i];`).join("")});out center tags 150;`;
-  const ac = new AbortController(); const tm = setTimeout(() => ac.abort(), 13000);
+  const toks = queryVariants(v)[0].split(" ").map(t => t.replace(/店$/, "")).filter(t => t && (t.length >= 2 || /[一-鿿]/.test(t))); if (!toks.length) return [];
+  const chains = new Set(Object.values(NICK).map(nz));
+  const lead = toks.find(t => chains.has(nz(t))) || [...toks].sort((a, b) => b.length - a.length)[0]; const rest = toks.filter(t => t !== lead);
+  // where to look: near the map, and — anywhere in Japan — around the place words in the query (駅名・地名・建物名)
+  const centers = []; if (ctr) centers.push({ lat: ctr.lat, lng: ctr.lng, r: 30000 });
+  if (rest.length) {
+    const pq = rest.join(" ");
+    for (const t of rest) GEO.stations.filter(s => norm(s.n) === norm(t)).slice(0, 3).forEach(s => centers.push({ lat: s.lat, lng: s.lng, r: 3000 }));
+    const [ph, gs] = await Promise.all([
+      fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(pq)}&limit=4&bbox=122,24,154,46`).then(r => r.ok ? r.json() : { features: [] }).catch(() => ({ features: [] })),
+      MapV.gsi(pq).catch(() => [])]);
+    (ph.features || []).forEach(f => { const c = f.geometry && f.geometry.coordinates; if (c) centers.push({ lat: c[1], lng: c[0], r: 2500 }); });
+    gs.slice(0, 4).forEach(g => centers.push({ lat: +g.lat, lng: +g.lng, r: 3000 }));
+  }
+  const C = []; for (const c of centers) if (!C.some(d => kmBetween(c.lat, c.lng, d.lat, d.lng) < 1.5 && d.r >= c.r)) C.push(c); if (!C.length) return [];
+  const re = lead.replace(/[.*+?^${}()|[\]\\"]/g, "\\$&");
+  const parts = C.slice(0, 7).flatMap(c => ["name", "name:ja", "name:en", "branch", "brand"].map(k => `nwr(around:${c.r},${c.lat.toFixed(5)},${c.lng.toFixed(5)})["${k}"~"${re}",i];`));
+  const q = `[out:json][timeout:15];(${parts.join("")});out center tags 200;`;
+  const ac = new AbortController(); const tm = setTimeout(() => ac.abort(), 16000);
   try {
     const r = await fetch("https://overpass-api.de/api/interpreter", { method: "POST", body: "data=" + encodeURIComponent(q), headers: { "content-type": "application/x-www-form-urlencoded" }, signal: ac.signal }); if (!r.ok) return [];
-    const j = await r.json(); const out = [];
+    const j = await r.json(); const out = []; const seen = new Set();
     for (const e of j.elements || []) {
+      if (seen.has(e.type + e.id)) continue; seen.add(e.type + e.id);
       const t = e.tags || {}; const la = e.lat != null ? e.lat : e.center && e.center.lat, lo = e.lon != null ? e.lon : e.center && e.center.lon; if (la == null) continue;
-      const text = nz([t.name, t["name:ja"], t["name:en"], t.branch, t.brand, t["brand:ja"], t.official_name, t["addr:city"], t["addr:quarter"], t["addr:neighbourhood"], t["addr:street"], t.operator].filter(Boolean).join(" "));
-      const hit = toks.filter(k => text.includes(nz(k))).length; if (!hit) continue;
+      const text = nz([t.name, t["name:ja"], t["name:en"], t.branch, t.brand, t["brand:ja"], t.official_name, t["addr:province"], t["addr:city"], t["addr:quarter"], t["addr:neighbourhood"], t["addr:street"], t.operator].filter(Boolean).join(" "));
+      let hit = toks.filter(k => text.includes(nz(k))).length;
+      const near = C.filter(c => c.r < 30000).some(c => kmBetween(c.lat, c.lng, la, lo) < c.r / 1000); if (near) hit += 0.5;   // found around a place named in the query
+      if (hit < 1) continue;
       let name = (t["name:ja"] || t.name || t.brand || "").trim(); if (t.branch && !name.includes(t.branch)) name += " " + t.branch; if (!name) continue;
       const rail = /^(station|halt)$/.test(t.railway || ""); if (rail && !/駅$/.test(name)) name += "駅";
-      const km = kmBetween(ctr.lat, ctr.lng, la, lo);
-      out.push({ t: name, sub: [fmtKm(km), t["addr:city"], t["addr:quarter"] || t["addr:neighbourhood"], OSM_LABEL[t.amenity || t.shop || t.tourism || t.leisure] || ""].filter(Boolean).join(" · "), lat: la, lng: lo, z: 18, name, cat: rail ? "駅" : t.aeroway ? "空港" : /道の駅/.test(name) ? "道の駅" : "施設", hit, km });
+      const km = ctr ? kmBetween(ctr.lat, ctr.lng, la, lo) : 0;
+      out.push({ t: name, sub: [ctr ? fmtKm(km) : "", t["addr:province"], t["addr:city"], t["addr:quarter"] || t["addr:neighbourhood"], OSM_LABEL[t.amenity || t.shop || t.tourism || t.leisure] || ""].filter(Boolean).join(" · "), lat: la, lng: lo, z: 18, name, cat: rail ? "駅" : t.aeroway ? "空港" : /道の駅/.test(name) ? "道の駅" : "施設", hit, km });
     }
-    const best = Math.max(0, ...out.map(o => o.hit)); const need = best === toks.length ? toks.length : Math.max(1, toks.length - 1);
-    return out.filter(o => o.hit >= need).sort((a, b) => b.hit - a.hit || a.km - b.km).slice(0, 10);
+    const best = Math.max(0, ...out.map(o => o.hit)); const need = Math.min(best, Math.max(1, toks.length - 0.5));
+    return out.filter(o => o.hit >= need).sort((a, b) => b.hit - a.hit || a.km - b.km).slice(0, 12);
   } catch { return []; } finally { clearTimeout(tm); }
 }
 
