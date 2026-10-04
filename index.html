@@ -681,6 +681,12 @@ html,body{touch-action:pan-x pan-y}
 @keyframes ppin{0%{transform:translateY(12px) scale(.6);opacity:0}100%{transform:none;opacity:1}}
 @keyframes pfade{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){.pcard,.pcard.gold,.hanko,.pthumbs img{animation:none}}
+
+/* iPhone: date fields stay inside the form; no double-tap delay */
+.fld input[type=date]{-webkit-appearance:none;appearance:none;display:block;width:100%;max-width:100%;min-width:0;min-height:42px;text-align:left;line-height:1.3}
+.fld input[type=date]::-webkit-date-and-time-value{text-align:left}
+.sheet button,.sheet label,.sheet select,.sheet input{touch-action:manipulation}
+.sheet-head{background:var(--surface);box-shadow:0 6px 8px -6px rgba(0,0,0,.08)}
 </style>
 
 <div id="app">
@@ -3112,6 +3118,7 @@ function wireForm() {
   $("#lnQ").oninput = e => lnSearch(e.target.value);
   $("#lnRes").onclick = e => { const b = e.target.closest("[data-ln]"); if (!b) return; const id = b.dataset.ln, r = RALLY_BY_ID.get(id); if (!r) return; if (!Profile.lines.includes(id)) { Profile.lines.push(id); Profile.save(); } evl.innerHTML = evlOptions({ line: id }); evl.value = "l:" + id; $("#lnBox").hidden = true; refreshRallySel(); toast(`「${r.name}」を登録しました`); };
   refreshRallySel(); wireSheet(c);
+  const fmd = $("#f_medium"); if (fmd && c.mode === "add") fmd.addEventListener("change", () => applyMedium(fmd.value === "digital", !!c.orig0));
   const ob = $("#f_overlap"); if (ob) ob.onchange = () => { const h = $("#ovlHint"); if (h && ob.checked) h.hidden = true; };
   if (c.exif && c.exif.lat != null) { const b = $("#exifBtn"); b.hidden = false; b.onclick = () => setLoc(c.exif.lat, c.exif.lng, "写真の位置情報"); }
   const lc = $("#locClear"); if (lc) lc.onclick = () => setLoc(null, null, "");
@@ -3476,8 +3483,8 @@ function formHTML(d, ro) {
 function rallySelectHTML() { return ""; }
 function addStepHTML(c) {
   const g = c.type === "goshuin", dg = !g && !!c.digital;
-  return `${c.queue ? `<div class="qbar">この写真の <b>${c.queue.i + 1} / ${c.queue.boxes.length}</b> 個目。日付・場所・イベントは前の入力を引き継いでいます。</div>` : c.fixedType ? "" : `<div class="seg typeseg" role="group" aria-label="種類"><button type="button" data-type="stamp" aria-pressed="${!g && !dg}">スタンプ</button><button type="button" data-type="digital" aria-pressed="${dg}">デジタル</button></div>`}
-  <label class="drop" id="drop"${c.queue ? " hidden" : ""}><input type="file" id="fileIn" accept="image/*,application/pdf"><strong>${g ? "御朱印の写真を選ぶ" : dg ? "デジタルスタンプのスクショを選ぶ" : "スタンプの写真かPDFを選ぶ"}</strong><span>${dg ? "アプリなどに表示されたスタンプの画面を撮ったスクリーンショットから、スタンプの部分だけを色そのままで切り抜きます。<br>まわりの背景の色は自動で抜きます。1枚に複数あっても、1つずつ登録できます。" : g ? "斜めから撮っても、ページの四隅を見つけてまっすぐに整えます。<br>影や紙の色むらも白く補正します。" : "範囲を自動で見つけて切り抜きます。斜めから撮った丸や四角もまっすぐに直します。<br>1枚に複数のスタンプが写っていても、1つずつ登録できます。<br>硬貨やカードを横に置いて撮ると、大きさも測れます。"}</span></label>
+  return `${c.queue ? `<div class="qbar">この写真の <b>${c.queue.i + 1} / ${c.queue.boxes.length}</b> 個目。日付・場所・イベントは前の入力を引き継いでいます。</div>` : c.fixedType ? "" : ``}
+  <label class="drop" id="drop"${c.queue ? " hidden" : ""}><input type="file" id="fileIn" accept="image/*,application/pdf"><strong>${g ? "御朱印の写真を選ぶ" : dg ? "デジタルスタンプのスクショを選ぶ" : "スタンプの写真・スクショ・PDFを選ぶ"}</strong><span>${dg ? "アプリなどに表示されたスタンプの画面を撮ったスクリーンショットから、スタンプの部分だけを色そのままで切り抜きます。<br>まわりの背景の色は自動で抜きます。1枚に複数あっても、1つずつ登録できます。" : g ? "斜めから撮っても、ページの四隅を見つけてまっすぐに整えます。<br>影や紙の色むらも白く補正します。" : "範囲を自動で見つけて切り抜きます。斜めから撮った丸や四角もまっすぐに直します。<br>1枚に複数のスタンプが写っていても、1つずつ登録できます。<br>硬貨やカードを横に置いて撮ると、大きさも測れます。"}</span></label>
   <div id="cropStep" hidden>
     <div class="multibar" id="multiBar" hidden></div>
     <div class="crop-wrap"><canvas id="cropCv"></canvas></div>
@@ -3583,7 +3590,7 @@ async function handleFile(file) {
   const c = sheetCtx; if (!c) return; const st = $("#drop strong"); if (!st) return; st.textContent = "読み込み中…";
   let orig; try { orig = await fileToCanvas(file); } catch { st.textContent = c.type === "goshuin" ? "御朱印の写真を選ぶ" : "スタンプの写真かPDFを選ぶ"; toast(/pdf/i.test(file.type + file.name) ? "PDFを読み込めませんでした。写真で試してみてください。" : "この画像は読み込めませんでした。JPEGかPNGでどうぞ。", 4000); return; }
   if (sheetCtx !== c) return;
-  const exif = await exifOf(file); if (orig.pages > 1) toast(`PDFは${orig.pages}ページありますが、1ページ目を使っています。`);
+  const exif = await exifOf(file); if (!c.queue && looksLikeShot(file, orig, exif) !== !!c.digital) applyMedium(looksLikeShot(file, orig, exif), false); if (orig.pages > 1) toast(`PDFは${orig.pages}ページありますが、1ページ目を使っています。`);
   startFromOrig(orig, exif);
 }
 function startFromOrig(orig, exif) {
@@ -3982,7 +3989,7 @@ const PlacePick = {
     const q = $("#pmQ"), box = $("#pmRes");
     if (q) {
       let t = 0;
-      q.oninput = () => { clearTimeout(t); const v = q.value.trim(); if (!v) { box.hidden = true; return; } t = setTimeout(() => this.search(v, false), 200); };
+      q.oninput = () => { clearTimeout(t); const v = q.value.trim(); if (!v) { box.hidden = true; return; } t = setTimeout(() => this.search(v, false), 350); };
       q.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); const v = q.value.trim(); if (v) this.search(v, true); } };
       q.onfocus = () => { const s = $("#pmapWrap"); if (s && s.scrollIntoView) s.scrollIntoView({ block: "start", behavior: "smooth" }); };
       box.onclick = e => {
@@ -4010,11 +4017,15 @@ const PlacePick = {
     const seen = new Set(); let top = res.filter(r => { const k = norm(r.t); if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 8);
     this.show(top, deep);
     const more = [];
-    const g = await MapV.gsi(v).catch(() => []); g.forEach(x => more.push({ ...x, sub: "住所・地名" }));
+    const ctr = this.map ? this.map.getCenter() : null;
+    const [ph, g] = await Promise.all([placeSearch(v, ctr).catch(() => []), MapV.gsi(v).catch(() => [])]);
+    if (my !== this.seq) return;
+    more.push(...ph); g.forEach(x => more.push({ ...x, sub: "住所・地名" }));
     if (deep) { try { more.push(...await this.nominatim(v)); } catch {} }
     if (my !== this.seq || !$("#pmRes")) return;
     const add = more.filter(r => { const k = norm(r.t); if (seen.has(k)) return false; seen.add(k); return true; });
-    top = [...top, ...add].slice(0, 14); this.show(top, false);
+    const exact = top.filter(r => r.w >= 100), rest = top.filter(r => !(r.w >= 100));
+    top = [...exact, ...add.filter(r => r.photon), ...rest, ...add.filter(r => !r.photon)].slice(0, 16); this.show(top, false);
   },
   async nominatim(v) {
     const r = await fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=jp&limit=6&accept-language=ja&q=" + encodeURIComponent(v)); if (!r.ok) return [];
@@ -4493,6 +4504,54 @@ function setCols(n, anchor) {
     box.addEventListener("touchend", e => { if (e.touches.length < 2) d0 = 0; }, { passive: true });
     box.addEventListener("wheel", e => { if (!e.ctrlKey) return; e.preventDefault(); acc += e.deltaY; if (Math.abs(acc) > 60) { setCols(Grid.cols + (acc > 0 ? 1 : -1), anchorAt(e.clientX, e.clientY)); acc = 0; } }, { passive: false });
   }
+})();
+
+/* ---------- お店・施設の検索（OpenStreetMap / Photon）: 略称・ひらがな・英語も ---------- */
+const NICK = { "スタバ": "スターバックス", "マック": "マクドナルド", "マクド": "マクドナルド", "ドンキ": "ドン・キホーテ", "セブイレ": "セブン-イレブン", "セブン": "セブン-イレブン", "ファミマ": "ファミリーマート",
+  "ミスド": "ミスタードーナツ", "ケンタ": "ケンタッキー", "サイゼ": "サイゼリヤ", "コメダ": "コメダ珈琲店", "ムジ": "無印良品", "無印": "無印良品", "ヨドバシ": "ヨドバシカメラ", "ビック": "ビックカメラ", "モス": "モスバーガー",
+  "ララポ": "ららぽーと", "タリーズ": "タリーズコーヒー", "ドトール": "ドトールコーヒー", "ガスト": "ガスト", "ユニクロ": "ユニクロ", "ニトリ": "ニトリ", "イオン": "イオン", "ロフト": "ロフト", "ハンズ": "ハンズ", "スシロー": "スシロー", "クラ": "くら寿司" };
+const toKata = t => String(t).replace(/[ぁ-ゖ]/g, ch => String.fromCharCode(ch.charCodeAt(0) + 0x60));
+function queryVariants(v) {
+  const a = v.trim().replace(/\s+/g, " "); const k = toKata(a); const out = [];
+  let e = k; for (const key of Object.keys(NICK).sort((x, y) => y.length - x.length)) { if (e.includes(key) && !e.includes(NICK[key])) { e = e.replace(key, NICK[key] + " "); break; } }
+  // split where the writing changes (カタカナ⇔漢字・英数字) and drop a trailing 店 so 「スタバ中野店」 finds 「スターバックス … 中野…店」
+  const spaced = e.replace(/([゠-ヿー]+)(?=[一-鿿々A-Za-z0-9])/g, "$1 ").replace(/([一-鿿々]+)(?=[゠-ヿ])/g, "$1 ").replace(/店$/, "").replace(/\s+/g, " ").trim();
+  for (let x of [spaced, a, e]) { x = x.replace(/\s+/g, " ").trim(); if (x && !out.includes(x)) out.push(x); }
+  return out.slice(0, 3);
+}
+const PH_CAT = { aerodrome: "空港", terminal: "空港", station: "駅", halt: "駅", rest_area: "道の駅", services: "インターチェンジ", motorway_junction: "インターチェンジ" };
+async function placeSearch(v, ctr) {
+  const qs = queryVariants(v); const seen = new Set(); const out = [];
+  const bias = ctr && isFinite(ctr.lat) ? `&lat=${ctr.lat.toFixed(4)}&lon=${ctr.lng.toFixed(4)}&location_bias_scale=0.3&zoom=12` : "";
+  const lists = await Promise.all(qs.map(q => fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=10&bbox=122,24,154,46${bias}`).then(r => r.ok ? r.json() : { features: [] }).catch(() => ({ features: [] }))));
+  for (const j of lists) for (const f of j.features || []) {
+    const p = f.properties || {}; if (p.countrycode && p.countrycode !== "JP") continue; const c = f.geometry && f.geometry.coordinates; if (!c) continue;
+    const key = (p.osm_type || "") + (p.osm_id || c.join(",")); if (seen.has(key)) continue; seen.add(key);
+    let name = p.name || [p.street, p.housenumber].filter(Boolean).join(" "); if (!name) continue;
+    const st = p.osm_value === "station" || p.osm_value === "halt"; if (st && !/駅$/.test(name)) name += "駅";
+    const sub = [p.state, p.city, p.district || p.locality, p.street].filter((x, i, a) => x && a.indexOf(x) === i).join(" ");
+    out.push({ t: name, sub: sub || "地図", lat: c[1], lng: c[0], z: 18, name, cat: PH_CAT[p.osm_value] || (/道の駅/.test(name) ? "道の駅" : st ? "駅" : "施設"), photon: true });
+  }
+  return out.slice(0, 12);
+}
+
+/* ---------- 種類（リアル / デジタル）で切り抜き方を切りかえる ---------- */
+function applyMedium(dig, restart) {
+  const c = sheetCtx; if (!c || c.type === "goshuin" || c.mode !== "add") return;
+  c.digital = !!dig; if (dig) c.d.medium = "digital"; else delete c.d.medium; c.adj = { auto: !dig, bright: 0, contrast: 0 }; c.erase = [];
+  const fm = $("#f_medium"); if (fm) fm.value = dig ? "digital" : "real";
+  const st = $("#addStep"); if (!st) return; st.innerHTML = addStepHTML(c); wireAdd();
+  if (restart && c.orig0) { $("#drop").hidden = true; $("#cropStep").hidden = false; applyRotation(); }
+}
+// a phone screenshot (PNG, tall, no camera data) is probably a digital stamp
+const looksLikeShot = (file, orig, exif) => /png/i.test(file.type || file.name || "") && !exif && Math.max(orig.width, orig.height) / Math.min(orig.width, orig.height) > 1.7;
+
+/* ---------- iPhone: keep the sheet lined up with what is visible while the keyboard is open ---------- */
+(function keyboardFix() {
+  const vv = window.visualViewport; const wrap = $("#sheetWrap"); if (!vv || !wrap) return;
+  const sync = () => { const kb = innerHeight - vv.height > 80; wrap.style.top = kb ? vv.offsetTop + "px" : ""; wrap.style.height = kb ? vv.height + "px" : ""; wrap.style.bottom = kb ? "auto" : ""; };
+  vv.addEventListener("resize", sync); vv.addEventListener("scroll", sync);
+  document.addEventListener("focusout", () => setTimeout(() => { const a = document.activeElement; if (!a || !/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) { if (scrollY) scrollTo(0, 0); sync(); } }, 80));
 })();
 
 /* ================= boot ================= */
