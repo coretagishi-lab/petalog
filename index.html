@@ -500,6 +500,173 @@ html,body{touch-action:pan-x pan-y}
 .cover.chic .hint{position:absolute;left:0;right:0;bottom:3%;text-align:center;font-size:11px;opacity:1;color:rgba(226,203,148,.6)}
 .face.back.endpaper{background-color:#EFE8DA;background-image:radial-gradient(circle at 50% 100%,transparent 58%,color-mix(in srgb,var(--c) 22%,transparent) 59%,color-mix(in srgb,var(--c) 22%,transparent) 64%,transparent 65%),radial-gradient(circle at 50% 100%,transparent 38%,color-mix(in srgb,var(--c) 16%,transparent) 39%,color-mix(in srgb,var(--c) 16%,transparent) 44%,transparent 45%);background-size:28px 14px}
 #bkTitle{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif!important;letter-spacing:.04em}
+/* ---------- v10 ---------- */
+.fall-note{display:none!important}
+/* trading-card list: 5 / 3 / 2 columns */
+.cards.c5{grid-template-columns:repeat(5,minmax(0,1fr));gap:12px 7px;padding:4px 12px 24px}
+.cards.c3{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 10px;padding:4px 14px 24px}
+.cards.c2{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:2px 16px 20px}
+@media (min-width:640px){.cards.c5{grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}.cards.c3{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}.cards.c2{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}}
+.cell{display:flex;flex-direction:column;gap:4px;min-width:0}
+.cell .card{width:100%}
+.card.mini{border-radius:7px;box-shadow:0 0 0 1px var(--page-edge),0 1px 2px rgba(20,30,50,.16),0 4px 10px rgba(20,30,50,.10)}
+.card.mini .band{height:3px;flex:0 0 auto}
+.card.mini .c-art{position:absolute;left:8%;right:8%;top:calc(3px + 8%);bottom:11%;margin:0;padding:0;box-shadow:none;border-radius:0;flex:none}
+.cno{font-family:var(--f-mono);font-size:9px;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums;line-height:1.25;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.cno b{display:block;font-family:var(--f-hand);font-weight:600;font-size:12px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cards.c5 .cno{font-size:8.5px}
+.card.mini .new{top:5px;right:-22px;font-size:6.5px;padding:1px 22px;letter-spacing:.1em}
+.card.mini .visits{top:auto;bottom:3px;right:3px;font-size:7.5px;padding:0 4px}
+.card.mini .pick{width:20px;height:20px;left:4px;bottom:4px;font-size:11px}
+.card .c-ev i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:1px}
+/* stamp art + faint real-size ruler (1cm ticks, 5mm half ticks) */
+.c-art{container-type:size;position:relative}
+.fig{position:relative;width:80%;height:80%}
+@supports (width:1cqw){.fig{width:min(84cqw,100cqh * var(--ar));height:min(100cqh,84cqw / var(--ar))}.fig.hr{width:min(76cqw,100cqh * var(--ar));height:min(100cqh,76cqw / var(--ar));margin-left:7%}}
+.fig img{position:absolute;inset:0;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:contain;display:block}
+.card.digi .fig img{mix-blend-mode:normal}
+.rul{position:absolute;top:0;bottom:0;right:calc(100% + 3px);width:4px;color:rgba(70,58,38,.5);pointer-events:none;border-right:1px solid currentColor;
+  background:repeating-linear-gradient(to top,currentColor 0 1px,transparent 1px calc(100% / var(--n))) right top/100% 100% no-repeat,repeating-linear-gradient(to top,currentColor 0 1px,transparent 1px calc(50% / var(--n))) right top/55% 100% no-repeat}
+.card:not(.mini) .rul{width:6px;right:calc(100% + 5px)}
+.card:not(.mini) .rul::after{content:"cm";position:absolute;right:-1px;top:100%;margin-top:1px;font:500 7px var(--f-mono);color:currentColor;line-height:1}
+/* 重ね押し: gold edge + a slow foil shine */
+.card.ovl{box-shadow:0 0 0 1.5px #D4AF4F,0 0 0 3.5px rgba(212,175,79,.22),0 6px 16px rgba(20,30,50,.12)}
+.card.mini.ovl{box-shadow:0 0 0 1.5px #D4AF4F,0 1px 2px rgba(20,30,50,.16),0 4px 12px rgba(168,132,44,.28)}
+.card.ovl::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;z-index:1;background:linear-gradient(115deg,transparent 30%,rgba(255,244,200,.62) 44%,rgba(190,222,255,.42) 51%,rgba(255,196,232,.36) 57%,transparent 70%);background-size:260% 100%;background-position:120% 0;mix-blend-mode:soft-light;animation:foil 4.2s ease-in-out infinite}
+@keyframes foil{0%{background-position:120% 0}55%,100%{background-position:-60% 0}}
+@media (prefers-reduced-motion:reduce){.card.ovl::after{animation:none;background-position:50% 0}}
+.ovlb{position:absolute;z-index:2;left:12px;top:30px;background:linear-gradient(135deg,#E9C766,#B8892E);color:#fff;font-size:9px;font-weight:700;letter-spacing:.06em;border-radius:99px;padding:1px 7px;box-shadow:0 1px 2px rgba(0,0,0,.2);pointer-events:none}
+.card.mini .ovlb{left:3px;top:auto;bottom:3px;font-size:6.5px;padding:0 4px;letter-spacing:0}
+.cards.selecting .card.mini .ovlb{display:none}
+.chips .ovlchip{border-color:#D4AF4F;color:#7A5C14;background:linear-gradient(135deg,#FFF8E1,#F6E6B4);font-weight:700}
+.chips .ovlchip[aria-pressed="true"]{background:linear-gradient(135deg,#E9C766,#B8892E);border-color:#B8892E;color:#fff}
+.chip.ovlc{color:#7A5C14!important;background:#FFF3CF}
+.hero.ovl{box-shadow:inset 0 0 0 1.5px #D4AF4F,0 0 0 3px rgba(212,175,79,.18)}
+/* detail: tap the stamp to see it on white paper */
+.hero .hi{border:0;background:none;padding:0;cursor:zoom-in;position:relative;width:100%;color:inherit}
+.hero .zoomi{position:absolute;right:0;bottom:0;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.92) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231B2130' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6'/%3E%3Cpath d='M15 15l5 5M10.5 8v5M8 10.5h5'/%3E%3C/svg%3E") center/14px no-repeat;box-shadow:0 1px 3px rgba(0,0,0,.22)}
+.pview{position:fixed;inset:0;z-index:75;background:rgba(18,20,26,.94);display:flex;flex-direction:column;color:#fff;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.pv-top{display:flex;align-items:center;gap:10px;padding:10px 14px}
+.pv-t{flex:1;min-width:0;font-family:var(--f-hand);font-weight:600;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pv-top .btn{color:var(--ink)}
+.pv-stage{flex:1;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;touch-action:none;cursor:grab}
+.pv-paper{background:#fff;box-shadow:0 10px 40px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;transform-origin:50% 50%;will-change:transform;position:relative;flex:0 0 auto}
+.pv-fig{position:relative;color:rgba(60,52,40,.6)}
+.pv-fig img{width:100%;height:100%;display:block;object-fit:contain;user-select:none;-webkit-user-select:none;-webkit-user-drag:none;pointer-events:none}
+.pv-fig img.mul{mix-blend-mode:multiply}
+.pv-rul{position:absolute;top:0;right:calc(100% + 6px);pointer-events:none}
+.pv-foot{text-align:center;font-size:12px;color:rgba(255,255,255,.72);padding:8px 14px 14px}
+/* record form */
+.toggle small{color:var(--muted);font-size:12px}
+.toggle.ovltog{background:linear-gradient(135deg,#FFFBEE,#FFF1CC);border-color:#E3C979;color:#1D2230}
+.toggle.ovltog small{color:#6B5A2E}
+.toggle.ovltog input{accent-color:#B8892E}
+.ovlhint{display:block;margin-top:4px;font-style:normal;color:#9A7420;font-weight:700;font-size:12px}
+.evlhint{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5}
+.evlhint:empty{display:none}
+.evlhint b{color:var(--ink)}
+.evlhint .warn{color:var(--shu)}
+.ninput{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 10px;font-size:16px;min-width:0}
+.lnbox{margin-top:6px;display:flex;flex-direction:column;gap:6px}
+.lnbox .ninput{width:100%;box-sizing:border-box}
+.lnres{display:flex;flex-direction:column;gap:4px;max-height:250px;overflow:auto}
+.lnres button{display:flex;align-items:center;gap:8px;text-align:left;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 10px;font-size:13px}
+.lnres button i{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+.lnres button b{flex:1;min-width:0;font-weight:600}
+.lnres button small{color:var(--muted);font-size:11px;white-space:nowrap}
+/* place: name + map + nearby names */
+.pmap-wrap{position:relative;margin-top:8px;border-radius:14px;overflow:hidden;box-shadow:inset 0 0 0 1px var(--line);background:#E8ECEF;scroll-margin-top:12px}
+.pmap{height:250px;z-index:0;background:#E8ECEF}
+.pmtop{position:absolute;left:8px;right:8px;top:8px;display:flex;gap:6px;z-index:500}
+.pmq{flex:1;min-width:0;border:1px solid rgba(0,0,0,.12);background:rgba(255,255,255,.97);color:#1B2130;border-radius:10px;padding:8px 10px;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.pmbtn{border:1px solid rgba(0,0,0,.12);background:rgba(255,255,255,.97);color:#1B2130;border-radius:10px;padding:0 10px;font-size:12.5px;box-shadow:0 2px 8px rgba(0,0,0,.12);white-space:nowrap}
+.pmres{position:absolute;left:8px;right:8px;top:50px;max-height:180px;overflow:auto;z-index:600;background:#fff;color:#1B2130;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.22)}
+.pmres button{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #EEF0F3;background:none;padding:8px 12px;font-size:14px;color:#1B2130}
+.pmres button small{display:block;color:#6B7079;font-size:11px}
+.pmres .nores{padding:10px 12px;font-size:12.5px;color:#6B7079}
+.pmhint{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:500;background:rgba(27,33,48,.78);color:#fff;font-size:12px;border-radius:99px;padding:4px 12px;pointer-events:none;white-space:nowrap}
+.pmhint:empty{display:none}
+.pmfail{display:flex;align-items:center;justify-content:center;height:100%;font-size:12.5px;color:#6B7079;padding:0 20px;text-align:center}
+.leaflet-marker-icon.pmpin{background:none;border:0}
+.pcands{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.pcands:empty{display:none}
+.pcands .pch{flex-basis:100%;font-size:11.5px;color:var(--muted);letter-spacing:.04em}
+.pcands button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:5px 10px;font-size:13px;text-align:left;display:flex;flex-direction:column;line-height:1.3;max-width:100%}
+.pcands button b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:15em}
+.pcands button small{font-size:10.5px;color:var(--muted)}
+.pcands button[aria-pressed="true"]{border-color:var(--ai);background:var(--ai-soft);box-shadow:inset 0 0 0 1px var(--ai)}
+.pcnone{font-size:12px;color:var(--muted)}
+/* settings: who can see what */
+.pvbox{margin-top:8px;display:flex;flex-direction:column;gap:8px}
+.pvbox .lab{font-size:12px;color:var(--muted);white-space:nowrap}
+.pvlab{font-size:11.5px;color:var(--muted);letter-spacing:.05em}
+.pvchecks{display:flex;flex-wrap:wrap;gap:6px}
+.pvck{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);border-radius:99px;padding:6px 12px;font-size:13px}
+.pvck input{width:17px;height:17px;accent-color:var(--ai);margin:0}
+/* everyone's collections */
+.ohead{display:flex;align-items:center;gap:10px;padding:2px 16px 10px}
+.ohead>div{flex:1;min-width:0;display:flex;flex-direction:column}
+.ohead b{font-size:16px}
+.ohead small{font-size:11.5px;color:var(--muted)}
+.opriv{padding:0 16px;margin:0 0 10px}
+.rank{list-style:none;margin:0;padding:0 12px 24px;display:flex;flex-direction:column;gap:8px}
+.rrow2{width:100%;display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--card);border-radius:14px;padding:10px 12px;text-align:left;color:var(--ink)}
+.rrow2.me{border-color:var(--ai);box-shadow:inset 0 0 0 1px var(--ai)}
+.rkn{flex:0 0 auto;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--f-disp);font-size:15px;background:var(--surface);color:var(--muted)}
+.rkn.rk1{background:linear-gradient(135deg,#F3D57A,#C99A2E);color:#fff}
+.rkn.rk2{background:linear-gradient(135deg,#E3E6EB,#9AA2AD);color:#fff}
+.rkn.rk3{background:linear-gradient(135deg,#E9B98A,#A9683A);color:#fff}
+.rnm{flex:1;min-width:0;display:flex;flex-direction:column}
+.rnm b{font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rnm em,.oname em{font-style:normal;font-size:10px;background:var(--ai);color:var(--card);border-radius:99px;padding:0 6px;margin-left:6px;vertical-align:2px;font-weight:700}
+.rnm small{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.rth{display:flex;gap:2px;background:var(--page);border-radius:8px;padding:2px}
+.rth:empty{display:none}
+.rth img{width:32px;height:32px;object-fit:contain;mix-blend-mode:multiply}
+.chev{color:var(--muted);font-size:20px;line-height:1}
+.ouser{display:flex;align-items:center;gap:10px;padding:2px 16px 8px}
+.oname{flex:1;min-width:0;display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.oname b{font-size:17px}
+.oname small{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.obook{display:flex;align-items:center;gap:10px;padding:2px 16px 12px}
+.obook b{flex:1;min-width:0;font-family:var(--f-hand);font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.obook small{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.opages{display:flex;flex-direction:column;gap:20px;padding:0 16px 30px;align-items:center}
+.opg{margin:0;width:100%;max-width:520px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.opi{width:100%;min-height:160px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px}
+.opi img{width:100%;height:auto;border-radius:4px;box-shadow:0 0 0 1px var(--page-edge),0 8px 24px rgba(20,30,50,.14);cursor:zoom-in}
+.opg figcaption{font-family:var(--f-hand);font-size:14px;color:var(--ink)}
+.opg figcaption small{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.oshelf{padding:6px 16px 24px}
+.omemo{font-family:var(--f-hand);font-size:15px;line-height:1.7;margin:0;white-space:pre-wrap}
+/* milestone celebration */
+.party{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;background:rgba(14,17,24,.55);animation:pfade .25s ease-out;padding:20px}
+.party.grand{background:radial-gradient(ellipse at 50% 42%,rgba(92,70,20,.94),rgba(10,12,20,.98) 72%)}
+.party.out{opacity:0;transition:opacity .25s}
+.pcv{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.pcard{position:relative;width:min(300px,84vw);border-radius:16px;padding:26px 20px 20px;text-align:center;color:var(--page-ink);box-shadow:0 0 0 1px var(--page-edge),0 24px 60px rgba(0,0,0,.4);animation:ppop .55s cubic-bezier(.2,1.4,.4,1) both,pshake .3s .62s both;display:flex;flex-direction:column;align-items:center;gap:8px}
+.pcard.gold{background:linear-gradient(160deg,#FFF6D8,#F3D98A 45%,#E5BD55 70%,#FBEFC4);box-shadow:0 0 0 2px #C99A2E,0 0 70px rgba(255,214,107,.55),0 24px 60px rgba(0,0,0,.5);animation:ppop .7s cubic-bezier(.2,1.4,.4,1) both,pshake .3s .92s both}
+.hanko{width:104px;height:104px;border-radius:50%;border:5px solid #C8412E;color:#C8412E;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;transform:rotate(-10deg);animation:slam .6s .3s cubic-bezier(.3,1.6,.5,1) both;mix-blend-mode:multiply}
+.hanko::after{content:"";position:absolute;inset:5px;border:1.5px solid currentColor;border-radius:50%}
+.hk1{font-family:'Shippori Mincho',serif;font-weight:600;font-size:30px;line-height:1}
+.hk2{font-family:var(--f-disp);font-size:24px;line-height:1.15;letter-spacing:.02em}
+.party.grand .hanko{width:128px;height:128px;border-width:6px;animation-delay:.6s}
+.party.grand .hk1{font-size:38px}
+.party.grand .hk2{font-size:25px}
+.pt1{font-family:var(--f-disp);font-size:25px;margin-top:6px;letter-spacing:.02em;line-height:1.3}
+.party.grand .pt1{font-size:30px;background:linear-gradient(90deg,#7A4E08,#C8412E 50%,#7A4E08);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pt2{font-family:var(--f-hand);font-size:15px;line-height:1.7;color:var(--page-ink)}
+.pthumbs{display:flex;gap:4px;justify-content:center;margin:4px 0 6px;min-height:44px}
+.pthumbs:empty{display:none}
+.pthumbs img{width:44px;height:44px;object-fit:contain;mix-blend-mode:multiply;animation:ppin .5s calc(.9s + var(--i) * .08s) both}
+.pthumbs img.nm{mix-blend-mode:normal}
+.pcard .btn{margin-top:6px;min-width:150px}
+@keyframes ppop{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes pshake{0%,100%{transform:none}30%{transform:translate(2px,3px)}60%{transform:translate(-2px,-1px)}}
+@keyframes slam{0%{transform:scale(2.8) rotate(-28deg);opacity:0}55%{transform:scale(.9) rotate(-8deg);opacity:1}75%{transform:scale(1.04) rotate(-11deg)}100%{transform:scale(1) rotate(-10deg);opacity:1}}
+@keyframes ppin{0%{transform:translateY(12px) scale(.6);opacity:0}100%{transform:none;opacity:1}}
+@keyframes pfade{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.pcard,.pcard.gold,.hanko,.pthumbs img{animation:none}}
 </style>
 
 <div id="app">
@@ -514,7 +681,7 @@ html,body{touch-action:pan-x pan-y}
   <main>
     <section class="view" id="v-book">
       <div class="subbar">
-        <div class="seg" role="group" aria-label="表示"><button type="button" id="mGrid" aria-pressed="true">トレカ</button><button type="button" id="mGos" aria-pressed="false">御朱印帳</button></div>
+        <div class="seg" role="group" aria-label="だれのコレクション" id="collSeg" hidden><button type="button" id="mGrid" aria-pressed="true">じぶん</button><button type="button" id="mOthers" aria-pressed="false">みんな</button></div>
         <span class="spacer"></span>
         <span class="stat" id="bookStat"></span>
       </div>
@@ -524,6 +691,7 @@ html,body{touch-action:pan-x pan-y}
           <button class="btn small" type="button" id="gFilt" aria-expanded="false">絞り込み</button>
           <button class="btn small" type="button" id="gSort">新しい順</button>
           <button class="btn small" type="button" id="gSel">選択</button>
+          <button class="btn small" type="button" id="gCols" aria-label="1列のまい数を変える">5列</button>
         </div>
         <div class="filters" id="gFilters" hidden></div>
         <div class="chips" id="gChips"></div>
@@ -532,6 +700,7 @@ html,body{touch-action:pan-x pan-y}
         <div class="selbar" id="selBar" hidden></div>
       </div>
       <div id="gosMode" class="scroll" hidden></div>
+      <div id="othersMode" class="scroll" hidden></div>
     </section>
 
     <section class="view" id="v-fall" hidden>
@@ -551,7 +720,7 @@ html,body{touch-action:pan-x pan-y}
           <button class="hudbtn" id="shakeBtn" type="button">ゆらす</button>
           <button class="hudbtn" id="dropBtn" type="button">ふらす</button>
         </div>
-        <div class="fall-note" id="fallNote">指でつまんで投げられます · タップで詳細</div>
+        <div class="fall-note" id="fallNote" hidden></div>
       </div>
     </section>
 
@@ -651,8 +820,10 @@ function imgFor(url) { if (!url) return null; let im = imgCache.get(url); if (!i
 const fmtCm = mm => mm ? (mm / 10).toFixed(1) + "cm" : "";
 const norm = s => String(s || "").replace(/[\s　]/g, "").replace(/駅$/, "").replace(/ヶ/g, "ケ");
 
-const GENRES = ["駅","イベント","観光地","商業施設","道の駅","博物館・美術館","寺社","鉄道・乗り物","その他"];
-const GCOL = { "駅":"#2B4C9B","イベント":"#C0396A","観光地":"#2F7A4F","商業施設":"#B0641A","道の駅":"#5F7F1E","博物館・美術館":"#6B47A6","寺社":"#9C2F2F","鉄道・乗り物":"#1F6F82","その他":"#6A6F78", "御朱印":"#B8322A" };
+const GENRES = ["駅","空港","イベント","施設"];
+const GCOL = { "駅":"#2B4C9B","空港":"#1F6F82","イベント":"#C0396A","施設":"#2F7A4F","御朱印":"#B8322A" };
+const OLD_CAT = { "観光地":"施設","商業施設":"施設","道の駅":"施設","博物館・美術館":"施設","寺社":"施設","鉄道・乗り物":"駅","乗り物":"駅","その他":"施設" };
+const catNorm = c => GENRES.includes(c) || c === "御朱印" ? c : OLD_CAT[c] || (/空港/.test(c || "") ? "空港" : /駅/.test(c || "") ? "駅" : /イベント|祭|フェス/.test(c || "") ? "イベント" : "施設");
 const gcol = g => GCOL[g] || `hsl(${Math.round(hash(g) * 360)} 45% 42%)`;
 
 /* ================= washi texture ================= */
@@ -758,10 +929,11 @@ const Store = {
   async pubReport(o) { if (!this.pub) throw new Error("no"); return this.pub.doc(this.uid + "_miss_" + Date.now().toString(36)).set(this.clean({ miss: true, type: "report", by: this.uid, nick: Profile.nick || "", rk: o.rk || "", name: o.name || "", lat: o.lat ?? null, lng: o.lng ?? null, date: todayStr(), reason: o.reason || "", spot: o.note || "", t: Date.now() })); },
   async pubDel(sid) { if (!this.pub) return; try { await this.pub.doc(this.uid + "_" + sid).delete(); } catch {} }
 };
-const Profile = { nick: "", shareDefault: false, refs: [], events: [], fallBg: "washi",
-  async load() { try { const p = await Store.getMeta("profile"); if (p) Object.assign(this, { nick: p.nick || "", shareDefault: !!p.shareDefault, refs: Array.isArray(p.refs) ? p.refs : [], events: Array.isArray(p.events) ? p.events : [], fallBg: p.fallBg || "washi" }); } catch {} },
-  save() { return Store.putMeta("profile", { nick: this.nick, shareDefault: this.shareDefault, refs: this.refs, events: this.events, fallBg: this.fallBg }).catch(() => toast("設定を保存できませんでした")); },
-  allEvents() { const s = new Set(this.events); list().forEach(x => x.event && s.add(x.event)); return [...s]; }
+const Profile = { nick: "", shareDefault: false, refs: [], events: [], lines: [], fallBg: "washi", celebrated: 0,
+  async load() { try { const p = await Store.getMeta("profile"); if (p) Object.assign(this, { nick: p.nick || "", shareDefault: !!p.shareDefault, refs: Array.isArray(p.refs) ? p.refs : [], events: Array.isArray(p.events) ? p.events : [], lines: Array.isArray(p.lines) ? p.lines.filter(x => typeof x === "string") : [], fallBg: p.fallBg || "washi", celebrated: +p.celebrated || 0 }); } catch {} },
+  save() { return Store.putMeta("profile", { nick: this.nick, shareDefault: this.shareDefault, refs: this.refs, events: this.events, lines: this.lines, fallBg: this.fallBg, celebrated: this.celebrated }).catch(() => toast("設定を保存できませんでした")); },
+  allEvents() { const s = new Set(this.events); list().forEach(x => x.event && s.add(x.event)); return [...s]; },
+  allLines() { const s = new Set(this.lines); list().forEach(x => { const id = lineIdOf(x); if (id) s.add(id); }); return [...s].filter(id => RALLY_BY_ID.has(id)); }
 };
 
 /* ================= sample stamps ================= */
@@ -806,10 +978,8 @@ const SAMPLE_EV = ["旅行", "デート", "デート", "旅行", "ドライブ",
 function buildSamples() {
   SAMPLES = SAMPLE_DEF.map((d, i) => {
     const art = drawSample({ name: d[0], sub: d[1], ink: d[7], ink2: d[8], motif: d[9], shape: d[10] });
-    const s = { id: "sample" + i, sample: true, name: d[0], place: d[0], pref: d[2], cat: d[3], date: d[4], lat: d[5], lng: d[6], ink: d[7], cut: art.url, cw: art.w, ch: art.h, shape: d[10], sizeMm: d[11], sizeSrc: "manual", note: d[12], memo: d[13], event: SAMPLE_EV[i] || "", scenes: [], created: i };
-    return s;
+    return { id: "sample" + i, sample: true, name: d[0], place: d[0], pref: d[2], cat: catNorm(d[3]), date: d[4], lat: d[5], lng: d[6], ink: d[7], cut: art.url, cw: art.w, ch: art.h, shape: d[10], sizeMm: d[11], sizeSrc: "manual", note: d[12], memo: d[13], event: SAMPLE_EV[i] || "", overlap: !!d[8], scenes: [], created: i };
   });
-  const g = drawGoshuin(); SAMPLES.push({ id: "sampleG", sample: true, type: "goshuin", name: "夕凪神社", place: "夕凪神社", pref: "神奈川県", cat: "御朱印", date: "2023-10-08", lat: 35.3066, lng: 139.4900, cut: g.url, cw: g.w, ch: g.h, shape: "rect", note: "海の見える境内。", memo: "書き置き・初穂料500円", event: "旅行", scenes: [], created: 99, colors: [], corner: 1 });
 }
 function drawGoshuin() {
   const W = 400, H = 600, c = mkCanvas(W, H), x = c.getContext("2d");
@@ -829,9 +999,9 @@ function drawGoshuin() {
 /* ================= state ================= */
 let stamps = [];
 let ready = false;
-const list = () => stamps.length ? stamps : SAMPLES;
+const list = () => stamps.length ? stamps : ready ? SAMPLES : [];
 const byDate = (asc = true) => { const a = [...list()].sort((p, q) => (p.date || "9999").localeCompare(q.date || "9999") || (p.created || 0) - (q.created || 0)); return asc ? a : a.reverse(); };
-const findStamp = id => list().find(s => s.id === id);
+const findStamp = id => list().find(s => s.id === id) || (typeof Others !== "undefined" ? Others.find(id) : undefined);
 let view = "fall";
 
 function setStatus() {
@@ -843,7 +1013,7 @@ function setStatus() {
 function refreshAll() {
   setStatus();
   const L = list(); const prefs = new Set(L.map(s => s.pref).filter(Boolean));
-  $("#bookStat").innerHTML = `<b>${L.length}</b> まい · <b>${prefs.size}</b> 都道府県`;
+  $("#bookStat").innerHTML = ready ? `<b>${L.length}</b> まい · <b>${prefs.size}</b> 都道府県` : "";
   Grid.render(); if (typeof Gos !== "undefined") Gos.render();
   Fall.dirty = true; if (view === "fall") Fall.start();
   MapV.render(); Books.refresh(); Rally.render();
@@ -1011,20 +1181,44 @@ function hayOf(s) {
   const sh = shapeName(s);
   const shw = { 丸: "丸 丸型 円 まる", 楕円: "楕円 だ円 丸", 四角: "四角 角型 四角形 しかく", 横長: "横長 四角 角型", 縦長: "縦長 四角 角型" }[sh];
   const r = rallyOf(rallyKeyOf(s));
-  s._hay = [s.name, s.place, s.pref || prefAt(s.lat, s.lng), s.addr, s.note, s.memo, s.cat, s.event, (s.colors || []).join(" "), (s.colors || []).map(c => c + "色").join(" "), s.multi ? "重ね押し 多色 カラフル" : "", shw, d, fmtDate(d),
+  s._hay = [s.name, s.place, s.pref || prefAt(s.lat, s.lng), s.addr, s.note, s.memo, catNorm(s.cat), s.event, (evlOf(s) || {}).t, (s.colors || []).join(" "), (s.colors || []).map(c => c + "色").join(" "), s.overlap ? "重ね押し 重ね 特別" : "", s.multi ? "多色 カラフル" : "", shw, d, fmtDate(d),
     isDigi(s) ? "デジタル デジタルスタンプ スクショ" : "リアル", y ? `${y}年 ${+m}月 ${y}年${+m}月 ${y}年${+m}月${+dd}日 ${+m}月${+dd}日 ${y}/${+m}` : "", a.city, a.st ? a.st + "駅" : "", (a.lines || []).join(" "), r ? r.r.name + " " + r.st.n : "", s.sizeMm ? fmtCm(s.sizeMm) : ""].join(" ").toLowerCase();
   return s._hay;
 }
 
 /* ================= GRID (トレカ) ================= */
+const GRID_COLS = [5, 3, 2];
+function rulerHTML(s) {
+  if (!s || !s.sizeMm || isDigi(s) || s.type === "goshuin") return "";
+  const n = s.sizeMm / 10 * ((s.ch || 1) / Math.max(s.cw || 1, s.ch || 1));
+  return n > 0.3 ? `<i class="rul" style="--n:${n.toFixed(3)}" aria-hidden="true"></i>` : "";
+}
+function figHTML(s) {
+  const ar = clamp((s.cw || 1) / (s.ch || 1), 0.2, 5); const r = rulerHTML(s);
+  return `<div class="fig${r ? " hr" : ""}" style="--ar:${ar.toFixed(4)}"><img src="${s.cut}" alt="" loading="lazy" draggable="false" data-ck="${esc(s.id)}">${r}</div>`;
+}
+function cardHTML(s, no, o = {}) {
+  const g = catNorm(s.cat), cols = o.cols || 2; const isNew = !s.sample && !o.other && s.created && Date.now() - s.created < 3 * 864e5;
+  const nv = s.visits ? s.visits.length : (s.nv || 0); const num = "No." + String(no || 0).padStart(3, "0");
+  const cls = `card washi${isDigi(s) ? " digi" : ""}${s.overlap ? " ovl" : ""}${o.picked ? " picked" : ""}${cols > 2 ? " mini" : ""}`;
+  const badges = `<span class="pick" aria-hidden="true">✓</span>${isNew ? '<span class="new">NEW</span>' : ""}${nv ? `<span class="visits">×${nv + 1}</span>` : ""}${s.overlap ? '<span class="ovlb">重ね押し</span>' : ""}`;
+  if (cols > 2) return `<div class="cell"><button type="button" class="${cls}" data-open="${esc(s.id)}" style="--g:${gcol(g)}" aria-label="${esc(s.name || "スタンプ")}"><div class="band"></div>${badges}<div class="c-art">${figHTML(s)}</div></button><span class="cno">${cols === 3 ? `<b>${esc(s.name || "名前未設定")}</b>` : ""}${num}</span></div>`;
+  const ev = evlOf(s);
+  return `<button type="button" class="${cls}" data-open="${esc(s.id)}" style="--g:${gcol(g)}"><div class="band"></div>${badges}<div class="c-in">
+    <div class="c-top"><span>${num}${isDigi(s) ? '<span class="dg">DIGITAL</span>' : ""}</span><span>${esc(fmtDate(s.date))}</span></div>
+    <div class="c-art">${figHTML(s)}</div>
+    <div class="c-name">${esc(s.name || "名前未設定")}</div>
+    ${ev ? `<div class="c-ev">${ev.k === "l" ? `<i style="background:${ev.c}"></i>` : "#"}${esc(ev.t)}</div>` : ""}
+    <div class="c-meta"><span class="c-g">${esc(g)}</span><span>${esc(s.pref || "")}${s.sizeMm ? " · " + fmtCm(s.sizeMm) : ""}</span></div></div></button>`;
+}
 const Grid = {
-  on: true, g: "all", q: "", desc: true, f: {}, open: false, selMode: false, sel: new Set(), items: [],
+  on: true, g: "all", q: "", desc: true, f: {}, open: false, selMode: false, sel: new Set(), items: [], cols: GRID_COLS.includes(+lsGet("petalog.gridCols")) ? +lsGet("petalog.gridCols") : 5,
   setMode(on) { setColl(on ? "grid" : "flip"); },
   facets() {
     const L = list(); const cnt = arr => { const m = new Map(); arr.forEach(v => v && m.set(v, (m.get(v) || 0) + 1)); return [...m.entries()].sort((a, b) => b[1] - a[1]); };
     const area = s => areaOf(s.lat, s.lng) || {};
     return {
-      event: cnt(L.map(s => s.event)),
+      evl: cnt(L.map(s => (evlOf(s) || {}).t)),
       medium: [["リアル", L.filter(s => s.type !== "goshuin" && !isDigi(s)).length], ["デジタル", L.filter(isDigi).length]].filter(([, c]) => c),
       color: cnt(L.flatMap(s => s.colors || [])),
       multi: L.filter(s => s.multi).length,
@@ -1037,7 +1231,7 @@ const Grid = {
   },
   match(s) {
     const f = this.f;
-    if (f.event && s.event !== f.event) return false;
+    if (f.evl && (evlOf(s) || {}).t !== f.evl) return false;
     if (f.medium && (f.medium === "デジタル") !== isDigi(s)) return false;
     if (f.color && !(s.colors || []).includes(f.color)) return false;
     if (f.multi && !s.multi) return false;
@@ -1049,34 +1243,28 @@ const Grid = {
   },
   renderFilters() {
     const F = this.facets(), f = this.f;
-    const row = (k, title, items, lab = v => v, sw) => items.length ? `<div class="frow"><b>${title}</b>${items.map(([v, c]) => `<button type="button" data-fk="${k}" data-fv="${esc(v)}" aria-pressed="${f[k] === v}">${sw ? `<i style="background:${sw(v)}"></i>` : ""}${esc(lab(v))}<small>${c}</small></button>`).join("")}</div>` : "";
+    const row = (k, title, items, lab = v => v) => items.length ? `<div class="frow"><b>${title}</b>${items.map(([v, c]) => `<button type="button" data-fk="${k}" data-fv="${esc(v)}" aria-pressed="${f[k] === v}">${esc(lab(v))}<small>${c}</small></button>`).join("")}</div>` : "";
     $("#gFilters").innerHTML =
-      row("event", "イベント", F.event) + (F.medium.some(([k]) => k === "デジタル") ? row("medium", "種類", F.medium) : "") +
-      (F.color.length ? `<div class="frow"><b>色</b>${F.color.map(([v, c]) => `<button type="button" data-fk="color" data-fv="${esc(v)}" aria-pressed="${f.color === v}"><i style="background:${CSW[v] || "#999"}"></i>${esc(v)}<small>${c}</small></button>`).join("")}${F.multi ? `<button type="button" data-fk="multi" data-fv="1" aria-pressed="${!!f.multi}"><i style="background:conic-gradient(#D23A2E 0 33%,#2B4C9B 0 66%,#2F8F4F 0)"></i>重ね押し<small>${F.multi}</small></button>` : ""}</div>` : "") +
+      row("evl", "イベント・路線", F.evl) + (F.medium.some(([k]) => k === "デジタル") ? row("medium", "種類", F.medium) : "") +
+      (F.color.length ? `<div class="frow"><b>色</b>${F.color.map(([v, c]) => `<button type="button" data-fk="color" data-fv="${esc(v)}" aria-pressed="${f.color === v}"><i style="background:${CSW[v] || "#999"}"></i>${esc(v)}<small>${c}</small></button>`).join("")}${F.multi ? `<button type="button" data-fk="multi" data-fv="1" aria-pressed="${!!f.multi}"><i style="background:conic-gradient(#D23A2E 0 33%,#2B4C9B 0 66%,#2F8F4F 0)"></i>多色<small>${F.multi}</small></button>` : ""}</div>` : "") +
       row("shape", "形", F.shape) +
       row("ym", "年月", F.ym, v => v.slice(0, 4) + "年" + (+v.slice(5, 7)) + "月") +
-      row("pref", "都道府県", F.pref) + row("city", "市区町村", F.city) + row("line", "路線", F.line);
+      row("pref", "都道府県", F.pref) + row("city", "市区町村", F.city) + row("line", "近くの路線", F.line);
   },
   render() {
-    const L = list(); const asc = byDate(true); const numOf = new Map(asc.map((s, i) => [s.id, i + 1]));
-    const gs = [...new Set(L.map(s => s.cat || "その他"))];
-    if (this.g !== "all" && !gs.includes(this.g)) this.g = "all";
-    $("#gChips").innerHTML = [["all", "すべて " + L.length], ...gs.map(g => [g, g + " " + L.filter(s => (s.cat || "その他") === g).length])].map(([k, t]) => `<button type="button" data-g="${esc(k)}" aria-pressed="${this.g === k}">${esc(t)}</button>`).join("");
+    const L = list(); const numOf = new Map(byDate(true).map((s, i) => [s.id, i + 1]));
+    const gs = GENRES.filter(g => L.some(s => catNorm(s.cat) === g)); const nOv = L.filter(s => s.overlap).length;
+    if (this.g === "__ovl" ? !nOv : this.g !== "all" && !gs.includes(this.g)) this.g = "all";
+    $("#gChips").innerHTML = [["all", "すべて " + L.length], ...(nOv ? [["__ovl", "重ね押し " + nOv]] : []), ...gs.map(g => [g, g + " " + L.filter(s => catNorm(s.cat) === g).length])].map(([k, t]) => `<button type="button" data-g="${esc(k)}" aria-pressed="${this.g === k}"${k === "__ovl" ? ' class="ovlchip"' : ""}>${esc(t)}</button>`).join("");
     if (this.open) this.renderFilters();
     const toks = this.q.trim().toLowerCase().split(/[\s　]+/).filter(Boolean);
-    const items = byDate(!this.desc).filter(s => (this.g === "all" || (s.cat || "その他") === this.g) && this.match(s) && (!toks.length || toks.every(t => hayOf(s).includes(t))));
+    const items = byDate(!this.desc).filter(s => (this.g === "all" || (this.g === "__ovl" ? s.overlap : catNorm(s.cat) === this.g)) && this.match(s) && (!toks.length || toks.every(t => hayOf(s).includes(t))));
     this.items = items; const nf = Object.keys(this.f).length;
     $("#gFilt").textContent = nf ? `絞り込み ${nf}` : "絞り込み"; $("#gFilt").classList.toggle("primary", nf > 0);
     $("#gCount").innerHTML = (nf || toks.length || this.g !== "all") ? `<span>${items.length} まい見つかりました</span><button type="button" id="gClear">条件をクリア</button>` : "";
     const cl = $("#gClear"); if (cl) cl.onclick = () => { this.f = {}; this.q = ""; this.g = "all"; $("#gSearch").value = ""; this.render(); };
-    const now = Date.now();
-    $("#cards").innerHTML = items.length ? items.map(s => { const g = s.cat || "その他"; const isNew = !s.sample && s.created && now - s.created < 3 * 864e5;
-      return `<button type="button" class="card washi${s.type === "goshuin" ? " gos" : ""}${isDigi(s) ? " digi" : ""}${this.sel.has(s.id) ? " picked" : ""}" data-open="${s.id}" style="--g:${gcol(g)}"><div class="band"></div><span class="pick" aria-hidden="true">✓</span>${isNew ? '<span class="new">NEW</span>' : ""}${s.visits && s.visits.length ? `<span class="visits">×${s.visits.length + 1}</span>` : ""}<div class="c-in">
-        <div class="c-top"><span>No.${String(numOf.get(s.id)).padStart(3, "0")}${isDigi(s) ? '<span class="dg">DIGITAL</span>' : ""}</span><span>${esc(fmtDate(s.date))}</span></div>
-        <div class="c-art"><img src="${s.cut}" alt="" loading="lazy" draggable="false"></div>
-        <div class="c-name">${esc(s.name || "名前未設定")}</div>
-        ${s.event ? `<div class="c-ev">#${esc(s.event)}</div>` : ""}
-        <div class="c-meta"><span class="c-g">${esc(g)}</span><span>${esc(s.pref || "")}${s.sizeMm ? " · " + fmtCm(s.sizeMm) : ""}</span></div></div></button>`; }).join("")
+    const box = $("#cards"); box.className = `cards c${this.cols}${this.selMode ? " selecting" : ""}`; $("#gCols").textContent = this.cols + "列";
+    box.innerHTML = !ready ? `<div class="empty" style="grid-column:1/-1"><span class="spin"></span></div>` : items.length ? items.map(s => cardHTML(s, numOf.get(s.id), { cols: this.cols, picked: this.sel.has(s.id) })).join("")
       : `<div class="empty" style="grid-column:1/-1">見つかりませんでした。</div>`;
     $("#gSort").textContent = this.desc ? "新しい順" : "古い順";
   }
@@ -1088,6 +1276,7 @@ $("#gFilt").onclick = () => { Grid.open = !Grid.open; $("#gFilters").hidden = !G
 $("#gFilters").onclick = e => { const b = e.target.closest("[data-fk]"); if (!b) return; const k = b.dataset.fk, v = k === "multi" ? true : b.dataset.fv; if (Grid.f[k] === v) delete Grid.f[k]; else Grid.f[k] = v; Grid.render(); };
 $("#cards").onclick = e => { const c = e.target.closest("[data-open]"); if (!c) return; if (Grid.selMode) { const id = c.dataset.open; Grid.sel.has(id) ? Grid.sel.delete(id) : Grid.sel.add(id); c.classList.toggle("picked", Grid.sel.has(id)); renderSelBar(); return; } openStamp("edit", findStamp(c.dataset.open)); };
 $("#gSel").onclick = () => setSelMode(!Grid.selMode);
+$("#gCols").onclick = () => { const i = GRID_COLS.indexOf(Grid.cols); Grid.cols = GRID_COLS[(i + 1) % GRID_COLS.length]; lsSet("petalog.gridCols", Grid.cols); Grid.render(); };
 </script>
 <script>
 "use strict";
@@ -1149,14 +1338,13 @@ const Fall = {
     M.Composite.add(this.engine.world, this.mc);
     $("#fallCount").textContent = L.length + "まい";
     const emp = $("#fallEmpty"); emp.hidden = L.length > 0;
-    if (!L.length) emp.innerHTML = this.month ? "この期間のスタンプはありません。" : this.filter === "today" ? "今日のスタンプはまだありません。<br>押したら「＋ 追加」へ。" : this.filter === "month" ? "今月のスタンプはまだありません。" : "スタンプを追加すると、ここに降ってきます。";
-    $("#fallNote").textContent = bundles.length ? `あふれた ${L.length - singles.length} まいは、古い順に「${bundles[0].label}」などの玉にまとめています。玉をタップで開けます。` : "指でつまんで投げられます · タップで詳細";
+    if (!ready) emp.innerHTML = `<span class="spin"></span>`; else if (!L.length) emp.innerHTML = this.month ? "この期間のスタンプはありません。" : this.filter === "today" ? "今日のスタンプはまだありません。<br>押したら「＋ 追加」へ。" : this.filter === "month" ? "今月のスタンプはまだありません。" : "スタンプを追加すると、ここに降ってきます。";
     this.dirty = false; this.lastSize = W + "x" + H;
     return true;
   },
   start() {
     const wrap = $("#fallWrap");
-    if (!window.Matter) { $("#fallNote").textContent = "物理エンジンを読み込めませんでした。通信状態を確かめて開き直してください。"; return; }
+    if (!window.Matter) { const e = $("#fallEmpty"); e.hidden = false; e.textContent = "物理エンジンを読み込めませんでした。通信状態を確かめて開き直してください。"; return; }
     if (this.dirty || this.lastSize !== wrap.clientWidth + "x" + wrap.clientHeight) this.setup();
     if (this.running) return; this.running = true; this.last = performance.now();
     const loop = now => {
@@ -1432,9 +1620,9 @@ const MapV = {
     if (!this.pubs) { f.innerHTML = `<span><span class="spin"></span> みんなの記録を読み込み中…</span>`; return; }
     const others = this.pubs.filter(p => p.by !== Store.uid && !p.miss);
     f.innerHTML = `<div class="nick"><span>ニックネーム</span><input id="nickIn" maxlength="20" value="${esc(Profile.nick)}" placeholder="例: えきすたん"><button class="btn small" type="button" id="nickSave">保存</button><button class="btn small" type="button" id="pubReload">更新</button></div>
-      <span>公開は、スタンプごとの「みんなの地図に公開」をオンにしたものだけ。写真とメモは公開されません。いま ${others.length} 件。</span>
+      <span>出ているのは、公開設定で「場所」を見せていて、非公開にしていないトレカだけです。写真とメモは出ません。いま ${others.length} 件。</span>
       <div class="feed">${others.slice(0, 40).map(p => `<button type="button" data-pub="${esc(p._id)}"><img src="${p.thumb || ""}" alt=""><span><b>${esc(p.nick || "だれか")}</b> · ${esc(fmtDate(p.date))}<br>${esc(p.name)}${p.pref ? "（" + esc(p.pref) + "）" : ""}</span></button>`).join("") || "<span>まだ誰も公開していません。</span>"}</div>`;
-    $("#nickSave").onclick = async () => { Profile.nick = $("#nickIn").value.trim(); await Profile.save(); for (const s of stamps.filter(s => s.share)) { try { await Store.pubPut(s, await thumbOf(s.cut), Profile.nick); } catch {} } toast("ニックネームを保存しました"); };
+    $("#nickSave").onclick = async () => { Profile.nick = $("#nickIn").value.trim(); await Profile.save(); syncShares(true); toast("ニックネームを保存しました"); };
     $("#pubReload").onclick = () => { this.pubs = null; this.loadPubs(); };
     f.querySelector(".feed").onclick = e => { const b = e.target.closest("[data-pub]"); if (b) openPub(b.dataset.pub); };
   },
@@ -1490,7 +1678,7 @@ const MapV = {
     card.hidden = false;
     $("#mcX").onclick = () => this.closeCard();
     card.querySelectorAll("[data-open]").forEach(b => b.onclick = () => openStamp("edit", findStamp(b.dataset.open)));
-    $("#mcAdd").onclick = () => { const name = it.kind === "st" ? o.n + "駅" : o.n; const pre = { name, place: name, cat: it.kind === "st" ? "駅" : "観光地", lat: +o.lat.toFixed(6), lng: +o.lng.toFixed(6), pref: prefAt(o.lat, o.lng) || "", locSrc: it.kind === "st" ? "駅の位置" : "施設の位置" }; this.closeCard(); openStamp("add", null, pre); };
+    $("#mcAdd").onclick = () => { const name = it.kind === "st" ? o.n + "駅" : o.n; const pre = { name, place: name, cat: it.kind === "st" ? "駅" : o.k === "air" ? "空港" : "施設", lat: +o.lat.toFixed(6), lng: +o.lng.toFixed(6), pref: prefAt(o.lat, o.lng) || "", locSrc: it.kind === "st" ? "駅の位置" : "施設の位置" }; this.closeCard(); openStamp("add", null, pre); };
     const mr = $("#mcRally"); if (mr) mr.onclick = () => { const r = rallyChoices(o)[0]; if (!r) return; Rally.cur = r.id; Rally.hl = o.n; show("rally"); Rally.render(); };
   },
   closeCard() { const c = $("#mapCard"); if (c) c.hidden = true; },
@@ -1900,7 +2088,7 @@ const Books = {
     else this.renderShelf();
   },
   renderShelf() {
-    const box = $("#shelfBox"); if (!box) return; const B = this.data.books;
+    const box = $("#shelfBox"); if (!box) return; if (!ready) { box.innerHTML = `<div class="empty"><span class="spin"></span></div>`; return; } const B = this.data.books;
     box.innerHTML = `${this.sample ? `<p class="cap shelfnote">いま見えているのはサンプルです。「＋ 新しいスタンプ帳」から自分のスタンプ帳を作れます（スタンプを登録する前でも作れます）。</p>` : ""}
       <div class="shelf">${B.map(b => `<button type="button" class="bcover" data-book="${b.id}" style="--c:${bookColor(b.color)}" aria-label="${esc(b.title)}"><span class="bk"><span class="frame"><span class="kick">STAMP BOOK</span><span class="bt">${esc(b.title)}</span><span class="rule"></span><small>${b.pages.length} PAGES</small></span></span></button>`).join("")}
       <button type="button" class="bcover new" data-newbook="1"><span class="bk"><span class="plus">＋</span><span>新しいスタンプ帳</span></span></button></div>
@@ -2031,10 +2219,19 @@ function wrapLines(x, text, maxW, maxLines) {
   return out;
 }
 function roundRect(x, X, Y, W, H, r) { x.beginPath(); x.moveTo(X + r, Y); x.arcTo(X + W, Y, X + W, Y + H, r); x.arcTo(X + W, Y + H, X, Y + H, r); x.arcTo(X, Y + H, X, Y, r); x.arcTo(X, Y, X + W, Y, r); x.closePath(); }
+// faint real-size ruler beside the stamp (1mm ticks, a number every cm)
+function drawRuler(x, X, Y, H, hmm, K) {
+  if (!(hmm > 0)) return; const ppm = H / hmm; x.save(); x.strokeStyle = x.fillStyle = "rgba(70,58,38,.5)"; x.lineWidth = Math.max(1, 0.45 * K);
+  x.beginPath(); x.moveTo(X, Y); x.lineTo(X, Y + H);
+  for (let mm = 0; mm <= hmm + 1e-6; mm++) { if (ppm < 3 && mm % 5) continue; const y = Y + H - mm * ppm, L = mm % 10 === 0 ? 4 * K : mm % 5 === 0 ? 2.6 * K : 1.5 * K; x.moveTo(X, y); x.lineTo(X - L, y); }
+  x.stroke(); x.font = `500 ${5.5 * K}px 'IBM Plex Mono',monospace`; x.textAlign = "right"; x.textBaseline = "middle";
+  for (let cm = 1; cm * 10 <= hmm + 1e-6; cm++) x.fillText(String(cm), X - 5 * K, Y + H - cm * 10 * ppm);
+  x.textBaseline = "top"; x.font = `500 ${4.8 * K}px 'IBM Plex Mono',monospace`; x.fillText("cm", X + 0.5 * K, Y + H + 1.5 * K); x.restore();
+}
 // トレカ: 63×88mm at 300dpi, same design as the card grid
 async function renderCard(s, no) {
   const W = Math.round(63 * MM), H = Math.round(88 * MM), K = W / 160;
-  const cv = mkCanvas(W, H), x = cv.getContext("2d"); const g = s.cat || "その他", gc = gcol(g);
+  const cv = mkCanvas(W, H), x = cv.getContext("2d"); const g = catNorm(s.cat), gc = gcol(g);
   await fontsReady([{ t: "text", font: "hand" }, { t: "text", font: "mono" }, { t: "text", font: "goth" }]);
   x.fillStyle = "#FFFFFF"; x.fillRect(0, 0, W, H); Paper.pat(x, Paper.washi(), K, 0, 0, W, H, "multiply");
   const band = 5 * K; x.fillStyle = gc; x.fillRect(0, 0, W, band);
@@ -2050,11 +2247,20 @@ async function renderCard(s, no) {
   x.save(); roundRect(x, px, artTop, W - px * 2, artBot - artTop, 6 * K); x.strokeStyle = "rgba(60,50,30,.08)"; x.lineWidth = K; x.stroke(); x.restore();
   if (isDigi(s)) { x.save(); x.textAlign = "left"; x.font = `500 ${8 * K}px 'IBM Plex Mono',monospace`; const lw = x.measureText("DIGITAL").width + 6 * K; x.fillStyle = "#1B2130"; roundRect(x, px + 4 * K, artTop + 4 * K, lw, 10 * K, 2.5 * K); x.fill(); x.fillStyle = "#fff"; x.fillText("DIGITAL", px + 7 * K, artTop + 11.6 * K); x.restore(); }
   try {
-    const im = await loadImg(s.cut); const mw = (W - px * 2) * 0.88, mh = artBot - artTop - 12 * K; const sc = Math.min(mw / im.width, mh / im.height);
-    const iw = im.width * sc, ih = im.height * sc; x.save(); x.globalCompositeOperation = isDigi(s) || s.type === "goshuin" ? "source-over" : "multiply";
+    const im = await loadImg(s.cut); const rul = !!(s.sizeMm && !isDigi(s) && s.type !== "goshuin");
+    const mw = (W - px * 2) * (rul ? 0.8 : 0.88), mh = artBot - artTop - 12 * K; const sc = Math.min(mw / im.width, mh / im.height);
+    const iw = im.width * sc, ih = im.height * sc, ix = (W - iw) / 2 + (rul ? 6 * K : 0), iy = artTop + (artBot - artTop - ih) / 2;
+    x.save(); x.globalCompositeOperation = isDigi(s) || s.type === "goshuin" ? "source-over" : "multiply";
     if (s.type === "goshuin") { x.shadowColor = "rgba(0,0,0,.18)"; x.shadowBlur = 4 * K; x.shadowOffsetY = K; }
-    x.imageSmoothingQuality = "high"; x.drawImage(im, (W - iw) / 2, artTop + (artBot - artTop - ih) / 2, iw, ih); x.restore();
+    x.imageSmoothingQuality = "high"; x.drawImage(im, ix, iy, iw, ih); x.restore();
+    if (rul) drawRuler(x, ix - 5 * K, iy, ih, s.sizeMm * (im.height / Math.max(im.width, im.height)), K);
   } catch {}
+  if (s.overlap) {
+    x.save(); const gg = x.createLinearGradient(0, 0, W, H); gg.addColorStop(0, "#E9C766"); gg.addColorStop(0.5, "#B8892E"); gg.addColorStop(1, "#E9C766");
+    x.strokeStyle = gg; x.lineWidth = 3 * K; roundRect(x, 1.5 * K, 1.5 * K, W - 3 * K, H - 3 * K, 7 * K); x.stroke();
+    x.font = `700 ${8 * K}px 'Zen Kaku Gothic New',sans-serif`; const t = "重ね押し", tw = x.measureText(t).width + 10 * K; x.fillStyle = gg; roundRect(x, W - px - 4 * K - tw, artTop + 4 * K, tw, 12 * K, 6 * K); x.fill();
+    x.fillStyle = "#fff"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(t, W - px - 4 * K - tw / 2, artTop + 10.2 * K); x.textBaseline = "alphabetic"; x.restore();
+  }
   x.fillStyle = "#1D2230"; x.textAlign = "left"; x.font = `600 ${15 * K}px 'Klee One',serif`; nameLines.forEach((l, i) => x.fillText(l, px, nameY0 + i * 15 * K * 1.25));
   if (s.event) { x.font = `700 ${10.5 * K}px 'Zen Kaku Gothic New',sans-serif`; x.fillStyle = "#2B4C9B"; x.fillText(wrapLines(x, "#" + s.event, W - px * 2, 1)[0], px, evY); }
   x.font = `700 ${10.5 * K}px 'Zen Kaku Gothic New',sans-serif`; x.fillStyle = gc; x.fillText(g, px, metaY);
@@ -2167,7 +2373,7 @@ async function deleteStamps(L) {
   let n = 0; const done = [];
   for (const s of L) {
     if (s.sample) continue;
-    try { await Store.removeStamp(s); if (s.share) await Store.pubDel(s.id); done.push(s.id); n++; } catch { toast("削除できないものがありました。通信を確かめてください", 3600); break; }
+    try { await Store.removeStamp(s); await Store.pubDel(s.id); done.push(s.id); n++; } catch { toast("削除できないものがありました。通信を確かめてください", 3600); break; }
   }
   const gone = new Set(done); stamps = stamps.filter(x => !gone.has(x.id)); Grid.sel && done.forEach(id => Grid.sel.delete(id));
   Books.removeStamps(done); MapV.pubs = null;
@@ -2263,7 +2469,7 @@ function autoRally(s) {
   }
   return best && bs >= 3 && !tie ? best.id + "|" + st.n : "";
 }
-const rallyKeyOf = s => s.rally === "none" ? "" : s.rally ? normKey(s.rally) : autoRally(s);
+const rallyKeyOf = s => s.rally === "none" ? "" : s.rally ? normKey(s.rally) : "";
 function rallyIndex() {
   const m = new Map();
   byDate(true).forEach(s => { if (s.type === "goshuin") return; const k = rallyKeyOf(s); if (!k) return; const [rid, sn] = k.split("|"); if (!m.has(rid)) m.set(rid, new Map()); m.get(rid).set(sn, s); });
@@ -2308,7 +2514,7 @@ const Rally = {
     const g = idx.get(r.id) || new Map(), n = r.stations.length; const I = r.info;
     const pubsOk = Store.mode === "cloud" && MapV.pubs;
     if (Store.mode === "cloud" && !MapV.pubs && !MapV.pubLoading) MapV.loadPubs().then(() => { if (this.cur === r.id) this.render(); });
-    box.innerHTML = `<div class="rdet-head" style="--c:${r.c}"><div class="row"><button class="btn small" type="button" id="rBack">‹ 特集一覧</button></div>
+    box.innerHTML = `<div class="rdet-head" style="--c:${r.c}"><div class="row"><button class="btn small" type="button" id="rBack">‹ 特集一覧</button><span style="flex:1"></span><button class="btn small" type="button" id="rReg">${Profile.lines.includes(r.id) ? "✓ イベント・路線に登録済み" : "＋ イベント・路線に登録"}</button></div>
       <div class="row"><span class="lineball">${esc(r.short.slice(0, 1))}</span><h2 style="flex:1">${esc(r.name)}</h2><span class="big">${g.size}<span class="stat"> / ${n}</span></span></div>
       <div class="bar"><i style="width:${(g.size / n * 100).toFixed(1)}%"></i></div>
       <p><em class="stb st-${I.st}">${ST_LABEL[I.st]}</em> ${esc(I.note || "")}${I.place ? `<br>置き場所の目安: ${esc(I.place)}（時間は駅の営業時間内が目安）` : ""}${I.src ? ` <a href="${I.src}" target="_blank" rel="noopener">出典</a>` : ""}</p>
@@ -2318,6 +2524,7 @@ const Rally = {
           : (() => { const cm = pubsOk ? communityFor(r.id + "|" + st.n, st.n + "駅", st.lat, st.lng) : null; const gd = hs === "none" ? "スタンプなし" : cm && cm.warn ? "なかった報告あり" : cm && cm.n ? `✓${cm.n}人 ${cm.last.slice(2, 7).replace("-", ".")}` : "未獲得";
             return `<button type="button" class="slot no washi${hs === "none" ? " nost" : ""}${cm && (cm.n || cm.warn) ? " seen" : ""}${this.hl === st.n ? " hl" : ""}" data-si="${i}" data-st="${esc(st.n)}"><span class="code">${i + 1}</span><span class="art"><span>${hs === "none" ? "なし" : hs === "ask" ? "窓口" : "?"}</span></span><span class="st">${esc(st.n)}</span><span class="gd${cm && cm.warn ? " warn" : cm && cm.n ? " okc" : ""}">${gd}</span></button>`; })(); }).join("")}</div>`;
     $("#rBack").onclick = () => { this.cur = null; this.hl = null; this.render(); };
+    $("#rReg").onclick = () => { if (Profile.lines.includes(r.id)) Profile.lines = Profile.lines.filter(x => x !== r.id); else Profile.lines.push(r.id); Profile.save(); this.render(); toast(Profile.lines.includes(r.id) ? `「${r.name}」を登録しました。記録の「イベント・路線」で選べます` : "登録をはずしました"); };
     box.onclick = e => {
       const o = e.target.closest("[data-open]"); if (o) return openStamp("edit", findStamp(o.dataset.open));
       const a = e.target.closest("[data-si]"); if (a) openStation(r, r.stations[+a.dataset.si]);
@@ -2530,12 +2737,12 @@ const Gos = {
   }
 };
 function setColl(m) {
-  if (m !== "gos") m = "grid"; Grid.on = true; Grid.mode = m;
-  $("#gridMode").hidden = m !== "grid"; $("#gosMode").hidden = m !== "gos";
-  $("#mGrid").setAttribute("aria-pressed", m === "grid"); $("#mGos").setAttribute("aria-pressed", m === "gos");
-  if (m === "grid") Grid.render(); else { if (Grid.selMode) setSelMode(false); Gos.render(); }
+  if (m !== "others") m = "grid"; Grid.on = true; Grid.mode = m;
+  $("#gridMode").hidden = m !== "grid"; $("#gosMode").hidden = true; $("#othersMode").hidden = m !== "others";
+  $("#mGrid").setAttribute("aria-pressed", m === "grid"); $("#mOthers").setAttribute("aria-pressed", m === "others");
+  if (m === "grid") Grid.render(); else { if (Grid.selMode) setSelMode(false); Others.show(); }
 }
-$("#mGrid").onclick = () => setColl("grid"); $("#mGos").onclick = () => setColl("gos");
+$("#mGrid").onclick = () => setColl("grid"); $("#mOthers").onclick = () => setColl("others");
 
 </script>
 <script>
@@ -2834,8 +3041,8 @@ JSONだけを返す: {"lat":数値かnull,"lng":数値かnull,"pref":"都道府�
 
 /* ================= sheet ================= */
 let sheetCtx = null;
-function openSheet(html) { $("#sheet").innerHTML = html; $("#sheetWrap").hidden = false; $("#sheet").scrollTop = 0; $("#sheet").querySelectorAll("[data-close]").forEach(b => b.onclick = closeSheet); }
-function closeSheet() { if (sheetCtx && sheetCtx.ac) sheetCtx.ac.abort(); sheetCtx = null; $("#sheetWrap").hidden = true; $("#sheet").innerHTML = ""; }
+function openSheet(html) { PlacePick.unmount(); $("#sheet").innerHTML = html; $("#sheetWrap").hidden = false; $("#sheet").scrollTop = 0; $("#sheet").querySelectorAll("[data-close]").forEach(b => b.onclick = closeSheet); }
+function closeSheet() { if (sheetCtx && sheetCtx.ac) sheetCtx.ac.abort(); PlacePick.unmount(); sheetCtx = null; $("#sheetWrap").hidden = true; $("#sheet").innerHTML = ""; }
 $("#sheetWrap").addEventListener("click", e => { if (e.target.id === "sheetWrap") closeSheet(); });
 addEventListener("keydown", e => { if (e.key === "Escape") { if (!$("#lightbox").hidden) $("#lightbox").hidden = true; else if (!$("#sheetWrap").hidden) closeSheet(); } });
 $("#lightbox").onclick = () => $("#lightbox").hidden = true;
@@ -2847,18 +3054,18 @@ function refOptions() {
 }
 function refMm() { const v = $("#refSel").value; if (v === "custom") return (parseFloat($("#refCustom").value) || 0) * 10; const r = v[0] === "p" ? REF_PRESETS[+v.slice(1)] : Profile.refs[+v.slice(1)]; return r ? r.cm * 10 : 0; }
 
-function eventOptions(cur) {
-  const evs = Profile.allEvents(); if (cur && !evs.includes(cur)) evs.push(cur);
-  return `<option value="">なし</option>${evs.map(e => `<option${e === cur ? " selected" : ""}>${esc(e)}</option>`).join("")}<option value="__new">＋ 新しいイベントを作る</option>`;
-}
+function eventOptions(cur) { return evlOptions({ event: cur || "" }); }
 function renderLoc() {
-  const c = sheetCtx; if (!c || !$("#locInfo")) return; const d = c.d; const a = areaOf(d.lat, d.lng);
-  $("#locInfo").innerHTML = d.lat != null && d.lng != null ? `📍 ${a && a.city ? esc(a.city) + (a.st ? ` · ${esc(a.st)}駅から${a.km < 1 ? Math.round(a.km * 1000) + "m" : a.km.toFixed(1) + "km"}` : "") + " · " : ""}${d.lat.toFixed(5)}, ${d.lng.toFixed(5)}${d.locSrc ? ` · ${esc(d.locSrc)}` : ""} · <a href="https://www.google.com/maps?q=${d.lat},${d.lng}" target="_blank" rel="noopener">Googleマップで確かめる</a>` : "位置はまだ入っていません。";
+  const c = sheetCtx; if (!c || !$("#locInfo")) return; const d = c.d; const has = d.lat != null && d.lng != null;
+  const a = has ? areaOf(d.lat, d.lng) : null; const pf = has ? prefAt(d.lat, d.lng) : "";
+  $("#locInfo").innerHTML = has ? `📍 ${esc(pf || "")}${a && a.city ? esc(a.city) : ""}${a && a.st ? ` · ${esc(a.st)}駅から${a.km < 1 ? Math.round(a.km * 1000) + "m" : a.km.toFixed(1) + "km"}` : ""}${d.locSrc ? ` · ${esc(d.locSrc)}` : ""} · <a href="https://www.google.com/maps?q=${d.lat},${d.lng}" target="_blank" rel="noopener">Googleマップ</a>`
+    : c.ro ? "位置は入っていません。" : "";
+  const lc = $("#locClear"); if (lc) lc.hidden = !has;
 }
-function setLoc(lat, lng, src) {
-  const c = sheetCtx; if (!c) return; c.d.lat = lat; c.d.lng = lng; c.d.locSrc = src || "";
-  if (!$("#f_pref").value) { const p = prefAt(lat, lng); if (p) $("#f_pref").value = p; }
+function setLoc(lat, lng, src, o = {}) {
+  const c = sheetCtx; if (!c) return; c.d.lat = lat; c.d.lng = lng; c.d.locSrc = lat == null ? "" : src || "";
   renderLoc(); refreshRallySel();
+  if (PlacePick.c === c) { PlacePick.pin(lat, lng, o.pan !== false); if (lat != null) PlacePick.cands(lat, lng); }
 }
 function renderPhotos() {
   const c = sheetCtx; if (!c || !$("#photos")) return; const d = c.d; let h = "";
@@ -2881,37 +3088,26 @@ function renderPhotos() {
 function wireForm() {
   const c = sheetCtx; const sheet = $("#sheet");
   sheet.onclick = e => {
+    if (e.target.closest("[data-pv]")) { PaperView.open(c.mode === "edit" ? findStamp(c.d.id) || c.d : c.d); return; }
     const lb = e.target.closest("[data-lb]"); if (lb) return lightbox(lb.src);
     const dl = e.target.closest("[data-del]"); if (dl) { c.delScenes.push(dl.dataset.del); renderPhotos(); return; }
     const dn = e.target.closest("[data-deln]"); if (dn) { c.newScenes = c.newScenes.filter(n => n.k !== dn.dataset.deln); renderPhotos(); }
   };
-  renderLoc(); renderPhotos();
+  renderLoc(); renderPhotos(); PlacePick.mount(c);
   if (c.ro) return;
-  const stg = $("#spotTags"); if (stg) stg.addEventListener("click", e => { const b = e.target.closest("[data-spt]"); if (!b) return; e.preventDefault(); b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") !== "true"); });
   if ($("#f_size")) $("#f_size").oninput = () => { c.d.sizeSrc = "manual"; $("#sizeSrc").hidden = false; $("#sizeSrc").textContent = "手入力"; };
-  ["#f_name", "#f_place", "#f_memo"].forEach(id => { const el = $(id); if (el) el.addEventListener("change", refreshRallySel); });
-  $("#f_event").addEventListener("change", () => setTimeout(refreshRallySel, 0));
-  $("#geoBtn").onclick = async () => {
-    const q = [$("#f_addr").value, $("#f_place").value, $("#f_name").value].map(s => s.trim()).filter(Boolean)[0];
-    if (!q) { toast("住所か施設名を入れてください"); return; }
-    const b = $("#geoBtn"); b.disabled = true; b.innerHTML = `<span class="spin"></span> 調べ中`;
-    const st = GEO.stations.find(s => norm(s.n) === norm(q));
-    if (st) { setLoc(+st.lat.toFixed(6), +st.lng.toFixed(6), `${st.n}駅の位置`); b.disabled = false; b.textContent = "住所・駅名から位置を出す"; toast("駅の位置を入れました。「地図でピン」で細かく直せます", 3400); return; }
-    const g = await MapV.gsi(q);
-    if (g.length) { setLoc(+g[0].lat.toFixed(6), +g[0].lng.toFixed(6), `住所から（${g[0].t}）`); b.disabled = false; b.textContent = "住所・駅名から位置を出す"; toast("位置を入れました。ずれていたら「地図でピン」で直せます", 3400); return; }
-    try { const r = await aiGeocode(q); if (typeof r.lat === "number" && typeof r.lng === "number") { setLoc(+r.lat.toFixed(5), +r.lng.toFixed(5), `住所から推定${r.confidence < 0.6 ? "（あいまい）" : ""}`); if (r.pref && !$("#f_pref").value) $("#f_pref").value = r.pref; toast("位置を入れました。ずれていたら「地図でピン」で直せます", 3600); } else toast("位置を特定できませんでした。「地図でピン」で指定できます", 3600); }
-    catch (e) { toast(e && e.code === "unavailable" ? "この表示では住所の変換が使えません。「地図でピン」をどうぞ" : aiErrMsg(e, "位置を出せませんでした。もう一度どうぞ"), 3600); }
-    finally { if ($("#geoBtn")) { b.disabled = false; b.textContent = "住所・駅名から位置を出す"; } }
-  };
-  $("#pinBtn").onclick = () => {
-    const prev = view; $("#sheetWrap").hidden = true; show("map");
-    MapV.startPick(c.d.lat, c.d.lng, ($("#f_place").value || $("#f_name").value).trim(), (lat, lng, name) => { $("#sheetWrap").hidden = false; if (lat != null && sheetCtx === c) { setLoc(lat, lng, name ? `地図でピン（${name}）` : "地図でピン"); if (name && !$("#f_place").value) $("#f_place").value = name + (GEO.stations.some(s => s.n === name) ? "駅" : ""); toast("位置を入れました"); } show(prev); });
-  };
-  $("#f_event").onchange = e => { const nw = e.target.value === "__new"; $("#evNewBox").hidden = !nw; $("#evSug").hidden = !nw || !$("#evSug").children.length; if (nw) $("#f_evNew").focus(); };
+  ["#f_name", "#f_place"].forEach(id => { const el = $(id); if (el) el.addEventListener("change", refreshRallySel); });
+  const evl = $("#f_evl");
+  evl.onchange = () => { const v = evl.value; $("#evNewBox").hidden = v !== "__newev"; $("#evSug").hidden = v !== "__newev" || !$("#evSug").children.length; $("#lnBox").hidden = v !== "__newline"; if (v === "__newev") $("#f_evNew").focus(); if (v === "__newline") { $("#lnQ").value = ""; lnSearch(""); } refreshRallySel(); };
   $("#evSug").onclick = e => { const b = e.target.closest("[data-evs]"); if (b) { $("#f_evNew").value = b.dataset.evs; $("#evAdd").click(); } };
-  $("#evAdd").onclick = async () => { const v = $("#f_evNew").value.trim(); if (!v) { toast("イベント名を入れてください"); return; } if (!Profile.events.includes(v)) { Profile.events.push(v); Profile.save(); } $("#f_event").innerHTML = eventOptions(v); $("#evNewBox").hidden = true; $("#evSug").hidden = true; $("#f_evNew").value = ""; toast(`「${v}」を追加しました。ほかのスタンプでも選べます`); };
+  $("#evAdd").onclick = () => { const v = $("#f_evNew").value.trim(); if (!v) { toast("イベント名を入れてください"); return; } if (!Profile.events.includes(v)) { Profile.events.push(v); Profile.save(); } evl.innerHTML = evlOptions({ event: v }); evl.value = "e:" + v; $("#evNewBox").hidden = true; $("#evSug").hidden = true; $("#f_evNew").value = ""; refreshRallySel(); toast(`「${v}」を追加しました。ほかのスタンプでも選べます`); };
   $("#f_evNew").onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); $("#evAdd").click(); } };
+  $("#lnQ").oninput = e => lnSearch(e.target.value);
+  $("#lnRes").onclick = e => { const b = e.target.closest("[data-ln]"); if (!b) return; const id = b.dataset.ln, r = RALLY_BY_ID.get(id); if (!r) return; if (!Profile.lines.includes(id)) { Profile.lines.push(id); Profile.save(); } evl.innerHTML = evlOptions({ line: id }); evl.value = "l:" + id; $("#lnBox").hidden = true; refreshRallySel(); toast(`「${r.name}」を登録しました`); };
+  refreshRallySel();
+  const ob = $("#f_overlap"); if (ob) ob.onchange = () => { const h = $("#ovlHint"); if (h && ob.checked) h.hidden = true; };
   if (c.exif && c.exif.lat != null) { const b = $("#exifBtn"); b.hidden = false; b.onclick = () => setLoc(c.exif.lat, c.exif.lng, "写真の位置情報"); }
+  const lc = $("#locClear"); if (lc) lc.onclick = () => setLoc(null, null, "");
   // measuring
   if (!$("#measureBtn")) return;
   $("#measureBtn").onclick = () => openMeasure();
@@ -2943,7 +3139,7 @@ function updateMeas() {
 
 function aiRender(r) {
   const conf = clamp(+r.confidence || 0, 0, 1);
-  $("#aiBd").innerHTML = `<div><b>${esc(r.name || "特定できませんでした")}</b>${r.pref ? " · " + esc(r.pref) : ""}${r.cat ? " · " + esc(r.cat) : ""}${r.size_cm ? ` · 約${(+r.size_cm).toFixed(1)}cm（${esc(r.size_ref || "基準物")}から）` : ""}</div>
+  $("#aiBd").innerHTML = `<div><b>${esc(r.name || "特定できませんでした")}</b>${r.pref ? " · " + esc(r.pref) : ""}${r.cat ? " · " + esc(catNorm(r.cat)) : ""}${r.size_cm ? ` · 約${(+r.size_cm).toFixed(1)}cm（${esc(r.size_ref || "基準物")}から）` : ""}</div>
     ${r.text ? `<div><small>読み取った文字: ${esc(r.text)}</small></div>` : ""}${r.reason ? `<div><small>${esc(r.reason)}</small></div>` : ""}
     <div class="conf"><i style="width:${Math.round(conf * 100)}%"></i></div><small>確からしさ ${Math.round(conf * 100)}%</small>
     <div style="margin-top:8px"><button class="btn small" type="button" id="aiApply">この推定で上書きする</button></div>`;
@@ -2951,12 +3147,12 @@ function aiRender(r) {
 }
 function applyAI(r, force) {
   const set = (id, v) => { const el = $(id); if (!el || v == null || v === "") return; if (force || !el.value) el.value = v; };
-  set("#f_name", r.name); set("#f_place", r.place); set("#f_pref", r.pref);
-  if (r.cat && $("#f_cat") && (force || !$("#f_cat").value || $("#f_cat").value === "駅")) $("#f_cat").value = r.cat;
+  set("#f_name", r.name); set("#f_place", r.place);
   const c = sheetCtx;
+  if (r.cat && $("#f_cat") && (force || !c.catTouched)) $("#f_cat").value = catNorm(r.cat);
   if (typeof r.lat === "number" && typeof r.lng === "number" && (force || c.d.lat == null)) setLoc(+r.lat.toFixed(5), +r.lng.toFixed(5), "AIの推定（施設の代表位置）");
   if ($("#f_size") && typeof r.size_cm === "number" && r.size_cm > 0.5 && r.size_cm < 30 && (force || !$("#f_size").value)) { $("#f_size").value = (+r.size_cm).toFixed(1); c.d.sizeSrc = "ai"; $("#sizeSrc").hidden = false; $("#sizeSrc").textContent = "AIの見積もり"; }
-  refreshRallySel();
+  PlacePick.mark(); refreshRallySel();
 }
 async function runAI(force) {
   const c = sheetCtx; const bd = $("#aiBd"), btn = $("#aiRun"); if (!bd || !c) return;
@@ -3231,7 +3427,7 @@ function CropView(cv, src, o) {
 
 /* ================= the record sheet ================= */
 function formHTML(d, ro) {
-  const dis = ro ? " disabled" : ""; const gos = d.type === "goshuin"; const digi = !gos && d.medium === "digital";
+  const dis = ro ? " disabled" : ""; const gos = d.type === "goshuin"; const digi = !gos && d.medium === "digital"; const cat = catNorm(d.cat);
   return `
   ${gos || digi ? "" : `<div class="sec"><h4>大きさ（実寸）</h4>
     <div class="sizebox"><input id="f_size" inputmode="decimal" placeholder="例 4.5" value="${d.sizeMm ? (d.sizeMm / 10).toFixed(1) : ""}" aria-label="スタンプの大きさ（cm）"${dis}><span>cm（いちばん長い所・丸なら直径）</span><span class="src" id="sizeSrc"${d.sizeSrc ? "" : " hidden"}>${d.sizeSrc === "ref" ? "基準物で測定" : d.sizeSrc === "ai" ? "AIの見積もり" : "手入力"}</span>
@@ -3245,45 +3441,35 @@ function formHTML(d, ro) {
       <details><summary style="cursor:pointer;color:var(--muted)">よく使う基準物を登録する</summary><div class="row2" style="margin-top:8px"><input id="refNewN" class="grow" placeholder="例: 5cmのキーホルダー"><input id="refNewCm" inputmode="decimal" placeholder="cm" style="width:70px"><button class="btn small" type="button" id="refAdd">登録</button></div></details>
     </div>
   </div>`}
-  ${ro ? "" : `<div class="sec ai-box" id="aiBox"><div class="hd"><span>AIで${gos ? "どこの御朱印か" : "どこのスタンプか"}調べる</span><span class="spacer"></span><button class="btn small" type="button" id="aiRun">調べる</button></div><div class="bd" id="aiBd"><small>${gos ? "墨書きや印から寺社名と場所を推定します。" : digi ? "文字や図柄から、名前・場所・ジャンル・地図の位置を推定します。" : "文字や図柄から、名前・場所・ジャンル・地図の位置を推定します。基準物が写っていれば大きさも見積もります。"}</small></div></div>`}
+  ${ro ? "" : `<div class="sec ai-box" id="aiBox"><div class="hd"><span>AIでどこのスタンプか調べる</span><span class="spacer"></span><button class="btn small" type="button" id="aiRun">調べる</button></div><div class="bd" id="aiBd"><small>${digi ? "文字や図柄から、名前・場所・ジャンル・地図の位置を推定します。" : "文字や図柄から、名前・場所・ジャンル・地図の位置を推定します。基準物が写っていれば大きさも見積もります。"}</small></div></div>`}
   <div class="sec"><h4>記録</h4><div class="form">
     <label class="fld full"><span>${gos ? "寺社名" : "スタンプの名前"}</span><input id="f_name" class="hand" value="${esc(d.name)}" placeholder="${gos ? "例: ○○神社" : "例: 東京駅"}"${dis}></label>
-    ${gos ? "" : `<label class="fld"><span>ジャンル</span><input id="f_cat" list="genreList" value="${esc(d.cat || "")}" placeholder="駅"${dis}><datalist id="genreList">${GENRES.map(g => `<option value="${g}">`).join("")}</datalist></label><label class="fld"><span>種類</span><select id="f_medium" aria-label="リアルかデジタルか"${dis}><option value="real"${digi ? "" : " selected"}>リアルスタンプ</option><option value="digital"${digi ? " selected" : ""}>デジタルスタンプ</option></select></label>`}
-    <label class="fld full"><span>${gos ? "参拝した日" : "押した日"}</span><input id="f_date" type="date" value="${esc(d.date || "")}"${dis}></label>
-    <div class="fld full"><span>きっかけ・イベント</span><select id="f_event" aria-label="きっかけ・イベント"${dis}>${eventOptions(d.event)}</select>
-      <div class="row2" id="evNewBox" style="margin-top:6px" hidden><input id="f_evNew" class="grow" maxlength="30" placeholder="例: 謎解き" style="border:1px solid var(--line);background:var(--card);border-radius:10px;padding:9px 10px;font-size:16px"><button class="btn small primary" type="button" id="evAdd">追加</button></div>
-      <div class="evsug" id="evSug" hidden>${["謎解き", "デート", "旅行", "ひとり旅", "スタンプラリー", "ドライブ", "推し活", "御朱印めぐり"].filter(e => !Profile.allEvents().includes(e)).map(e => `<button type="button" data-evs="${e}">${e}</button>`).join("")}</div></div>
-    <label class="fld full"><span>ひとこと</span><input id="f_note" class="hand" maxlength="60" value="${esc(d.note || "")}" placeholder="その時の気分を一行で"${dis}></label>
-    <label class="fld full"><span>メモ（自分だけ）</span><textarea id="f_memo" placeholder="${gos ? "御朱印の内容、初穂料、直書き／書き置き など" : "インクの具合、混み具合など"}"${dis}>${esc(d.memo || "")}</textarea></label>
+    ${gos ? "" : `<label class="fld"><span>ジャンル</span><select id="f_cat" aria-label="ジャンル"${dis}>${GENRES.map(g => `<option${g === cat ? " selected" : ""}>${g}</option>`).join("")}</select></label><label class="fld"><span>種類</span><select id="f_medium" aria-label="リアルかデジタルか"${dis}><option value="real"${digi ? "" : " selected"}>リアルスタンプ</option><option value="digital"${digi ? " selected" : ""}>デジタルスタンプ</option></select></label>`}
+    <label class="fld full"><span>押した日</span><input id="f_date" type="date" value="${esc(d.date || "")}"${dis}></label>
+    ${gos ? "" : `<label class="toggle ovltog full"><input type="checkbox" id="f_overlap"${d.overlap ? " checked" : ""}${dis}><span><b>重ね押し</b><br><small>2つ以上のスタンプを重ねて押した特別な1まい。トレカ一覧の「重ね押し」に入ります。</small><em class="ovlhint" id="ovlHint" hidden>インクが2色以上あります。重ね押しならチェックを入れてください。</em></span></label>`}
+    <div class="fld full"><span>イベント・路線</span><select id="f_evl" aria-label="イベント・路線"${dis}>${evlOptions(d)}</select><div class="evlhint" id="evlHint"></div>
+      <div class="row2" id="evNewBox" style="margin-top:6px" hidden><input id="f_evNew" class="grow ninput" maxlength="30" placeholder="例: 謎解き"><button class="btn small primary" type="button" id="evAdd">追加</button></div>
+      <div class="evsug" id="evSug" hidden>${["謎解き", "デート", "旅行", "ひとり旅", "スタンプラリー", "ドライブ", "推し活"].filter(e => !Profile.allEvents().includes(e)).map(e => `<button type="button" data-evs="${e}">${e}</button>`).join("")}</div>
+      <div class="lnbox" id="lnBox" hidden><input id="lnQ" class="ninput" placeholder="路線名・駅名で探す（例: 三田線、日比谷）" autocomplete="off"><div class="lnres" id="lnRes"></div></div></div>
+    <label class="fld full"><span>メモ</span><textarea id="f_memo" placeholder="インクの具合、混み具合など"${dis}>${esc(d.memo || "")}</textarea></label>
   </div></div>
-  <div class="sec"><h4>${gos ? "場所" : "押した場所"}</h4><div class="form">
-    <label class="fld"><span>${gos ? "寺社・場所" : "施設・駅名"}</span><input id="f_place" value="${esc(d.place || "")}" placeholder="${gos ? "例: ○○神社" : "例: 日比谷駅"}"${dis}></label>
-    <label class="fld"><span>都道府県</span><input id="f_pref" value="${esc(d.pref || "")}" placeholder="自動で入ります"${dis}></label>
-    <label class="fld full"><span>住所</span><input id="f_addr" value="${esc(d.addr || "")}" placeholder="例: 東京都千代田区有楽町1丁目"${dis}></label>
-    <label class="fld full"><span>置き場所メモ（公開するとみんなに共有）</span><input id="f_spot" maxlength="80" value="${esc(d.spot || "")}" placeholder="${gos ? "例: 社務所で受付" : "例: 窓口の左の台"}"${dis}>${spotTagsHTML(d.spotTags || [], dis)}</label>
+  <div class="sec"><h4>押した場所</h4>
+    <label class="fld"><span>場所の名前</span><input id="f_place" value="${esc(d.place || "")}" placeholder="例: 日比谷駅（下の地図の候補からも選べます）" autocomplete="off"${dis}></label>
+    <div class="pmap-wrap" id="pmapWrap"><div class="pmap" id="pmap"></div>
+      ${ro ? "" : `<div class="pmtop"><input class="pmq" id="pmQ" type="search" placeholder="地図で探す（駅・施設・住所）" autocomplete="off" enterkeyhint="search" aria-label="地図で探す"><button class="pmbtn" type="button" id="pmMe">現在地</button></div><div class="pmres" id="pmRes" hidden></div>`}
+      <div class="pmhint" id="pmHint"${d.lat != null ? " hidden" : ""}>${ro ? "" : "地図をタップしてピンを立てる"}</div></div>
+    ${ro ? "" : `<div class="pcands" id="pCands"></div>`}
+    <div class="locinfo" id="locInfo" style="margin-top:6px"></div>
+    ${ro ? "" : `<div class="row2" style="margin-top:6px"><button class="btn small" type="button" id="exifBtn" hidden>写真の位置を使う</button><button class="btn small ghost" type="button" id="locClear" hidden>ピンを消す</button></div>`}
+    <label class="fld" style="margin-top:10px"><span>置き場所メモ（公開するとみんなに共有）</span><input id="f_spot" maxlength="80" value="${esc(d.spot || "")}" placeholder="例: 窓口の左の台"${dis}></label>
   </div>
-  ${ro ? "" : `<div class="row2" style="margin-top:8px"><button class="btn small" type="button" id="pinBtn">地図でピン</button><button class="btn small" type="button" id="geoBtn">住所・駅名から位置を出す</button><button class="btn small" type="button" id="exifBtn" hidden>写真の位置を使う</button></div>`}
-  <div class="locinfo" id="locInfo" style="margin-top:8px"></div></div>
-  ${gos ? "" : `<div class="sec"><h4>路線特集にひもづけ</h4><label class="fld"><select id="f_rally" aria-label="路線特集の駅"${dis}>${rallySelectHTML(d)}</select></label></div>`}
-  <div class="sec"><h4>写真</h4><div class="photos" id="photos"></div><p class="cap">${gos ? "境内や参道の風景なども一緒に残せます。" : "スタンプの写真と、その場所の風景などを一緒に残せます。"}</p></div>
-  ${ro ? "" : `<div class="sec"><label class="toggle"><input type="checkbox" id="f_share"${d.share ? " checked" : ""}><span><b>みんなの地図に公開</b><br>いつ・どこで・どの${gos ? "御朱印" : "スタンプ"}を押したかと「置き場所メモ」だけを公開します。写真・メモ・住所は公開しません。</span></label></div>`}`;
+  <div class="sec"><h4>写真</h4><div class="photos" id="photos"></div><p class="cap">スタンプの写真と、その場所の風景などを一緒に残せます。</p></div>
+  ${ro ? "" : `<div class="sec"><label class="toggle"><input type="checkbox" id="f_pub"${d.priv ? "" : " checked"}><span><b>このトレカを公開</b><br><small id="pubNote">${esc(Privacy.note())}</small></span></label></div>`}`;
 }
-function rallySelectHTML(d) {
-  const st = stationFor(d); const rs = rallyChoices(st); const auto = autoRally({ ...d, rally: "" }); const ar = rallyOf(auto);
-  const cur = d.rally === "none" ? "none" : d.rally ? normKey(d.rally) : "";
-  const keys = rs.map(r => r.id + "|" + st.n);
-  let h = `<option value="">自動${ar ? `（${esc(ar.r.name)} ${esc(ar.st.n)}駅）` : st ? "（路線をえらんでください）" : "（駅が見つかりません）"}</option>`;
-  h += rs.map((r, i) => `<option value="${esc(keys[i])}"${cur === keys[i] ? " selected" : ""}>${esc(r.name)} ${esc(st.n)}駅</option>`).join("");
-  const co = cur && cur !== "none" && !keys.includes(cur) ? rallyOf(cur) : null; if (co) h += `<option value="${esc(cur)}" selected>${esc(co.r.name)} ${esc(co.st.n)}駅</option>`;
-  return h + `<option value="none"${cur === "none" ? " selected" : ""}>ひもづけない</option>`;
-}
-function refreshRallySel() {
-  const c = sheetCtx, el = $("#f_rally"); if (!c || !el) return;
-  el.innerHTML = rallySelectHTML({ ...c.d, name: $("#f_name").value, place: $("#f_place").value, memo: $("#f_memo").value, event: $("#f_event").value, rally: el.value });
-}
+function rallySelectHTML() { return ""; }
 function addStepHTML(c) {
   const g = c.type === "goshuin", dg = !g && !!c.digital;
-  return `${c.queue ? `<div class="qbar">この写真の <b>${c.queue.i + 1} / ${c.queue.boxes.length}</b> 個目。日付・場所・イベントは前の入力を引き継いでいます。</div>` : c.fixedType ? "" : `<div class="seg typeseg" role="group" aria-label="種類"><button type="button" data-type="stamp" aria-pressed="${!g && !dg}">スタンプ</button><button type="button" data-type="digital" aria-pressed="${dg}">デジタル</button><button type="button" data-type="goshuin" aria-pressed="${g}">御朱印</button></div>`}
+  return `${c.queue ? `<div class="qbar">この写真の <b>${c.queue.i + 1} / ${c.queue.boxes.length}</b> 個目。日付・場所・イベントは前の入力を引き継いでいます。</div>` : c.fixedType ? "" : `<div class="seg typeseg" role="group" aria-label="種類"><button type="button" data-type="stamp" aria-pressed="${!g && !dg}">スタンプ</button><button type="button" data-type="digital" aria-pressed="${dg}">デジタル</button></div>`}
   <label class="drop" id="drop"${c.queue ? " hidden" : ""}><input type="file" id="fileIn" accept="image/*,application/pdf"><strong>${g ? "御朱印の写真を選ぶ" : dg ? "デジタルスタンプのスクショを選ぶ" : "スタンプの写真かPDFを選ぶ"}</strong><span>${dg ? "アプリなどに表示されたスタンプの画面を撮ったスクリーンショットから、スタンプの部分だけを色そのままで切り抜きます。<br>まわりの背景の色は自動で抜きます。1枚に複数あっても、1つずつ登録できます。" : g ? "斜めから撮っても、ページの四隅を見つけてまっすぐに整えます。<br>影や紙の色むらも白く補正します。" : "範囲を自動で見つけて切り抜きます。斜めから撮った丸や四角もまっすぐに直します。<br>1枚に複数のスタンプが写っていても、1つずつ登録できます。<br>硬貨やカードを横に置いて撮ると、大きさも測れます。"}</span></label>
   <div id="cropStep" hidden>
     <div class="multibar" id="multiBar" hidden></div>
@@ -3312,20 +3498,21 @@ function openStamp(mode, s, preset, extra = {}) {
   if (mode === "add" && !ready) { toast("保存先を準備しています。少し待ってからどうぞ"); return; }
   const ro = mode === "edit" && !!s.sample;
   const type = mode === "edit" ? (s.type || "stamp") : (extra.type || (preset && preset.type) || "stamp");
-  const d = mode === "add" ? { id: uid(), type, name: "", place: "", addr: "", pref: "", cat: type === "goshuin" ? "御朱印" : "駅", date: todayStr(), lat: null, lng: null, note: "", memo: "", spot: "", sizeMm: null, sizeSrc: null, rally: "", share: Profile.shareDefault, scenes: [], created: Date.now(), ...(preset || {}) } : JSON.parse(JSON.stringify(s));
+  const d = mode === "add" ? { id: uid(), type, name: "", place: "", pref: "", cat: "駅", date: todayStr(), lat: null, lng: null, memo: "", spot: "", sizeMm: null, sizeSrc: null, rally: "", line: "", scenes: [], created: Date.now(), ...(preset || {}) } : JSON.parse(JSON.stringify(s));
   if (!Array.isArray(d.scenes)) d.scenes = [];
-  sheetCtx = { mode, d, orig: s, ro, type, newScenes: [], delScenes: [], sceneUrls: new Map(), colorMode: "auto", offset: 0, erase: [], ghost: false, whiten: true, digital: type !== "goshuin" && d.medium === "digital", dmode: "auto", dtol: 36, adj: extra.adj || { auto: d.medium !== "digital", bright: 0, contrast: 0 }, warp: { auto: true, manual: false, quad: null }, queue: extra.queue || null, fixedType: !!(preset && preset.rally) };
-  const c = sheetCtx; const g = d.cat || "その他";
-  const rk = rallyOf(rallyKeyOf(d));
-  const hero = mode === "edit" ? `<div class="hero washi${type === "goshuin" ? " gos" : isDigi(d) ? " digi" : ""}"><div class="hi"><img src="${d.cut}" alt="${esc(d.name)}" data-lb="1"></div><div><span class="datestamp" style="display:inline-block">${esc(fmtDate(d.date))}</span><h3>${esc(d.name || "名前未設定")}</h3>
-      <div class="meta">${d.pref ? `<span>${esc(d.pref)}${(areaOf(d.lat, d.lng) || {}).city ? esc(areaOf(d.lat, d.lng).city) : ""}</span>` : ""}<span class="chip" style="color:${gcol(g)}">${esc(g)}</span>${isDigi(d) ? `<span class="chip">デジタル</span>` : ""}${d.event ? `<span class="chip" style="color:#2B4C9B">#${esc(d.event)}</span>` : ""}${d.sizeMm ? `<span>⌀ ${fmtCm(d.sizeMm)}</span>` : ""}${rk ? `<span>${esc(rk.r.name)}</span>` : ""}</div>
+  if (d.type !== "goshuin") d.cat = catNorm(d.cat);
+  sheetCtx = { mode, d, orig: s, ro, type, newScenes: [], delScenes: [], sceneUrls: new Map(), colorMode: "auto", offset: 0, erase: [], ghost: false, whiten: true, digital: type !== "goshuin" && d.medium === "digital", dmode: "auto", dtol: 36, adj: extra.adj || { auto: d.medium !== "digital", bright: 0, contrast: 0 }, warp: { auto: true, manual: false, quad: null }, queue: extra.queue || null, fixedType: !!(preset && preset.rally), catTouched: mode === "edit" || !!(preset && preset.cat) };
+  const c = sheetCtx; const g = catNorm(d.cat); const ev = evlOf(d);
+  const rk = rallyOf(rallyKeyOf(d)); const a = areaOf(d.lat, d.lng) || {};
+  const hero = mode === "edit" ? `<div class="hero washi${type === "goshuin" ? " gos" : isDigi(d) ? " digi" : ""}${d.overlap ? " ovl" : ""}"><button type="button" class="hi" data-pv="1" aria-label="スタンプを白い紙の上で大きく見る"><img src="${d.cut}" alt="${esc(d.name)}"><span class="zoomi" aria-hidden="true"></span></button><div><span class="datestamp" style="display:inline-block">${esc(fmtDate(d.date))}</span><h3>${esc(d.name || "名前未設定")}</h3>
+      <div class="meta">${d.pref || a.city ? `<span>${esc(d.pref || "")}${esc(a.city || "")}</span>` : ""}<span class="chip" style="color:${gcol(g)}">${esc(g)}</span>${isDigi(d) ? `<span class="chip">デジタル</span>` : ""}${d.overlap ? `<span class="chip ovlc">重ね押し</span>` : ""}${ev ? `<span class="chip" style="color:${ev.c || "#2B4C9B"}">${ev.k === "l" ? "" : "#"}${esc(ev.t)}</span>` : ""}${d.sizeMm ? `<span>⌀ ${fmtCm(d.sizeMm)}</span>` : ""}${rk ? `<span>${esc(rk.st.n)}駅</span>` : ""}</div>
       ${d.visits && d.visits.length ? `<div class="meta" style="margin-top:4px">押した回数 ${d.visits.length + 1}回（${[...d.visits.map(v => v.date), d.date].filter(Boolean).map(fmtDate).join("・")}）</div>` : ""}
-      ${d.note ? `<div class="note">「${esc(d.note)}」</div>` : ""}${d.spot || (d.spotTags && d.spotTags.length) ? `<div class="meta" style="margin-top:4px">置き場所: ${esc([...(d.spotTags || []), d.spot].filter(Boolean).join("・"))}</div>` : ""}${d.lat != null ? `<div class="meta" style="margin-top:6px"><a href="${gmapsDir(d.lat, d.lng)}" target="_blank" rel="noopener">ここへ行く（Googleマップ）</a></div>` : ""}${ro ? `<div class="meta" style="margin-top:6px">サンプルは編集できません。</div>` : ""}</div></div>` : "";
-  const title = mode === "add" ? (preset && preset.rally ? esc(preset.name) + " を追加" : "追加") : ro ? "サンプル" : type === "goshuin" ? "御朱印の記録" : "スタンプの記録";
+      ${d.spot ? `<div class="meta" style="margin-top:4px">置き場所: ${esc(d.spot)}</div>` : ""}${d.lat != null ? `<div class="meta" style="margin-top:6px"><a href="${gmapsDir(d.lat, d.lng)}" target="_blank" rel="noopener">ここへ行く（Googleマップ）</a></div>` : ""}${ro ? `<div class="meta" style="margin-top:6px">サンプルは編集できません。</div>` : d.priv ? `<div class="meta" style="margin-top:4px">🔒 非公開のトレカ</div>` : ""}</div></div>` : "";
+  const title = mode === "add" ? (preset && preset.rally ? esc(preset.name) + " を追加" : "追加") : ro ? "サンプル" : "スタンプの記録";
   openSheet(`<div class="sheet-head"><h2>${title}</h2><span class="headbtns">${mode === "edit" && !ro ? `<button class="btn small danger" type="button" id="hDel"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>削除</button>` : ""}<button class="btn small ghost" type="button" data-close>閉じる</button></span></div>
-    ${mode === "add" ? `<div id="addStep">${addStepHTML(c)}</div>` : `<div id="heroConfirm"></div>` + hero + `<div class="heroacts"><button class="btn small" type="button" id="hExport">画像で保存</button>${ro || type === "goshuin" ? "" : `<button class="btn small" type="button" id="hBoard">スタンプ帳に貼る</button>`}</div>`}
+    ${mode === "add" ? `<div id="addStep">${addStepHTML(c)}</div>` : `<div id="heroConfirm"></div>` + hero + `<div class="heroacts"><button class="btn small" type="button" id="hExport">画像で保存</button>${ro || type === "goshuin" ? "" : `<button class="btn small" type="button" id="hBoard">スタンプ帳に貼る</button><button class="btn small" type="button" id="hRecut">切り抜きを直す</button>`}</div>`}
     <div id="formArea"${mode === "add" ? " hidden" : ""}>${formHTML(d, ro)}
-    ${ro ? "" : `<div class="acts">${mode === "edit" ? `<button class="btn ghost" type="button" id="delBtn">削除</button>${type === "goshuin" ? "" : `<button class="btn" type="button" id="toBoard">スタンプ帳に貼る</button>`}` : ""}<button class="btn primary" type="button" id="saveBtn">${mode === "add" ? (type === "goshuin" ? "御朱印帳に入れる" : "スタンプ帳に入れる") : "保存"}</button></div><div id="confirmArea"></div>`}</div>`);
+    ${ro ? "" : `<div class="acts">${mode === "edit" ? `<button class="btn ghost" type="button" id="delBtn">削除</button>${type === "goshuin" ? "" : `<button class="btn" type="button" id="toBoard">スタンプ帳に貼る</button>`}` : ""}<button class="btn primary" type="button" id="saveBtn">${mode === "add" ? "スタンプ帳に入れる" : "保存"}</button></div><div id="confirmArea"></div>`}</div>`);
   wireForm();
   if (mode === "add") { wireAdd(); if (c.queue) startFromOrig(c.queue.orig, c.queue.exif); }
   if (mode === "edit" && !ro) wireEdit();
@@ -3333,8 +3520,9 @@ function openStamp(mode, s, preset, extra = {}) {
     loadEditPhotos();
     $("#hExport").onclick = () => openExport({ ids: [d.id] });
     const hb = $("#hBoard"); if (hb) hb.onclick = () => Books.addStamp(d.id);
+    const hr = $("#hRecut"); if (hr) hr.onclick = () => openRecrop(s);
     const hd = $("#hDel"); if (hd) hd.onclick = () => {
-      $("#heroConfirm").innerHTML = `<div class="confirm"><span style="flex:1">この記録と写真を削除します。${type === "goshuin" ? "" : "スタンプ帳のページからもはがれます。"}元には戻せません。</span><button class="btn small" type="button" id="hNo">やめる</button><button class="btn small shu" type="button" id="hYes">削除する</button></div>`;
+      $("#heroConfirm").innerHTML = `<div class="confirm"><span style="flex:1">この記録と写真を削除します。スタンプ帳のページからもはがれます。元には戻せません。</span><button class="btn small" type="button" id="hNo">やめる</button><button class="btn small shu" type="button" id="hYes">削除する</button></div>`;
       $("#hNo").onclick = () => $("#heroConfirm").innerHTML = "";
       $("#hYes").onclick = async () => { $("#hYes").disabled = true; const n = await deleteStamps([s]); if (n) { closeSheet(); toast("削除しました"); } };
     };
@@ -3349,7 +3537,7 @@ function wireAdd() {
   const c = sheetCtx;
   const typeBtns = document.querySelectorAll("[data-type]");
   typeBtns.forEach(b => b.onclick = () => { if (c.src) return; const t = b.dataset.type; c.digital = t === "digital"; c.type = c.d.type = t === "goshuin" ? "goshuin" : "stamp"; if (c.digital) { c.d.medium = "digital"; c.adj = { auto: false, bright: 0, contrast: 0 }; } else { delete c.d.medium; c.adj = { auto: true, bright: 0, contrast: 0 }; } c.d.cat = c.type === "goshuin" ? "御朱印" : "駅"; $("#addStep").innerHTML = addStepHTML(c); $("#formArea").outerHTML; rebuildForm(); wireAdd(); });
-  const drop = $("#drop");
+  const drop = $("#drop"); if (!drop) return;
   ["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("hover"); }));
   ["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("hover"); }));
   drop.addEventListener("drop", e => { const f = e.dataTransfer.files[0]; if (f) handleFile(f); });
@@ -3373,7 +3561,7 @@ function wireAdd() {
 }
 function rebuildForm() {
   const c = sheetCtx; const fa = $("#formArea");
-  fa.innerHTML = `${formHTML(c.d, false)}<div class="acts"><button class="btn primary" type="button" id="saveBtn">${c.type === "goshuin" ? "御朱印帳に入れる" : "スタンプ帳に入れる"}</button></div><div id="confirmArea"></div>`;
+  fa.innerHTML = `${formHTML(c.d, false)}<div class="acts"><button class="btn primary" type="button" id="saveBtn">スタンプ帳に入れる</button></div><div id="confirmArea"></div>`;
   wireForm();
 }
 function setTool(t) {
@@ -3385,7 +3573,7 @@ function setTool(t) {
   else warpCaption();
 }
 async function handleFile(file) {
-  const c = sheetCtx; if (!c) return; const st = $("#drop strong"); st.textContent = "読み込み中…";
+  const c = sheetCtx; if (!c) return; const st = $("#drop strong"); if (!st) return; st.textContent = "読み込み中…";
   let orig; try { orig = await fileToCanvas(file); } catch { st.textContent = c.type === "goshuin" ? "御朱印の写真を選ぶ" : "スタンプの写真かPDFを選ぶ"; toast(/pdf/i.test(file.type + file.name) ? "PDFを読み込めませんでした。写真で試してみてください。" : "この画像は読み込めませんでした。JPEGかPNGでどうぞ。", 4000); return; }
   if (sheetCtx !== c) return;
   const exif = await exifOf(file); if (orig.pages > 1) toast(`PDFは${orig.pages}ページありますが、1ページ目を使っています。`);
@@ -3468,6 +3656,7 @@ function drawResult() {
   const im = c.cut.canvas; const s = Math.min(maxW / im.width, maxH / im.height, c.type === "goshuin" ? 1 : 2); const dpr = Math.min(2, devicePixelRatio || 1);
   cv.width = im.width * s * dpr; cv.height = im.height * s * dpr; cv.style.width = im.width * s + "px"; cv.style.height = im.height * s + "px";
   const x = cv.getContext("2d"); x.clearRect(0, 0, cv.width, cv.height); x.drawImage(im, 0, 0, cv.width, cv.height);
+  const oh = $("#ovlHint"), ob = $("#f_overlap"); if (oh) oh.hidden = !(c.cut && c.cut.multi) || !!(ob && ob.checked);
 }
 function wireEraser() {
   const cv = $("#resCv"); if (!cv) return; let cur = null;
@@ -3494,8 +3683,17 @@ function readForm(d) {
   const v = id => { const el = $(id); return el ? el.value.trim() : null; };
   const num = s => { const n = parseFloat(s); return isFinite(n) ? n : null; };
   const gos = d.type === "goshuin";
-  Object.assign(d, { name: v("#f_name") || (gos ? "名前未設定の御朱印" : "名前未設定のスタンプ"), cat: gos ? "御朱印" : (v("#f_cat") || "その他"), date: $("#f_date").value, note: v("#f_note"), memo: v("#f_memo"), place: v("#f_place"), pref: v("#f_pref"), addr: v("#f_addr"), spot: v("#f_spot") || "", spotTags: [...document.querySelectorAll("#spotTags [data-spt][aria-pressed=true]")].map(b => b.dataset.spt), share: $("#f_share").checked, event: $("#f_event").value === "__new" ? (d.event || "") : $("#f_event").value });
-  if (!gos) { const md = $("#f_medium"); if (md) { if (md.value === "digital") d.medium = "digital"; else delete d.medium; } d.rally = $("#f_rally") ? $("#f_rally").value : d.rally; const cm = num(v("#f_size")); d.sizeMm = cm && cm > 0 ? Math.round(cm * 100) / 10 : null; if (!d.sizeMm) d.sizeSrc = null; }
+  Object.assign(d, { name: v("#f_name") || (gos ? "名前未設定の御朱印" : "名前未設定のスタンプ"), cat: gos ? "御朱印" : catNorm(v("#f_cat") || "施設"), date: $("#f_date").value, memo: v("#f_memo"), place: v("#f_place"), spot: v("#f_spot") || "", spotTags: [] });
+  if (d.lat != null && d.lng != null) d.pref = prefAt(d.lat, d.lng) || d.pref || "";
+  const pub = $("#f_pub"); if (pub) { if (pub.checked) delete d.priv; else d.priv = true; }
+  const ov = $("#f_overlap"); if (ov) { if (ov.checked) d.overlap = true; else delete d.overlap; }
+  const ev = $("#f_evl") ? $("#f_evl").value : null;
+  if (ev != null && !ev.startsWith("__")) {
+    if (ev.startsWith("e:")) { d.event = ev.slice(2); d.line = ""; d.rally = ""; }
+    else if (ev.startsWith("l:")) { d.event = ""; d.line = ev.slice(2); d.rally = lineKeyFor(d.line, d) || ""; }
+    else { d.event = ""; d.line = ""; d.rally = ""; }
+  }
+  if (!gos) { const md = $("#f_medium"); if (md) { if (md.value === "digital") d.medium = "digital"; else delete d.medium; } const cm = num(v("#f_size")); d.sizeMm = cm && cm > 0 ? Math.round(cm * 100) / 10 : null; if (!d.sizeMm) d.sizeSrc = null; }
 }
 async function saveStampForm() {
   const c = sheetCtx; if (!c) return; const d = c.d;
@@ -3537,23 +3735,24 @@ async function commitSave(c, d) {
     if ((c.mode === "add" || c.mode === "update") && c.photoUrl) { try { await Store.putPhoto("ph_" + d.id, c.photoUrl); d.hasPhoto = true; } catch { if (c.mode === "add") d.hasPhoto = false; } }
     for (const n of c.newScenes) { try { await Store.putPhoto("sc_" + d.id + "_" + n.k, n.url); d.scenes.push(n.k); } catch { toast("保存できない写真がありました"); } }
     for (const k of c.delScenes) { d.scenes = d.scenes.filter(x => x !== k); Store.delPhoto("sc_" + d.id + "_" + k).catch(() => {}); }
-    await Store.saveStamp(d);
+    d.share = wantShare(d); await Store.saveStamp(d);
   } catch (e) {
     if (btn) { btn.disabled = false; btn.textContent = "もう一度保存"; }
     toast(e && e.code === "quota_exceeded" ? "保存できる数の上限に達しました。" : "保存できませんでした。通信を確かめてもう一度どうぞ。", 4500); return;
   }
-  try { if (d.share) await Store.pubPut(d, await thumbOf(d.cut), Profile.nick); else if (c.orig && c.orig.share) await Store.pubDel(d.id); MapV.pubs = null; } catch { toast("みんなの地図への公開はできませんでした"); }
-  if (Profile.shareDefault !== d.share) { Profile.shareDefault = d.share; Profile.save(); }
+  try { if (d.share) await Store.pubPut(pubView(d), await thumbOf(d.cut), Profile.nick); else if (Store.mode === "cloud" && (c.mode !== "add" || (c.orig && c.orig.share))) await Store.pubDel(d.id); MapV.pubs = null; } catch { toast("みんなの地図への反映はできませんでした"); }
   const first = !stamps.length;
   if (c.mode === "add") stamps.push(d); else stamps = stamps.map(x => x.id === d.id ? d : x);
+  const ms = c.mode === "add" ? Party.check(stamps.length) : 0;
   if (first) { await Books.load(); Fall.setFilter("all"); }
   const mode = c.mode, q = c.queue, adj = c.adj;
-  closeSheet(); refreshAll();
+  closeSheet(); refreshAll(); Others.rank = null;
+  if (ms) setTimeout(() => Party.show(ms), 420);
   if (q && mode !== "edit" && q.i + 1 < q.boxes.length) {
-    const carry = { medium: d.medium, date: d.date, event: d.event, lat: d.lat, lng: d.lng, locSrc: d.locSrc, pref: d.pref, addr: d.addr, place: d.place, share: d.share, cat: d.cat };
+    const carry = { medium: d.medium, date: d.date, event: d.event, line: d.line, lat: d.lat, lng: d.lng, locSrc: d.locSrc, pref: d.pref, place: d.place, priv: d.priv, cat: d.cat };
     toast(`${q.i + 1}個目を保存しました。次のスタンプへ`); openStamp("add", null, carry, { queue: { ...q, i: q.i + 1 }, type: "stamp", adj }); return;
   }
-  if (mode === "add") { const r = rallyOf(rallyKeyOf(d)); toast(d.type === "goshuin" ? "御朱印帳に入れました" : r ? `${r.r.name} ${r.st.n}駅 をゲット！` : "スタンプ帳に入れました"); }
+  if (mode === "add") { const r = rallyOf(rallyKeyOf(d)); if (!ms) toast(r ? `${r.r.name} ${r.st.n}駅 をゲット！` : "スタンプ帳に入れました"); }
   else if (mode === "update") toast(`前の記録を更新しました（${(d.visits || []).length + 1}回目）`);
   else toast("保存しました");
 }
@@ -3564,7 +3763,8 @@ function openSettings() {
   sheetCtx = { mode: "settings" };
   openSheet(`<div class="sheet-head"><h2>設定</h2><button class="btn small ghost" type="button" data-close>閉じる</button></div>
     ${window.PetalogCloud ? PetalogCloud.settingsHTML() : ""}
-    <div class="sec"><h4>きっかけ・イベント</h4><div id="setEv"></div><div class="row2" style="margin-top:8px"><input id="setEvIn" class="search grow" maxlength="30" placeholder="例: 謎解き"><button class="btn small primary" type="button" id="setEvAdd">追加</button></div></div>
+    ${Privacy.html()}
+    <div class="sec"><h4>イベント・路線</h4><div id="setEv"></div><div class="row2" style="margin-top:8px"><input id="setEvIn" class="search grow" maxlength="30" placeholder="イベントを追加（例: 謎解き）"><button class="btn small primary" type="button" id="setEvAdd">追加</button></div><p class="cap">路線は、記録画面の「イベント・路線」→「＋ 路線を登録する」か、特集の路線ページから登録できます。</p></div>
     <div class="sec"><h4>大きさの基準物</h4><div id="setRef"></div><p class="cap">「写真で測る」の画面から追加できます。</p></div>
     <div class="sec"><h4>「ぜんぶ」の背景</h4><div class="papers" id="setFall">${["washi", "plain", "grid", "dot", "kraft", "cork", "seigaiha"].map(k => `<button type="button" data-fb="${k}" aria-pressed="${(Profile.fallBg || "washi") === k}"><i style="background-image:url(${Paper.previewURL(k)})"></i>${PAPERS[k]}</button>`).join("")}<label class="pbtn" aria-pressed="${Profile.fallBg === "photo"}"><i style="background-image:url(${Paper.previewURL("photo")})"></i>写真<input type="file" id="setFallPh" accept="image/*" style="position:absolute;width:1px;height:1px;opacity:0"></label></div></div>
     <div class="sec"><h4>バックアップ</h4><p class="cap">${Store.mode === "cloud" ? "記録はあなたのアカウントに保存されています。念のためファイルにも書き出せます。" : "記録はこの端末（このブラウザ）の中だけに保存されています。機種変更やブラウザのデータ削除に備えて、ときどき書き出してください。"}</p>
@@ -3572,12 +3772,14 @@ function openSettings() {
     ${inClaude || window.PetalogCloud ? "" : `<div class="sec"><h4>AI判定（任意）</h4><p class="cap">AnthropicのAPIキーを入れると、スタンプの場所の推定と大きさの見積もりが使えます。キーはこの端末の中だけに保存されます。共用の端末では入れないでください。</p>
       <div class="row2"><input id="keyIn" type="password" class="search grow" placeholder="${apiKey() ? "設定済み（入れ直すと上書き）" : "sk-ant-..."}" autocomplete="off"><button class="btn small primary" type="button" id="keySave">保存</button>${apiKey() ? `<button class="btn small" type="button" id="keyDel">消す</button>` : ""}</div></div>`}`);
   const lists = () => {
-    $("#setEv").innerHTML = Profile.events.length ? Profile.events.map((e, i) => `<div class="setrow"><span>${esc(e)} <small>${list().filter(s => s.event === e).length} まい</small></span><button class="xbtn" type="button" data-evd="${i}">一覧から外す</button></div>`).join("") : `<p class="cap">まだありません。スタンプの記録画面からも作れます。</p>`;
+    $("#setEv").innerHTML = Profile.events.length || Profile.lines.length ? Profile.events.map((e, i) => `<div class="setrow"><span>${esc(e)} <small>イベント · ${list().filter(s => s.event === e).length} まい</small></span><button class="xbtn" type="button" data-evd="${i}">一覧から外す</button></div>`).join("")
+      + Profile.lines.map((id, i) => { const r = RALLY_BY_ID.get(id); return r ? `<div class="setrow"><span>${esc(r.name)} <small>路線 · ${list().filter(s => lineIdOf(s) === id).length} まい</small></span><button class="xbtn" type="button" data-lnd="${i}">一覧から外す</button></div>` : ""; }).join("") : `<p class="cap">まだありません。スタンプの記録画面からも作れます。</p>`;
     $("#setRef").innerHTML = Profile.refs.length ? Profile.refs.map((r, i) => `<div class="setrow"><span>${esc(r.n)} <small>${r.cm}cm</small></span><button class="xbtn" type="button" data-rfd="${i}">消す</button></div>`).join("") : `<p class="cap">まだありません。</p>`;
   };
   lists();
   $("#sheet").onclick = e => {
     const a = e.target.closest("[data-evd]"); if (a) { Profile.events.splice(+a.dataset.evd, 1); Profile.save(); lists(); return; }
+    const ln = e.target.closest("[data-lnd]"); if (ln) { Profile.lines.splice(+ln.dataset.lnd, 1); Profile.save(); lists(); return; }
     const b = e.target.closest("[data-rfd]"); if (b) { Profile.refs.splice(+b.dataset.rfd, 1); Profile.save(); lists(); }
   };
   $("#setEvAdd").onclick = () => { const v = $("#setEvIn").value.trim(); if (!v) return; if (!Profile.events.includes(v)) { Profile.events.push(v); Profile.save(); } $("#setEvIn").value = ""; lists(); };
@@ -3588,6 +3790,7 @@ function openSettings() {
   const ks = $("#keySave"); if (ks) ks.onclick = () => { const v = $("#keyIn").value.trim(); if (!/^sk-ant-/.test(v)) { toast("sk-ant- で始まるキーを入れてください"); return; } lsSet("petalog.apikey", v); toast("APIキーを保存しました"); openSettings(); };
   const kd = $("#keyDel"); if (kd) kd.onclick = () => { try { localStorage.removeItem("petalog.apikey"); } catch {} toast("APIキーを消しました"); openSettings(); };
   if (window.PetalogCloud) PetalogCloud.wireSettings();
+  Privacy.wire();
 }
 $("#setBtn").onclick = openSettings;
 async function exportBackup() {
@@ -3600,7 +3803,7 @@ async function exportBackup() {
   }
   const books = Books.sample ? [] : Books.data.books;
   for (const bk of books) for (const p of bk.pages) if (p.bg) { const u = await Store.getPhoto(p.bg).catch(() => null); if (u) photos[p.bg] = u; }
-  const data = JSON.stringify({ app: "petalog", v: 1, at: new Date().toISOString(), stamps: stamps.map(s => Store.clean(s)), photos, profile: { events: Profile.events, refs: Profile.refs, nick: Profile.nick }, books });
+  const data = JSON.stringify({ app: "petalog", v: 1, at: new Date().toISOString(), stamps: stamps.map(s => Store.clean(s)), photos, profile: { events: Profile.events, lines: Profile.lines, refs: Profile.refs, nick: Profile.nick }, books });
   const filename = `petalog-${todayStr()}.json`;
   if (b) { b.disabled = false; b.textContent = "ファイルに書き出す"; }
   if (inClaude) { try { const dl = await claude.use("downloads"); if (dl) { await dl.save({ filename, data }); return; } } catch (e) { if (e && e.code && e.code !== "unavailable") return; } }
@@ -3613,10 +3816,10 @@ async function importBackup(file) {
   const have = new Set(stamps.map(s => s.id)); let n = 0;
   for (const s of j.stamps) {
     if (!s || !s.id || have.has(s.id)) continue;
-    try { await Store.saveStamp(s); for (const [k, u] of Object.entries(j.photos || {})) if (k === "ph_" + s.id || k.startsWith("sc_" + s.id + "_")) await Store.putPhoto(k, u); stamps.push(s); n++; }
+    try { if (s.type !== "goshuin") s.cat = catNorm(s.cat); await Store.saveStamp(s); for (const [k, u] of Object.entries(j.photos || {})) if (k === "ph_" + s.id || k.startsWith("sc_" + s.id + "_")) await Store.putPhoto(k, u); stamps.push(s); n++; }
     catch { toast("途中で保存できなくなりました（容量の上限かもしれません）", 4000); break; }
   }
-  const p = j.profile || {}; (p.events || []).forEach(e => Profile.events.includes(e) || Profile.events.push(e)); (p.refs || []).forEach(r => Profile.refs.some(x => x.n === r.n) || Profile.refs.push(r)); await Profile.save();
+  const p = j.profile || {}; (p.events || []).forEach(e => Profile.events.includes(e) || Profile.events.push(e)); (p.refs || []).forEach(r => Profile.refs.some(x => x.n === r.n) || Profile.refs.push(r)); (p.lines || []).forEach(l => Profile.lines.includes(l) || Profile.lines.push(l)); await Profile.save();
   if (Books.sample && stamps.length) await Books.load();
   if (!Books.sample && Array.isArray(j.books) && j.books.length) {
     const hb = new Set(Books.data.books.map(b => b.id));
@@ -3628,6 +3831,530 @@ async function importBackup(file) {
   closeSheet(); refreshAll(); toast(`${n} まい読み込みました`);
 }
 
+/* ================= v10: 場所ピッカー・イベントと路線・公開設定・みんなのコレクション・白い紙で拡大・達成のお祝い ================= */
+const BLANK = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+const fmtKm = km => km < 1 ? Math.max(10, Math.round(km * 100) * 10) + "m" : km.toFixed(1) + "km";
+
+/* ---------- イベント・路線（ひとつのプルダウン） ---------- */
+function lineIdOf(s) {
+  if (!s) return ""; if (s.line && RALLY_BY_ID.has(s.line)) return s.line;
+  const k = s.rally && s.rally !== "none" ? normKey(s.rally) : ""; const id = k ? k.split("|")[0] : "";
+  return RALLY_BY_ID.has(id) ? id : "";
+}
+function evlOf(s) {
+  if (!s) return null; if (s.event) return { t: s.event, k: "e" };
+  const r = RALLY_BY_ID.get(lineIdOf(s)); return r ? { t: r.name, k: "l", c: r.c } : null;
+}
+function nearestStation(lat, lng, maxKm) {
+  let best = null, bd = maxKm; for (const x of GEO.stations) { const k = kmBetween(lat, lng, x.lat, x.lng); if (k < bd) { bd = k; best = x; } } return best;
+}
+// which station of the chosen line this stamp belongs to (by the place name, then by the pin)
+function lineKeyFor(id, d) {
+  const r = RALLY_BY_ID.get(id); if (!r) return "";
+  const txt = norm((d.place || "") + " " + (d.name || "")); let st = null;
+  if (txt) for (const x of r.stations) { const n = norm(x.n); if ((n.length >= 2 && txt.includes(n)) || txt === n) { if (!st || n.length > norm(st.n).length) st = x; } }
+  if (!st && d.lat != null && d.lng != null) { let bd = 1.2; for (const x of r.stations) { const k = kmBetween(d.lat, d.lng, x.lat, x.lng); if (k < bd) { bd = k; st = x; } } }
+  return st ? r.id + "|" + st.n : "";
+}
+function evlOptions(d) {
+  const evs = Profile.allEvents(); if (d.event && !evs.includes(d.event)) evs.push(d.event);
+  const cur = d.event ? "" : lineIdOf(d); const lines = Profile.allLines(); if (cur && !lines.includes(cur)) lines.push(cur);
+  const sel = d.event ? "e:" + d.event : cur ? "l:" + cur : "";
+  return `<option value="">なし</option>`
+    + (evs.length ? `<optgroup label="イベント">${evs.map(e => `<option value="${esc("e:" + e)}"${sel === "e:" + e ? " selected" : ""}>${esc(e)}</option>`).join("")}</optgroup>` : "")
+    + (lines.length ? `<optgroup label="路線">${lines.map(id => { const r = RALLY_BY_ID.get(id); return r ? `<option value="${esc("l:" + id)}"${sel === "l:" + id ? " selected" : ""}>${esc(r.name)}</option>` : ""; }).join("")}</optgroup>` : "")
+    + `<option value="__newev">＋ イベントを作る</option><option value="__newline">＋ 路線を登録する</option>`;
+}
+function refreshRallySel() {
+  const c = sheetCtx, el = $("#f_evl"), h = $("#evlHint"); if (!c || !el || !h) return;
+  const v = el.value; if (!v.startsWith("l:")) { h.innerHTML = ""; return; }
+  const id = v.slice(2), r = RALLY_BY_ID.get(id); if (!r) { h.innerHTML = ""; return; }
+  const k = lineKeyFor(id, { ...c.d, name: ($("#f_name") || {}).value || "", place: ($("#f_place") || {}).value || "" });
+  h.innerHTML = k ? `→ <b>${esc(r.name)} ${esc(k.split("|")[1])}駅</b> として路線特集に入ります` : `<span class="warn">場所からこの路線の駅が見つかりません。路線特集のマスには入らず、分類としてだけ残ります。</span>`;
+}
+function lnSearch(q) {
+  const box = $("#lnRes"); if (!box) return; q = (q || "").trim(); const c = sheetCtx;
+  const rows = rs => rs.map(r => `<button type="button" data-ln="${esc(r.id)}"><i style="background:${r.c}"></i><b>${esc(r.name)}</b><small>${r.stations.length}駅${Profile.lines.includes(r.id) ? " · 登録済み" : ""}</small></button>`).join("");
+  if (!q) {
+    const d = c ? c.d : {}; const st = d.lat != null ? nearestStation(d.lat, d.lng, 1.5) : stationFor({ name: ($("#f_name") || {}).value || "", place: ($("#f_place") || {}).value || "" });
+    const rs = st ? rallyChoices(st) : [];
+    box.innerHTML = rs.length ? `<p class="cap" style="margin:0 0 4px">${esc(st.n)}駅を通る路線</p>${rows(rs)}` : `<p class="cap" style="margin:0">路線名か駅名を入れてください。</p>`; return;
+  }
+  const nq = norm(q); const rs = RALLIES.filter(r => r.name.includes(q) || norm(r.short).includes(nq)).slice(0, 24);
+  GEO.stations.filter(s => norm(s.n) === nq || (nq.length >= 2 && norm(s.n).startsWith(nq))).slice(0, 3).forEach(s => rallyChoices(s).forEach(r => rs.includes(r) || rs.push(r)));
+  box.innerHTML = rs.length ? rows(rs.slice(0, 30)) : `<p class="cap" style="margin:0">見つかりませんでした。</p>`;
+}
+
+/* ---------- 押した場所: 地図でピン → 近くの名前を近い順に ---------- */
+const OSM_LABEL = { museum: "博物館", gallery: "美術館", attraction: "観光地", viewpoint: "展望", information: "案内所", zoo: "動物園", aquarium: "水族館", theme_park: "テーマパーク", hotel: "ホテル", artwork: "アート",
+  townhall: "役所", library: "図書館", community_centre: "公民館", arts_centre: "文化施設", theatre: "劇場", cinema: "映画館", place_of_worship: "寺社", marketplace: "市場", university: "大学", college: "学校", school: "学校",
+  post_office: "郵便局", bus_station: "バスターミナル", ferry_terminal: "港", restaurant: "飲食店", cafe: "カフェ", fast_food: "飲食店", mall: "商業施設", department_store: "百貨店", supermarket: "スーパー",
+  gift: "おみやげ", books: "書店", convenience: "コンビニ", park: "公園", stadium: "スタジアム", garden: "庭園", sports_centre: "運動施設", water_park: "プール", rest_area: "SA・PA", services: "SA・PA" };
+const PlacePick = {
+  map: null, mk: null, c: null, io: null, ac: null, cache: new Map(), base: [], extra: [], list: [], loading: false, res: [], seq: 0,
+  icon() { return this._icon || (this._icon = L.divIcon({ className: "pmpin", html: `<svg viewBox="0 0 30 40" width="30" height="40"><path d="M15 39s-12-12.4-12-23a12 12 0 0 1 24 0c0 10.6-12 23-12 23z" fill="#C8412E" stroke="#fff" stroke-width="2"/><circle cx="15" cy="15.5" r="4.6" fill="#fff"/></svg>`, iconSize: [30, 40], iconAnchor: [15, 39] })); },
+  unmount() {
+    if (this.io) { this.io.disconnect(); this.io = null; } if (this.ac) { try { this.ac.abort(); } catch {} this.ac = null; }
+    clearTimeout(this._ct); if (this.map) { try { this.map.remove(); } catch {} } this.map = null; this.mk = null; this.c = null; this.loading = false;
+  },
+  mount(c) {
+    this.unmount(); const el = $("#pmap"); if (!el) return; this.c = c; this.base = []; this.extra = []; this.list = [];
+    if (!c.ro) this.wire(c);
+    if (!window.L) { el.innerHTML = `<div class="pmfail">地図の部品を読み込めませんでした。場所の名前は手で入れられます。</div>`; return; }
+    const go = () => { if (this.c === c && !this.map && document.body.contains(el)) this.init(el, c); };
+    if ("IntersectionObserver" in window) { this.io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { if (this.io) this.io.disconnect(); this.io = null; go(); } }); this.io.observe(el); }
+    else setTimeout(go, 60);
+  },
+  init(el, c) {
+    const d = c.d, has = d.lat != null && d.lng != null;
+    const m = L.map(el, { zoomControl: false, attributionControl: true, minZoom: 4, maxZoom: 18, zoomSnap: 0.5, tap: false, scrollWheelZoom: "center", maxBounds: [[17, 115], [49, 160]], maxBoundsViscosity: 0.7, bounceAtZoomLimits: false });
+    m.attributionControl.setPrefix(false);
+    L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", { maxZoom: 18, attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>' }).addTo(m);
+    L.control.zoom({ position: "bottomright", zoomInTitle: "拡大", zoomOutTitle: "縮小" }).addTo(m);
+    const g = has ? null : this.guess(c);
+    m.setView(has ? [d.lat, d.lng] : g ? [g.lat, g.lng] : [36.3, 138.3], has ? 16 : g ? 15 : 5);
+    this.map = m;
+    if (!c.ro) m.on("click", e => { setLoc(+e.latlng.lat.toFixed(6), +e.latlng.lng.toFixed(6), "地図でピン", { pan: false }); });
+    if (has) { this.pin(d.lat, d.lng, false); if (!c.ro) this.cands(d.lat, d.lng); }
+    setTimeout(() => { if (this.map === m) m.invalidateSize({ animate: false }); }, 80);
+  },
+  guess(c) {
+    const st = stationFor({ name: ($("#f_name") || {}).value || c.d.name || "", place: ($("#f_place") || {}).value || c.d.place || "" }); if (st) return st;
+    const last = byDate(false).find(s => !s.sample && s.lat != null && s.lng != null); return last ? { lat: +last.lat, lng: +last.lng } : null;
+  },
+  pin(lat, lng, pan) {
+    const h = $("#pmHint"); if (h) h.hidden = lat != null;
+    if (lat == null) { if (this.mk && this.map) this.map.removeLayer(this.mk); this.mk = null; const pc = $("#pCands"); if (pc) pc.innerHTML = ""; return; }
+    if (!this.map) return;
+    if (!this.mk) {
+      this.mk = L.marker([lat, lng], { draggable: !this.c.ro, icon: this.icon(), keyboard: false }).addTo(this.map);
+      this.mk.on("dragend", () => { const p = this.mk.getLatLng(); setLoc(+p.lat.toFixed(6), +p.lng.toFixed(6), "地図でピン", { pan: false }); });
+    } else this.mk.setLatLng([lat, lng]);
+    if (pan) this.map.setView([lat, lng], Math.max(this.map.getZoom(), 16));
+  },
+  wire(c) {
+    const q = $("#pmQ"), box = $("#pmRes");
+    if (q) {
+      let t = 0;
+      q.oninput = () => { clearTimeout(t); const v = q.value.trim(); if (!v) { box.hidden = true; return; } t = setTimeout(() => this.search(v, false), 200); };
+      q.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); const v = q.value.trim(); if (v) this.search(v, true); } };
+      q.onfocus = () => { const s = $("#pmapWrap"); if (s && s.scrollIntoView) s.scrollIntoView({ block: "start", behavior: "smooth" }); };
+      box.onclick = e => {
+        const b = e.target.closest("[data-i]"); if (!b) return; const r = this.res[+b.dataset.i]; if (!r) return; box.hidden = true; q.blur();
+        if (this.map) this.map.setView([r.lat, r.lng], r.z || 16);
+        setLoc(+(+r.lat).toFixed(6), +(+r.lng).toFixed(6), "地図で検索", { pan: false });
+        if (r.name) this.choose({ n: r.name, cat: r.cat }, true);
+      };
+    }
+    const me = $("#pmMe"); if (me) me.onclick = () => {
+      if (!navigator.geolocation) { toast("この画面では現在地が使えません"); return; } me.disabled = true;
+      navigator.geolocation.getCurrentPosition(p => { me.disabled = false; if (sheetCtx !== c) return; const la = +p.coords.latitude.toFixed(6), ln = +p.coords.longitude.toFixed(6); if (this.map) this.map.setView([la, ln], 17); setLoc(la, ln, "現在地", { pan: false }); },
+        () => { me.disabled = false; toast("現在地を取得できませんでした（この画面では使えないことがあります）", 3400); }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 });
+    };
+    const pc = $("#pCands"); if (pc) pc.onclick = e => { const b = e.target.closest("[data-ci]"); if (b) this.choose(this.list[+b.dataset.ci]); };
+    const fp = $("#f_place"); if (fp) fp.addEventListener("input", () => this.mark());
+    const fc = $("#f_cat"); if (fc) fc.addEventListener("change", () => { c.catTouched = true; });
+  },
+  async search(v, deep) {
+    const my = ++this.seq, box = $("#pmRes"); if (!box) return; const nq = norm(v); const res = [];
+    for (const s of GEO.stations) { const ns = norm(s.n); const w = ns === nq ? 100 + s.r : ns.startsWith(nq) ? 40 + s.r : nq.length >= 2 && ns.includes(nq) ? s.r : -1; if (w >= 0) res.push({ t: s.n + "駅", sub: s.L.slice(0, 2).map(i => GEO.lines[i] && GEO.lines[i].n).filter(Boolean).join("・"), lat: s.lat, lng: s.lng, z: 17, w, name: s.n + "駅", cat: "駅" }); }
+    for (const f of GEO.facs) if (f.n.includes(v)) res.push({ t: f.n, sub: f.k === "air" ? "空港" : "施設", lat: f.lat, lng: f.lng, z: 16, w: 60, name: f.n, cat: f.k === "air" ? "空港" : "施設" });
+    stamps.forEach(s => { if (s.lat != null && s.lng != null && ((s.name || "") + (s.place || "")).includes(v)) res.push({ t: s.place || s.name, sub: "自分の記録", lat: +s.lat, lng: +s.lng, z: 17, w: 80, name: s.place || s.name, cat: catNorm(s.cat) }); });
+    res.sort((a, b) => b.w - a.w);
+    const seen = new Set(); let top = res.filter(r => { const k = norm(r.t); if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 8);
+    this.show(top, deep);
+    const more = [];
+    const g = await MapV.gsi(v).catch(() => []); g.forEach(x => more.push({ ...x, sub: "住所・地名" }));
+    if (deep) { try { more.push(...await this.nominatim(v)); } catch {} }
+    if (my !== this.seq || !$("#pmRes")) return;
+    const add = more.filter(r => { const k = norm(r.t); if (seen.has(k)) return false; seen.add(k); return true; });
+    top = [...top, ...add].slice(0, 14); this.show(top, false);
+  },
+  async nominatim(v) {
+    const r = await fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=jp&limit=6&accept-language=ja&q=" + encodeURIComponent(v)); if (!r.ok) return [];
+    const j = await r.json(); return (j || []).map(x => ({ t: x.name || String(x.display_name || "").split(",")[0], sub: String(x.display_name || "").split(",").slice(1, 3).join(" ").trim() || "地図", lat: +x.lat, lng: +x.lon, z: 17, name: x.name || "", cat: /aerodrome|airport/.test(x.type || "") ? "空港" : x.type === "station" ? "駅" : "施設" })).filter(x => x.t && isFinite(x.lat));
+  },
+  show(top, searching) {
+    const box = $("#pmRes"); if (!box) return; this.res = top;
+    box.innerHTML = top.length ? top.map((r, i) => `<button type="button" data-i="${i}"><b>${esc(r.t)}</b>${r.sub ? `<small>${esc(r.sub)}</small>` : ""}</button>`).join("") + (searching ? `<div class="nores"><span class="spin"></span></div>` : "")
+      : searching ? `<div class="nores"><span class="spin"></span> さがしています</div>` : `<div class="nores">見つかりませんでした。キーボードの「検索」で、もっと広くさがします。</div>`;
+    box.hidden = false;
+  },
+  cands(lat, lng) {
+    const box = $("#pCands"); if (!box || !this.c || this.c.ro) return; const myId = this.c.d.id;
+    const out = []; const add = (n, km, sub, cat) => { n = String(n || "").trim(); if (!n) return; const k = norm(n); const ex = out.find(o => norm(o.n) === k); if (ex) { if (km < ex.km) ex.km = km; return; } out.push({ n, km, sub, cat }); };
+    for (const s of GEO.stations) { if (Math.abs(s.lat - lat) > 0.03 || Math.abs(s.lng - lng) > 0.04) continue; const km = kmBetween(lat, lng, s.lat, s.lng); if (km < 2) add(s.n + "駅", km, "駅", "駅"); }
+    for (const f of GEO.facs) { const km = kmBetween(lat, lng, f.lat, f.lng); if (km < 3) add(f.n, km, f.k === "air" ? "空港" : "施設", f.k === "air" ? "空港" : "施設"); }
+    stamps.forEach(s => { if (s.id !== myId && s.lat != null && s.lng != null) { const km = kmBetween(lat, lng, +s.lat, +s.lng); if (km < 1) add(s.place || s.name, km, "自分の記録", catNorm(s.cat)); } });
+    (MapV.pubs || []).forEach(p => { if (!p.miss && p.lat != null && p.by !== Store.uid) { const km = kmBetween(lat, lng, +p.lat, +p.lng); if (km < 1) add(p.place || p.name, km, "みんなの記録", catNorm(p.cat)); } });
+    this.base = out; this.extra = []; this.draw();
+    clearTimeout(this._ct); this._ct = setTimeout(() => this.poi(lat, lng), 450);
+  },
+  draw() {
+    const box = $("#pCands"); if (!box) return; const all = [];
+    for (const o of [...this.base, ...this.extra]) { const k = norm(o.n); const ex = all.find(a => norm(a.n) === k); if (ex) { if (o.km < ex.km) { ex.km = o.km; } continue; } all.push({ ...o }); }
+    all.sort((a, b) => (a.addr ? 1 : 0) - (b.addr ? 1 : 0) || a.km - b.km);
+    this.list = all.slice(0, 16);
+    box.innerHTML = `<div class="pch">近くの場所（近い順）${this.loading ? ` <span class="spin"></span>` : ""}</div>` + (this.list.length
+      ? this.list.map((o, i) => `<button type="button" data-ci="${i}"><b>${esc(o.n)}</b><small>${o.addr ? "住所" : fmtKm(o.km)}${o.sub && !o.addr ? " · " + esc(o.sub) : ""}</small></button>`).join("")
+      : this.loading ? "" : `<span class="pcnone">近くに名前の候補が見つかりませんでした。上の「場所の名前」に入れてください。</span>`);
+    this.mark();
+  },
+  mark() { const fp = $("#f_place"), box = $("#pCands"); if (!fp || !box) return; const cur = norm(fp.value); box.querySelectorAll("[data-ci]").forEach(b => { const o = this.list[+b.dataset.ci]; b.setAttribute("aria-pressed", !!o && !!cur && norm(o.n) === cur); }); },
+  async poi(lat, lng) {
+    const c = this.c; if (!c) return; const key = lat.toFixed(4) + "," + lng.toFixed(4);
+    if (this.cache.has(key)) { this.extra = this.cache.get(key); this.draw(); return; }
+    if (this.ac) { try { this.ac.abort(); } catch {} } const ac = new AbortController(); this.ac = ac; this.loading = true; this.draw();
+    const extra = []; const timer = setTimeout(() => { try { ac.abort(); } catch {} }, 12000);
+    const A = (r, k) => `nwr(around:${r},${lat},${lng})["name"]${k};`;
+    const q = `[out:json][timeout:10];(${A(350, '["tourism"]')}${A(350, '["amenity"~"^(museum|library|townhall|community_centre|arts_centre|theatre|cinema|place_of_worship|marketplace|university|college|post_office|bus_station|ferry_terminal|restaurant|cafe)$"]')}${A(350, '["shop"~"^(mall|department_store|gift|books)$"]')}${A(350, '["leisure"~"^(park|stadium|garden|sports_centre|water_park)$"]')}${A(350, '["historic"]')}${A(350, '["building"~"^(train_station|civic|public|commercial|retail)$"]')}${A(1200, '["aeroway"~"^(aerodrome|terminal)$"]')}${A(500, '["railway"~"^(station|halt)$"]')}${A(500, '["highway"~"^(rest_area|services)$"]')});out center tags 90;`;
+    await Promise.all([
+      (async () => {
+        const r = await fetch("https://overpass-api.de/api/interpreter", { method: "POST", body: "data=" + encodeURIComponent(q), headers: { "content-type": "application/x-www-form-urlencoded" }, signal: ac.signal }); if (!r.ok) return;
+        const j = await r.json();
+        for (const e of j.elements || []) {
+          const t = e.tags || {}; const la = e.lat != null ? e.lat : e.center && e.center.lat, lo = e.lon != null ? e.lon : e.center && e.center.lon; if (la == null) continue;
+          let n = t["name:ja"] || t.name; if (!n) continue; const rail = /^(station|halt)$/.test(t.railway || "") || t.building === "train_station"; if (rail && !/駅$/.test(n)) n += "駅";
+          const kind = t.tourism || t.amenity || t.shop || t.leisure || t.highway || (t.historic ? "史跡" : "");
+          extra.push({ n, km: kmBetween(lat, lng, la, lo), sub: rail ? "駅" : t.aeroway ? "空港" : OSM_LABEL[kind] || (t.historic ? "史跡" : "施設"), cat: rail ? "駅" : t.aeroway ? "空港" : "施設" });
+        }
+      })().catch(() => {}),
+      (async () => {
+        const r = await fetch(`https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lat=${lat}&lon=${lng}`, { signal: ac.signal }); if (!r.ok) return;
+        const j = await r.json(); const t = j && j.results && j.results.lv01Nm; if (!t || t === "－" || t === "-") return;
+        const a = areaOf(lat, lng); extra.push({ n: (a && a.km < 1.2 && a.city ? a.city : "") + t, km: 0, sub: "住所", addr: true });
+      })().catch(() => {})
+    ]);
+    clearTimeout(timer); if (this.ac !== ac || this.c !== c) return;
+    this.ac = null; this.loading = false; this.extra = extra; this.cache.set(key, extra); this.draw();
+  },
+  choose(o, fromSearch) {
+    if (!o) return; const fp = $("#f_place"); if (!fp) return; fp.value = o.n;
+    const fn = $("#f_name"); if (fn && !fn.value.trim() && !o.addr) fn.value = o.n;
+    const fc = $("#f_cat"); if (fc && o.cat && GENRES.includes(o.cat) && this.c && !this.c.catTouched) fc.value = o.cat;
+    this.mark(); refreshRallySel(); if (!fromSearch) toast(`場所を「${o.n}」にしました`, 1800);
+  }
+};
+
+/* ---------- 公開設定 ---------- */
+const Privacy = {
+  public: true, place: true, date: true, event: true, photo: false, memo: false, saved: false,
+  keys: [["place", "場所"], ["date", "日付"], ["event", "イベント・路線"], ["photo", "写真"], ["memo", "メモ"]],
+  async load() {
+    if (Store.mode !== "cloud") return;
+    try { const p = await Store.getMeta("privacy"); if (p) { this.saved = true; for (const k of ["public", ...this.keys.map(x => x[0])]) if (typeof p[k] === "boolean") this[k] = p[k]; } } catch {}
+  },
+  data() { const o = { public: this.public }; this.keys.forEach(([k]) => { o[k] = this[k]; }); return o; },
+  async save() { await Store.putMeta("privacy", this.data()); this.saved = true; },
+  html() {
+    if (!window.PetalogCloud) return "";
+    if (Store.mode !== "cloud") return `<div class="sec"><h4>公開</h4><p class="cap" style="margin-top:0">ログインすると、自分のコレクションをみんなに見せたり、ほかの人のコレクションを見たりできます。</p></div>`;
+    return `<div class="sec"><h4>公開</h4>
+      <label class="toggle"><input type="checkbox" id="pvPub"${this.public ? " checked" : ""}><span><b>コレクションを公開する</b><br><small>ほかの人が「トレカ → みんな」のランキングから、あなたのトレカとスタンプ帳を見られます。</small></span></label>
+      <div class="pvbox" id="pvBox"${this.public ? "" : " hidden"}>
+        <div class="row2"><span class="lab">ニックネーム</span><input id="pvNick" class="search grow" maxlength="20" value="${esc(Profile.nick)}" placeholder="例: えきすたん" autocomplete="nickname"></div>
+        <div class="pvlab">見せる項目</div>
+        <div class="pvchecks">${this.keys.map(([k, n]) => `<label class="pvck"><input type="checkbox" data-pk="${k}"${this[k] ? " checked" : ""}><span>${n}</span></label>`).join("")}</div>
+        <p class="cap">スタンプの画像・名前・ジャンル・大きさは、公開中のトレカなら見えます。トレカごとに「このトレカを公開」を外すと、そのトレカだけ非公開になります。場所を見せると、みんなの地図にもピンが出ます。</p>
+      </div></div>`;
+  },
+  wire() {
+    const pub = $("#pvPub"); if (!pub) return;
+    const apply = async (msg) => { try { await this.save(); toast(msg || "公開設定を保存しました"); } catch { toast("保存できませんでした。通信を確かめてください", 3600); return; } syncShares(); Others.rank = null; };
+    pub.onchange = () => { this.public = pub.checked; $("#pvBox").hidden = !this.public; apply(this.public ? "コレクションを公開にしました" : "コレクションを非公開にしました"); };
+    $("#pvBox").addEventListener("change", e => { const k = e.target.dataset && e.target.dataset.pk; if (!k) return; this[k] = e.target.checked; apply(); });
+    const nk = $("#pvNick"); nk.onchange = async () => { Profile.nick = nk.value.trim(); await Profile.save(); syncShares(); Others.rank = null; toast("ニックネームを保存しました"); };
+  },
+  note() {
+    if (Store.mode !== "cloud") return window.PetalogCloud ? "ログインすると、みんなに見せられるようになります。" : "このトレカを、みんなに見せる対象にします。";
+    if (!this.public) return "いまはコレクション全体を非公開にしています（右上の設定 → 公開）。";
+    const k = this.keys.filter(([x]) => this[x]).map(([, n]) => n); return `ランキングとコレクションに出ます。画像・名前のほか ${k.length ? k.join("・") : "なし"} も見えます（設定で変えられます）。`;
+  },
+  firstSync() { if (Store.mode !== "cloud" || this.saved || (window.PetalogCloud && PetalogCloud.isOffline && PetalogCloud.isOffline())) return; this.save().then(() => syncShares(true)).catch(() => {}); }
+};
+const wantShare = s => Store.mode === "cloud" && !!window.PetalogCloud && Privacy.public && Privacy.place && !!s && !s.priv && !s.sample && s.type !== "goshuin";
+const pubView = s => Privacy.date ? s : { ...s, date: "" };
+async function syncShares(quiet) {
+  if (Store.mode !== "cloud" || !Store.pubPutMany) return;
+  const W = stamps.filter(wantShare), N = stamps.filter(s => !wantShare(s));
+  try {
+    if (N.length) await Store.pubDelMany(N.map(s => s.id));
+    const items = []; for (const s of W) items.push({ s: pubView(s), thumb: await thumbOf(s.cut) });
+    if (items.length) await Store.pubPutMany(items, Profile.nick);
+    stamps.forEach(s => { s.share = wantShare(s); }); MapV.pubs = null;
+  } catch { if (!quiet) toast("みんなの地図への反映が一部できませんでした", 3600); }
+}
+
+/* ---------- 白い紙の上で大きく見る ---------- */
+function rulerSVG(hmm, hPx) {
+  const ppm = hPx / hmm; const fs = Math.min(2, 11 / ppm); const Wmm = fs * 2.2 + 4.4; const w = hPx * Wmm / hmm; let L = "", T = "";
+  for (let mm = 0; mm <= hmm + 1e-6; mm++) {
+    if (ppm < 2.2 && mm % 5) continue;
+    const y = (hmm - mm).toFixed(2), len = mm % 10 === 0 ? 3.2 : mm % 5 === 0 ? 2.1 : 1.2;
+    L += `<line x1="${(Wmm - len).toFixed(2)}" y1="${y}" x2="${Wmm.toFixed(2)}" y2="${y}"/>`;
+    if (mm % 10 === 0 && mm) T += `<text x="${(Wmm - 3.8).toFixed(2)}" y="${(hmm - mm + fs * 0.36).toFixed(2)}">${mm / 10}</text>`;
+  }
+  return `<svg class="pv-rul" viewBox="0 0 ${Wmm.toFixed(2)} ${hmm.toFixed(2)}" overflow="visible" style="width:${w.toFixed(1)}px;height:${hPx.toFixed(1)}px" aria-hidden="true"><g stroke="currentColor" stroke-width="${Math.max(0.1, 0.9 / ppm).toFixed(3)}">${L}<line x1="${Wmm.toFixed(2)}" y1="0" x2="${Wmm.toFixed(2)}" y2="${hmm.toFixed(2)}"/></g><g fill="currentColor" text-anchor="end" font-size="${fs.toFixed(2)}" font-family="IBM Plex Mono,monospace">${T}<text x="${(Wmm - 0.4).toFixed(2)}" y="${(hmm + fs * 1.25).toFixed(2)}" font-size="${(fs * 0.85).toFixed(2)}">cm</text></g></svg>`;
+}
+const PaperView = {
+  el: null, z: 1, tx: 0, ty: 0, s: null,
+  ensure() {
+    if (this.el) return this.el; const d = document.createElement("div"); d.className = "pview"; d.hidden = true;
+    d.innerHTML = `<div class="pv-top"><span class="pv-t" id="pvT"></span><button class="btn small" type="button" id="pvX">閉じる</button></div><div class="pv-stage" id="pvStage"><div class="pv-paper" id="pvPaper"></div></div><div class="pv-foot" id="pvFoot"></div>`;
+    document.body.appendChild(d); this.el = d; this.wire(); return d;
+  },
+  open(s) {
+    if (!s || !s.cut) return; const el = this.ensure(); this.s = s; this.z = 1; this.tx = this.ty = 0; el.hidden = false;
+    $("#pvT").textContent = s.name || "";
+    $("#pvFoot").textContent = (s.sizeMm && !isDigi(s) ? `実物の大きさ ${fmtCm(s.sizeMm)}（いちばん長いところ）· ` : "") + "2本指・ダブルタップで拡大";
+    requestAnimationFrame(() => this.layout());
+  },
+  layout() {
+    const st = $("#pvStage"), s = this.s; if (!st || !s) return; const P = Math.max(120, Math.min(st.clientWidth, st.clientHeight) - 28); const paper = $("#pvPaper");
+    paper.style.width = paper.style.height = P + "px";
+    const ar = clamp((s.cw || 1) / (s.ch || 1), 0.2, 5); const M = P * 0.7; const w = ar >= 1 ? M : M * ar, h = ar >= 1 ? M / ar : M;
+    const hmm = s.sizeMm && !isDigi(s) && s.type !== "goshuin" ? s.sizeMm * ((s.ch || 1) / Math.max(s.cw || 1, s.ch || 1)) : 0;
+    paper.innerHTML = `<div class="pv-fig" style="width:${w.toFixed(1)}px;height:${h.toFixed(1)}px"><img src="${s.cut}" alt="${esc(s.name || "")}" draggable="false"${isDigi(s) ? "" : ' class="mul"'}>${hmm ? rulerSVG(hmm, h) : ""}</div>`;
+    this.apply();
+  },
+  apply() { const p = $("#pvPaper"); if (p) p.style.transform = `translate(${this.tx.toFixed(1)}px,${this.ty.toFixed(1)}px) scale(${this.z.toFixed(4)})`; },
+  close() { if (this.el) this.el.hidden = true; },
+  center() { const r = $("#pvStage").getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; },
+  zoomAt(S, z1, base) {
+    const b = base || { z: this.z, tx: this.tx, ty: this.ty, x: S.x, y: S.y }; z1 = clamp(z1, 1, 8); const C = this.center();
+    this.tx = S.x - C.x - z1 * (b.x - C.x - b.tx) / b.z; this.ty = S.y - C.y - z1 * (b.y - C.y - b.ty) / b.z; this.z = z1;
+    if (z1 <= 1.001) { this.tx = this.ty = 0; } this.clampPan(); this.apply();
+  },
+  clampPan() { const p = $("#pvPaper"); const P = p.offsetWidth; const m = Math.max(0, (P * this.z - P) / 2) + 40; this.tx = clamp(this.tx, -m, m); this.ty = clamp(this.ty, -m, m); },
+  wire() {
+    $("#pvX").onclick = () => this.close();
+    const st = $("#pvStage"); const P = new Map(); let base = null, lastTap = 0, moved = false;
+    const snap = () => { const a = [...P.values()]; const n = a.length; const x = a.reduce((s, p) => s + p.x, 0) / n, y = a.reduce((s, p) => s + p.y, 0) / n; return { n, x, y, d: n >= 2 ? Math.max(10, Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y)) : 1, z: this.z, tx: this.tx, ty: this.ty }; };
+    st.addEventListener("pointerdown", e => { try { st.setPointerCapture(e.pointerId); } catch {} P.set(e.pointerId, { x: e.clientX, y: e.clientY }); base = snap(); moved = false; });
+    st.addEventListener("pointermove", e => {
+      if (!P.has(e.pointerId)) return; P.set(e.pointerId, { x: e.clientX, y: e.clientY }); if (!base) return; const cur = snap(); if (cur.n !== base.n) { base = cur; return; }
+      if (Math.hypot(cur.x - base.x, cur.y - base.y) > 6 || cur.n > 1) moved = true;
+      if (cur.n >= 2) this.zoomAt({ x: cur.x, y: cur.y }, base.z * cur.d / base.d, base);
+      else if (this.z > 1) { this.tx = base.tx + cur.x - base.x; this.ty = base.ty + cur.y - base.y; this.clampPan(); this.apply(); }
+    });
+    const up = e => {
+      const had = P.has(e.pointerId); P.delete(e.pointerId); base = P.size ? snap() : null; if (!had || P.size) return;
+      if (!moved && e.type === "pointerup") { const now = Date.now(); if (now - lastTap < 320) { lastTap = 0; this.zoomAt({ x: e.clientX, y: e.clientY }, this.z > 1.3 ? 1 : 2.6); } else { lastTap = now; if (e.target === st) setTimeout(() => { if (lastTap === now && this.z <= 1.001) this.close(); }, 330); } }
+    };
+    st.addEventListener("pointerup", up); st.addEventListener("pointercancel", up);
+    st.addEventListener("wheel", e => { e.preventDefault(); this.zoomAt({ x: e.clientX, y: e.clientY }, this.z * Math.exp(-e.deltaY * 0.0022)); }, { passive: false });
+    addEventListener("keydown", e => { if (e.key === "Escape" && this.el && !this.el.hidden) { e.stopImmediatePropagation(); this.close(); } }, true);
+    addEventListener("resize", () => { if (this.el && !this.el.hidden) { this.z = 1; this.tx = this.ty = 0; this.layout(); } });
+  }
+};
+
+/* ---------- 切り抜きを直す（登録したあとで） ---------- */
+async function openRecrop(s) {
+  if (!s || s.sample) return; toast("元の写真を読み込んでいます…", 1600);
+  let url = null; try { url = await Store.getPhoto("ph_" + s.id, s.id); } catch {}
+  if (!url) { toast("元の写真が保存されていないため、このスタンプは切り抜きを直せません", 4200); return; }
+  let im; try { im = await loadImg(url); } catch { toast("元の写真を読み込めませんでした", 3600); return; }
+  const orig = mkCanvas(im.naturalWidth || im.width, im.naturalHeight || im.height); orig.getContext("2d").drawImage(im, 0, 0);
+  const digital = isDigi(s);
+  sheetCtx = { mode: "recrop", recrop: true, d: JSON.parse(JSON.stringify(s)), origStamp: s, ro: false, type: s.type || "stamp", newScenes: [], delScenes: [], sceneUrls: new Map(), colorMode: "auto", offset: 0, erase: [], ghost: false, whiten: true, digital, dmode: "auto", dtol: 36, adj: { auto: !digital, bright: 0, contrast: 0 }, warp: { auto: true, manual: false, quad: null }, queue: null, fixedType: true };
+  const c = sheetCtx;
+  openSheet(`<div class="sheet-head"><h2>切り抜きを直す</h2><button class="btn small ghost" type="button" data-close>やめる</button></div>
+    <p class="cap" style="margin:0 0 10px">登録したときの写真から、もう一度切り抜きます。青い枠や「切り抜きの強さ」「消しゴム」で直して、保存してください。</p>
+    <div id="addStep">${addStepHTML(c)}</div>
+    <div class="acts"><button class="btn" type="button" id="rcBack">やめる</button><button class="btn primary" type="button" id="saveBtn">この切り抜きにする</button></div>`);
+  wireAdd(); $("#saveBtn").onclick = saveRecrop; $("#rcBack").onclick = () => { const t = findStamp(s.id); if (t) openStamp("edit", t); else closeSheet(); };
+  c.orig = orig; $("#drop").hidden = true; $("#cropStep").hidden = false;
+  const ps = s.photoScale || 1;
+  c.src = adjustCanvas(orig, c.adj);
+  if (c.digital) { c.an = analyzeDigital(c.src, c.dtol); c.boxes = digitalBoxes(c.src, c.an, c.dtol); }
+  else { c.an = analyze(c.src); c.boxes = findBoxes(c.src, c.an, c.an.t); }
+  const sb = s.box ? { x: s.box.x * ps, y: s.box.y * ps, w: s.box.w * ps, h: s.box.h * ps } : null;
+  c.box = sb && sb.w > 8 && sb.h > 8 && sb.x + sb.w <= orig.width + 2 && sb.y + sb.h <= orig.height + 2 ? sb : (c.boxes && c.boxes[0]) || (c.digital ? { x: 0, y: 0, w: orig.width, h: orig.height } : findBox(c.src, c.an, c.an.t));
+  c.crop = CropView($("#cropCv"), c.src, { box: c.box, quad: c.warp.quad, editable: true, tool: "box",
+    onBox: b => { c.box = b; if (b.w < 12 || b.h < 12) { c.box = c.digital ? c.boxes[0] : findBox(c.src, c.an, c.an.t); c.crop.box = c.box; } c.warp.manual = false; refresh("box"); },
+    onQuad: q => { c.warp.quad = q; c.warp.manual = true; refresh("quad"); },
+    onLine: () => {} });
+  refresh("box", true);
+}
+async function saveRecrop() {
+  const c = sheetCtx; if (!c || !c.recrop || !c.cut) return; const s = c.origStamp; const ps = s.photoScale || 1;
+  const btn = $("#saveBtn"); btn.disabled = true; btn.innerHTML = `<span class="spin"></span> 保存中`;
+  const d = { ...s, cut: c.cut.url, cw: c.cut.w, ch: c.cut.h, shape: c.cut.shape, ink: c.cut.ink || "", inkPx: c.cut.inkPx ? { w: c.cut.inkPx.w / ps, h: c.cut.inkPx.h / ps } : s.inkPx, box: c.box ? { x: c.box.x / ps, y: c.box.y / ps, w: c.box.w / ps, h: c.box.h / ps } : s.box, colors: c.cut.colors || [], multi: !!c.cut.multi, corner: c.cut.corner, recut: Date.now() };
+  delete d._sig; delete d._hay;
+  try { await Store.saveStamp(d); } catch { btn.disabled = false; btn.textContent = "もう一度保存"; toast("保存できませんでした。通信を確かめてもう一度どうぞ", 4000); return; }
+  stamps = stamps.map(x => x.id === d.id ? d : x); Books.thumbs.clear(); imgCache.delete(s.cut);
+  if (wantShare(d)) { try { await Store.pubPut(pubView(d), await thumbOf(d.cut), Profile.nick); MapV.pubs = null; } catch {} }
+  refreshAll(); openStamp("edit", d); toast("切り抜きを直しました");
+}
+
+/* ---------- みんなのコレクション（ランキング → その人のトレカ・スタンプ帳） ---------- */
+async function inPool(items, n, fn) { let i = 0; await Promise.all(Array.from({ length: Math.min(n, items.length) }, async () => { while (i < items.length) { const k = i++; try { await fn(items[k], k); } catch {} } })); }
+const Others = {
+  rank: null, err: null, loading: false, user: null, stamps: [], byId: new Map(), books: null, book: null, tab: "cards", uLoading: false, uErr: null, cuts: new Map(),
+  find(id) { return this.byId.get(id); },
+  box() { return $("#othersMode"); },
+  cutNow(p) { const v = this.cuts.get(p); return typeof v === "string" ? v : BLANK; },
+  cut(p) {
+    if (!p) return Promise.resolve(null); const v = this.cuts.get(p); if (typeof v === "string") return Promise.resolve(v); if (v) return v;
+    const pr = (Store.cutOf ? Store.cutOf(p) : Promise.resolve(null)).then(u => { this.cuts.set(p, u || BLANK); return u; }).catch(() => { this.cuts.delete(p); return null; });
+    this.cuts.set(p, pr); return pr;
+  },
+  show() {
+    const box = this.box(); if (!box) return;
+    if (!window.PetalogCloud) { box.innerHTML = `<div class="empty">ほかの人のコレクションは、Web版で見られます。</div>`; return; }
+    if (Store.mode !== "cloud") { box.innerHTML = `<div class="empty">ほかの人のコレクションは、ログインすると見られます。<br><br><button class="btn primary" type="button" id="oLogin">ログイン / 新規登録</button></div>`; $("#oLogin").onclick = () => PetalogCloud.openLogin(false); return; }
+    if (this.user) { this.renderUser(); return; }
+    if (!this.rank && !this.loading) this.loadRank(); else this.renderRank();
+  },
+  async loadRank() {
+    this.loading = true; this.err = null; this.renderRank();
+    try { this.rank = await Store.pubRanking(); } catch (e) { this.err = e; this.rank = null; }
+    this.loading = false; this.renderRank();
+    if (this.rank) inPool(this.rank.flatMap(r => (r.thumbs || []).slice(0, 4)), 6, async p => { const u = await this.cut(p); if (!u) return; document.querySelectorAll(`#othersMode img[data-cp="${CSS.escape(p)}"]`).forEach(im => { im.src = u; }); });
+  },
+  renderRank() {
+    const box = this.box(); if (!box || this.user) return;
+    if (this.loading && !this.rank) { box.innerHTML = `<div class="empty"><span class="spin"></span> 読み込み中…</div>`; return; }
+    if (this.err) {
+      const t = String((this.err && (this.err.code || "")) + " " + (this.err && this.err.message || "")); const nf = /PGRST202|42883|404|schema cache|Could not find|function/i.test(t);
+      box.innerHTML = `<div class="empty">${nf ? "みんなのコレクションは、いま準備中です。<br>サーバーの設定が終わると見られるようになります。" : "読み込めませんでした。通信を確かめてください。"}<br><br><button class="btn small" type="button" id="oRe">もう一度</button></div>`;
+      $("#oRe").onclick = () => this.loadRank(); return;
+    }
+    const R = this.rank || [];
+    box.innerHTML = `<div class="ohead"><div><b>ランキング</b><small>公開しているコレクションを、まい数の多い順に</small></div><button class="btn small" type="button" id="oRe">更新</button></div>
+      ${Privacy.public ? "" : `<p class="cap opriv">あなたのコレクションは非公開なので、ランキングには出ていません（右上の設定 → 公開）。</p>`}
+      ${R.length ? `<ol class="rank">${R.map((r, i) => `<li><button type="button" class="rrow2${r.user_id === Store.uid ? " me" : ""}" data-u="${esc(r.user_id)}"><span class="rkn rk${i < 3 ? i + 1 : 0}">${i + 1}</span><span class="rnm"><b>${esc(r.nick || "名無しのコレクター")}${r.user_id === Store.uid ? "<em>あなた</em>" : ""}</b><small>${r.n} まい</small></span><span class="rth">${(r.thumbs || []).slice(0, 4).map(p => `<img alt="" data-cp="${esc(p)}" src="${this.cutNow(p)}">`).join("")}</span><span class="chev" aria-hidden="true">›</span></button></li>`).join("")}</ol>` : `<div class="empty">まだ誰も公開していません。</div>`}`;
+    $("#oRe").onclick = () => this.loadRank();
+    box.onclick = e => { const b = e.target.closest("[data-u]"); if (b) this.open(b.dataset.u); };
+  },
+  async open(u) {
+    const r = (this.rank || []).find(x => x.user_id === u) || { user_id: u, nick: "", n: 0 };
+    this.user = r; this.tab = "cards"; this.stamps = []; this.byId = new Map(); this.books = null; this.book = null; this.uLoading = true; this.uErr = null; this.renderUser(); const box = this.box(); if (box) box.scrollTop = 0;
+    let rows = [];
+    try { rows = await Store.pubCollection(u); } catch (e) { this.uErr = e; }
+    if (this.user !== r) return;
+    this.stamps = rows.map(x => { const s = { ...(x.data || {}), id: x.id, cutPath: x.cut_path, cut: x.cut_path ? this.cutNow(x.cut_path) : BLANK, owner: u, other: true }; if (s.type !== "goshuin") s.cat = catNorm(s.cat); return s; });
+    this.stamps.forEach(s => this.byId.set(s.id, s)); this.uLoading = false; this.renderUser();
+    this.cutsReady = inPool(this.stamps.filter(s => s.cutPath), 6, async s => { const url = await this.cut(s.cutPath); if (!url || this.user !== r) return; s.cut = url; document.querySelectorAll(`#othersMode img[data-ck="${CSS.escape(s.id)}"]`).forEach(im => { im.src = url; }); });
+  },
+  renderUser() {
+    const box = this.box(); const r = this.user; if (!box || !r) return; const me = r.user_id === Store.uid;
+    const L = [...this.stamps].sort((p, q) => (q.date || "").localeCompare(p.date || "") || (q.created || 0) - (p.created || 0));
+    const numOf = new Map([...this.stamps].sort((p, q) => (p.date || "9999").localeCompare(q.date || "9999") || (p.created || 0) - (q.created || 0)).map((s, i) => [s.id, i + 1]));
+    box.innerHTML = `<div class="ouser"><button class="btn small" type="button" id="oBack">‹ ランキング</button><div class="oname"><b>${esc(r.nick || "名無しのコレクター")}</b>${me ? "<em>あなた</em>" : ""}<small>${this.uLoading ? "" : L.length + " まい"}</small></div></div>
+      <div class="subbar"><div class="seg" id="oTab" role="group" aria-label="表示"><button type="button" data-t="cards" aria-pressed="${this.tab === "cards"}">トレカ</button><button type="button" data-t="books" aria-pressed="${this.tab === "books"}">スタンプ帳</button></div></div>
+      <div id="oBody"></div>`;
+    $("#oBack").onclick = () => { this.user = null; this.book = null; this.renderRank(); if (!this.rank) this.loadRank(); };
+    $("#oTab").onclick = e => { const b = e.target.closest("[data-t]"); if (!b) return; this.tab = b.dataset.t; this.book = null; this.renderUser(); };
+    box.onclick = null;
+    const body = $("#oBody");
+    if (this.uLoading) { body.innerHTML = `<div class="empty"><span class="spin"></span></div>`; return; }
+    if (this.uErr) { body.innerHTML = `<div class="empty">読み込めませんでした。通信を確かめてください。</div>`; return; }
+    if (this.tab === "cards") {
+      const nOv = L.filter(s => s.overlap).length;
+      body.innerHTML = L.length ? `${nOv ? `<p class="cap" style="padding:0 16px;margin:0 0 8px">重ね押し ${nOv} まい</p>` : ""}<div class="cards c${Grid.cols}">${L.map(s => cardHTML(s, numOf.get(s.id), { cols: Grid.cols, other: true })).join("")}</div>` : `<div class="empty">公開しているトレカはありません。</div>`;
+      body.onclick = e => { const c = e.target.closest("[data-open]"); if (c) openOtherStamp(this.byId.get(c.dataset.open)); };
+    } else this.renderBooks(body);
+  },
+  async renderBooks(body) {
+    const r = this.user;
+    if (!this.books) {
+      body.innerHTML = `<div class="empty"><span class="spin"></span></div>`;
+      try { this.books = await Store.pubBooks(r.user_id); } catch { this.books = []; }
+      if (this.user !== r || this.tab !== "books") return; body = $("#oBody"); if (!body) return;
+    }
+    const B = (this.books || []).filter(b => b && Array.isArray(b.pages));
+    if (this.book) {
+      const b = B.find(x => x.id === this.book); if (!b) { this.book = null; return this.renderBooks(body); }
+      body.innerHTML = `<div class="obook"><button class="btn small" type="button" id="obBack">‹ 本棚</button><b>${esc(b.title || "スタンプ帳")}</b><small>${b.pages.length} ページ</small></div>
+        <div class="opages">${b.pages.map((p, i) => `<figure class="opg"><div class="opi" data-pi="${i}"><span class="spin"></span></div><figcaption>${esc(p.title || "タイトルなし")}<small> · ${i + 1}/${b.pages.length}</small></figcaption></figure>`).join("") || `<div class="empty">まだページがありません。</div>`}</div>`;
+      $("#obBack").onclick = () => { this.book = null; this.renderBooks($("#oBody")); };
+      body.onclick = e => { const im = e.target.closest(".opi img"); if (im) lightbox(im.src); };
+      if (this.cutsReady) await this.cutsReady;
+      for (let i = 0; i < b.pages.length; i++) {
+        if (this.book !== b.id || this.user !== r) return; const p = b.pages[i]; const el = document.querySelector(`#oBody [data-pi="${i}"]`); if (!el) continue;
+        let bgImg = null; if (p.paper === "photo" && p.bg && Store.photoOf) { try { const u = await Store.photoOf(r.user_id, p.bg); if (u) bgImg = await loadImg(u); } catch {} }
+        try { const cv = await renderPage(p, { max: 1000, bgImg }); el.innerHTML = `<img src="${cv.toDataURL("image/jpeg", 0.86)}" alt="${esc(p.title || "ページ")}">`; } catch { el.textContent = "表示できませんでした"; }
+      }
+      return;
+    }
+    body.innerHTML = B.length ? `<div class="shelf oshelf">${B.map(b => `<button type="button" class="bcover" data-ob="${esc(b.id)}" style="--c:${bookColor(b.color)}" aria-label="${esc(b.title)}"><span class="bk"><span class="frame"><span class="kick">STAMP BOOK</span><span class="bt">${esc(b.title)}</span><span class="rule"></span><small>${b.pages.length} PAGES</small></span></span></button>`).join("")}</div>` : `<div class="empty">公開しているスタンプ帳はありません。</div>`;
+    body.onclick = e => { const b = e.target.closest("[data-ob]"); if (b) { this.book = b.dataset.ob; this.renderBooks(body); } };
+  }
+};
+async function openOtherStamp(s) {
+  if (!s) return; sheetCtx = { mode: "other" }; const ctx = sheetCtx; const g = catNorm(s.cat); const ev = evlOf(s); const a = s.lat != null ? areaOf(s.lat, s.lng) || {} : {};
+  const who = Others.user ? Others.user.nick || "名無しのコレクター" : "";
+  openSheet(`<div class="sheet-head"><h2>${esc(who)}のトレカ</h2><button class="btn small ghost" type="button" data-close>閉じる</button></div>
+    <div class="hero washi${isDigi(s) ? " digi" : ""}${s.overlap ? " ovl" : ""}"><button type="button" class="hi" data-pv="1" aria-label="スタンプを大きく見る"><img src="${s.cut}" alt="${esc(s.name || "")}"><span class="zoomi" aria-hidden="true"></span></button><div>${s.date ? `<span class="datestamp" style="display:inline-block">${esc(fmtDate(s.date))}</span>` : ""}<h3>${esc(s.name || "名前未設定")}</h3>
+      <div class="meta">${s.place ? `<span>${esc(s.place)}</span>` : ""}${s.pref || a.city ? `<span>${esc(s.pref || "")}${esc(a.city || "")}</span>` : ""}<span class="chip" style="color:${gcol(g)}">${esc(g)}</span>${isDigi(s) ? `<span class="chip">デジタル</span>` : ""}${s.overlap ? `<span class="chip ovlc">重ね押し</span>` : ""}${ev ? `<span class="chip" style="color:${ev.c || "#2B4C9B"}">${ev.k === "l" ? "" : "#"}${esc(ev.t)}</span>` : ""}${s.sizeMm ? `<span>⌀ ${fmtCm(s.sizeMm)}</span>` : ""}</div>
+      ${s.nv ? `<div class="meta" style="margin-top:4px">押した回数 ${s.nv + 1}回</div>` : ""}</div></div>
+    ${s.memo ? `<div class="sec"><h4>メモ</h4><p class="omemo">${esc(s.memo)}</p></div>` : ""}
+    ${s.hasPhoto || (s.scenes && s.scenes.length) ? `<div class="sec"><h4>写真</h4><div class="photos" id="oPhotos"><span class="spin"></span></div></div>` : ""}
+    ${s.lat != null && s.lng != null ? `<div class="acts"><a class="btn" href="${gmapsDir(s.lat, s.lng)}" target="_blank" rel="noopener">ここへ行く（Googleマップ）</a></div>` : ""}`);
+  $("#sheet").onclick = e => { if (e.target.closest("[data-pv]")) { PaperView.open(s); return; } const lb = e.target.closest("[data-lb]"); if (lb) lightbox(lb.src); };
+  const box = $("#oPhotos"); if (!box || !Store.photoOf) return;
+  const keys = [...(s.hasPhoto ? ["ph_" + s.id] : []), ...(s.scenes || []).map(k => "sc_" + s.id + "_" + k)]; let h = "";
+  for (const k of keys.slice(0, 9)) { const u = await Store.photoOf(s.owner, k).catch(() => null); if (sheetCtx !== ctx) return; if (u) { h += `<div class="ph"><img src="${u}" alt="写真" data-lb="1"></div>`; box.innerHTML = h; } }
+  if (!h) box.innerHTML = `<span class="cap">写真を読み込めませんでした。</span>`;
+}
+
+/* ---------- 達成のお祝い ---------- */
+const Party = {
+  list: [5, 10, 25, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000],
+  check(n) { const hit = this.list.includes(n) || (n > 1000 && n % 1000 === 0); if (!hit || n <= (Profile.celebrated || 0)) return 0; Profile.celebrated = n; Profile.save(); return n; },
+  words(n) {
+    const W = { 5: ["はじめの5まい！", "コレクションの第一歩。ここからどんどん増えていきます。"], 10: ["10まい達成！", "立派なコレクターの仲間入りです。"], 25: ["25まい達成！", "地図がにぎやかになってきました。"],
+      50: ["50まい達成！", "もう止まりません。次はいよいよ100まい。"], 100: ["100まい達成！", "大台にのりました。ここまで集めるのは本当にすごいことです。"], 200: ["200まい達成！", "旅の記録が、ずっしり厚くなってきました。"],
+      300: ["300まい達成！", "スタンプ帳が何冊でも作れる量です。"], 400: ["400まい達成！", "行った場所の数だけ、思い出があります。"], 500: ["500まい達成！", "折り返しの500。せんまいが見えてきました。"],
+      600: ["600まい達成！", "ここまで来る人は、なかなかいません。"], 700: ["700まい達成！", "まだまだ、押したい場所がありますね。"], 800: ["800まい達成！", "あと200まいで、せんまいです。"], 900: ["900まい達成！", "せんまいまで、あと100まい！"] };
+    if (n >= 1000) return [n === 1000 ? "1000まい達成！！" : `${n.toLocaleString()}まい達成！！`, n === 1000 ? "せんまい。ここまで集めた人は、ほんのひと握りです。心からおめでとうございます。" : "とんでもない記録です。本当におめでとうございます。"];
+    return W[n] || [`${n}まい達成！`, "おめでとうございます。"];
+  },
+  show(n) {
+    const grand = n >= 1000; const [t1, t2] = this.words(n); const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const recent = byDate(false).filter(s => !s.sample).slice(0, grand ? 60 : 5);
+    const el = document.createElement("div"); el.className = "party" + (grand ? " grand" : ""); el.setAttribute("role", "dialog"); el.setAttribute("aria-label", t1);
+    el.innerHTML = `<canvas class="pcv"></canvas><div class="pcard${grand ? " gold" : " washi"}">
+      <div class="hanko"><span class="hk1">${grand ? "千" : "祝"}</span><span class="hk2">${n >= 1000 ? (n / 1000) + "000" : n}</span></div>
+      <div class="pt1">${esc(t1)}</div><div class="pt2">${esc(t2)}</div>
+      ${grand ? "" : `<div class="pthumbs">${recent.map((s, i) => `<img src="${s.cut}" alt="" style="--i:${i}"${isDigi(s) ? ' class="nm"' : ""}>`).join("")}</div>`}
+      <button class="btn primary" type="button">${grand ? "ありがとう！" : "やったね！"}</button></div>`;
+    document.body.appendChild(el);
+    const cv = el.querySelector(".pcv"), x = cv.getContext("2d"); const dpr = Math.min(2, devicePixelRatio || 1);
+    const size = () => { cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; }; size();
+    const C = ["#C8412E", "#2B4C9B", "#E6B33A", "#2F8F4F", "#E0609A", "#3BB0D8", "#F07C3A"]; const parts = []; let raf = 0, t0 = performance.now(), alive = true;
+    const confetti = (cx, cy, k, spread) => { for (let i = 0; i < k; i++) { const a = -Math.PI / 2 + (Math.random() - 0.5) * spread, v = 4 + Math.random() * 9; parts.push({ k: "c", x: cx, y: cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: Math.random() * 6, vr: (Math.random() - 0.5) * 0.4, w: 6 + Math.random() * 6, h: 3 + Math.random() * 5, c: C[i % C.length], life: 1 }); } };
+    const burst = (cx, cy) => { const col = ["#FFD86B", "#FF8A6B", "#9EC5FF", "#FFFFFF", "#F6A8D0"][Math.floor(Math.random() * 5)]; for (let i = 0; i < 70; i++) { const a = Math.random() * Math.PI * 2, v = 2 + Math.random() * 6; parts.push({ k: "s", x: cx, y: cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, c: col, life: 1, d: 0.012 + Math.random() * 0.01 }); } };
+    const imgs = grand ? recent.map(s => imgFor(s.cut)).filter(Boolean) : [];
+    const rain = () => { if (!imgs.length) return; const im = imgs[Math.floor(Math.random() * imgs.length)]; const sz = 46 + Math.random() * 46; parts.push({ k: "i", im, x: Math.random() * innerWidth, y: -60, vx: (Math.random() - 0.5) * 1.2, vy: 1.5 + Math.random() * 2, r: Math.random() * 6, vr: (Math.random() - 0.5) * 0.05, sz, life: 1 }); };
+    const W = () => innerWidth, H = () => innerHeight;
+    const loop = now => {
+      if (!alive) return; const t = now - t0; x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, W(), H());
+      if (grand) { if (t < 9000 && Math.random() < 0.05) burst(W() * (0.15 + Math.random() * 0.7), H() * (0.12 + Math.random() * 0.4)); if (t < 12000 && Math.random() < 0.18) rain(); if (t < 9000 && Math.random() < 0.06) confetti(Math.random() * W(), -10, 6, 1.2); }
+      for (let i = parts.length - 1; i >= 0; i--) {
+        const p = parts[i];
+        if (p.k === "c") { p.vy += 0.18; p.vx *= 0.985; p.vy *= 0.985; p.x += p.vx + Math.sin((t + i * 40) / 260) * 0.6; p.y += p.vy; p.r += p.vr; if (p.y > H() + 30) { parts.splice(i, 1); continue; }
+          x.save(); x.translate(p.x, p.y); x.rotate(p.r); x.scale(1, Math.cos(t / 140 + i)); x.fillStyle = p.c; x.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); x.restore(); }
+        else if (p.k === "s") { p.vy += 0.05; p.vx *= 0.97; p.vy *= 0.97; p.x += p.vx; p.y += p.vy; p.life -= p.d; if (p.life <= 0) { parts.splice(i, 1); continue; } x.globalAlpha = p.life; x.fillStyle = p.c; x.beginPath(); x.arc(p.x, p.y, 2.2, 0, 7); x.fill(); x.globalAlpha = 1; }
+        else { p.x += p.vx; p.y += p.vy; p.r += p.vr; if (p.y > H() + 80) { parts.splice(i, 1); continue; } if (p.im.complete && p.im.naturalWidth) { const ar = p.im.naturalWidth / p.im.naturalHeight; const w = ar >= 1 ? p.sz : p.sz * ar, h = ar >= 1 ? p.sz / ar : p.sz; x.save(); x.translate(p.x, p.y); x.rotate(p.r); x.globalAlpha = 0.9; x.drawImage(p.im, -w / 2, -h / 2, w, h); x.restore(); } }
+      }
+      if (parts.length || t < (grand ? 12000 : 1200)) raf = requestAnimationFrame(loop); else raf = 0;
+    };
+    if (!reduce) {
+      raf = requestAnimationFrame(loop);
+      setTimeout(() => { const hk = el.querySelector(".hanko").getBoundingClientRect(); confetti(hk.left + hk.width / 2, hk.top + hk.height / 2, grand ? 160 : 110, Math.PI * 1.1); if (!raf && alive) raf = requestAnimationFrame(loop); }, grand ? 900 : 620);
+      if (grand) setTimeout(() => { burst(W() * 0.3, H() * 0.25); burst(W() * 0.7, H() * 0.22); }, 300);
+    }
+    try { navigator.vibrate && navigator.vibrate(grand ? [40, 60, 40, 60, 120] : [30, 50, 30]); } catch {}
+    const shown = performance.now();
+    const close = () => { if (!alive) return; alive = false; cancelAnimationFrame(raf); el.classList.add("out"); setTimeout(() => el.remove(), 260); removeEventListener("resize", size); };
+    el.querySelector(".pcard .btn").onclick = close;
+    el.addEventListener("click", e => { if (e.target === el || e.target === cv) { if (performance.now() - shown > 900) close(); } });
+    addEventListener("resize", size);
+  }
+};
+
 /* ================= boot ================= */
 addEventListener("resize", () => { Book.layout(); if (view === "fall") { Fall.dirty = true; Fall.stop(); Fall.start(); } if (view === "map") MapV.draw(); });
 document.addEventListener("visibilitychange", () => { if (document.hidden) Fall.stop(); else if (view === "fall") Fall.start(); });
@@ -3635,15 +4362,16 @@ document.addEventListener("contextmenu", e => { if (!e.target.closest("input,tex
 (async function boot() {
   Paper.washiCv = makeWashi();
   try { await Promise.race([Promise.all([document.fonts.load("700 40px 'Zen Kaku Gothic New'"), document.fonts.load("500 17px 'IBM Plex Mono'")]), sleep(1500)]); } catch {}
-  buildSamples(); Books.data = Books.sampleData(); Books.sample = true;
+  buildSamples(); Books.data = { books: [] }; Books.sample = false; $("#collSeg").hidden = !window.PetalogCloud;
   setColl("grid"); refreshAll(); show("fall");
   Promise.all(SAMPLES.map(fillStats)).then(() => { if (!stamps.length) Grid.render(); });
-  await Store.init(); await Profile.load(); applyFallBg();
-  try { stamps = await Store.listStamps(); stamps.forEach(s => { if (!Array.isArray(s.scenes)) s.scenes = []; }); } catch { stamps = []; toast("記録を読み込めませんでした。開き直してみてください。", 4000); }
+  await Store.init(); await Profile.load(); await Privacy.load(); applyFallBg();
+  try { stamps = await Store.listStamps(); stamps.forEach(s => { if (!Array.isArray(s.scenes)) s.scenes = []; if (s.type !== "goshuin") s.cat = catNorm(s.cat); }); } catch { stamps = []; toast("記録を読み込めませんでした。開き直してみてください。", 4000); }
   await Books.load();
   ready = true; Book.idx = 0; MapV.shown = false;
   refreshAll(); show(view);
   if (window.PetalogCloud) PetalogCloud.afterBoot();
+  setTimeout(() => Privacy.firstSync(), 2500);
   (async () => { let n = 0; for (const s of stamps) { if (await fillStats(s)) n++; } if (n) Grid.render(); })();
 })();
 </script>

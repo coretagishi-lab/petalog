@@ -242,17 +242,24 @@
       }));
     },
     async pubPut(s, thumb, nick) {
-      const row = {
-        user_id: uid, stamp_id: s.id, kind: "record", nick: clip(nick, 20), name: clip(s.name, 120), place: clip(s.place, 120),
-        pref: clip(s.pref, 10), cat: clip(s.cat, 20), type: clip(s.type || "stamp", 20), date: clip(s.date, 10),
-        lat: num(s.lat), lng: num(s.lng), size_mm: num(s.sizeMm),
-        rk: s.type === "goshuin" ? "" : clip(typeof rallyKeyOf === "function" ? rallyKeyOf(s) : "", 120),
-        spot: clip(s.spot, 120), spot_tags: (s.spotTags || []).slice(0, 12).map((t) => clip(t, 30)),
-        thumb: thumb && thumb.length < 115000 ? thumb : "",
-      };
-      const { error } = await sb.from("shares").upsert(row, { onConflict: "user_id,stamp_id" });
+      const { error } = await sb.from("shares").upsert(shareRow(s, thumb, nick), { onConflict: "user_id,stamp_id" });
       if (error) fail(error);
     },
+    // many at once (used when the public settings change)
+    async pubPutMany(items, nick) {
+      const rows = items.map(({ s, thumb }) => shareRow(s, thumb, nick));
+      for (let i = 0; i < rows.length; i += 10) { const { error } = await sb.from("shares").upsert(rows.slice(i, i + 10), { onConflict: "user_id,stamp_id" }); if (error) fail(error); }
+    },
+    async pubDelMany(ids) {
+      for (let i = 0; i < ids.length; i += 100) { const { error } = await sb.from("shares").delete().eq("user_id", uid).eq("kind", "record").in("stamp_id", ids.slice(i, i + 100)); if (error) fail(error); }
+    },
+
+    /* everyone's public collections (server functions decide what can be seen) */
+    async pubRanking() { const { data } = await ask(sb.rpc("public_ranking")); return data || []; },
+    async pubCollection(u) { const { data } = await ask(sb.rpc("public_collection", { p_user: u })); return data || []; },
+    async pubBooks(u) { const { data } = await ask(sb.rpc("public_books", { p_user: u })); return (data && Array.isArray(data.books)) ? data.books : []; },
+    async cutOf(path) { return cutFor(path); },
+    async photoOf(u, key) { if (noNet()) return null; const b = await download("photos", `${u}/${safeKey(key)}`); return b ? toDataUrl(b) : null; },
     async pubReport(o) {
       const { error } = await sb.from("shares").insert({
         user_id: uid, stamp_id: null, kind: "miss", type: "report", nick: clip(typeof Profile !== "undefined" ? Profile.nick : "", 20),
@@ -263,6 +270,17 @@
     },
     async pubDel(sid) { try { await sb.from("shares").delete().eq("user_id", uid).eq("stamp_id", sid); } catch {} },
   };
+
+  function shareRow(s, thumb, nick) {
+    return {
+      user_id: uid, stamp_id: s.id, kind: "record", nick: clip(nick, 20), name: clip(s.name, 120), place: clip(s.place, 120),
+      pref: clip(s.pref, 10), cat: clip(s.cat, 20), type: clip(s.type || "stamp", 20), date: clip(s.date, 10),
+      lat: num(s.lat), lng: num(s.lng), size_mm: num(s.sizeMm),
+      rk: s.type === "goshuin" ? "" : clip(typeof rallyKeyOf === "function" ? rallyKeyOf(s) : "", 120),
+      spot: clip(s.spot, 120), spot_tags: (s.spotTags || []).slice(0, 12).map((t) => clip(t, 30)),
+      thumb: thumb && thumb.length < 115000 ? thumb : "",
+    };
+  }
 
   /* ---------- AI through the server ---------- */
   async function token() {
@@ -496,6 +514,7 @@
       return true;
     },
     loggedIn() { return attached; },
+    isOffline() { return offline || noNet(); },
     email() { return user ? user.email : ""; },
     aiAvailable() { return attached; },
     async ai(task, args, images, signal) {
