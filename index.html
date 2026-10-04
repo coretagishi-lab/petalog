@@ -510,7 +510,9 @@ html,body{touch-action:pan-x pan-y}
 .card .c-top{font-size:6.25cqw}
 .card .c-in{width:100%;box-sizing:border-box;align-self:stretch}
 .card .c-top,.card .c-meta,.card .c-name,.card .c-ev{width:100%;box-sizing:border-box}
-.card .c-art{width:100%;align-self:stretch;margin:2cqw 0 3cqw;padding:1cqw 2cqw 9cqw;border-radius:0;box-shadow:none;display:flex;align-items:center;justify-content:center}
+.card .c-art{position:absolute;left:6.25cqw;right:6.25cqw;top:17cqw;height:68cqw;width:auto;margin:0;padding:0;border-radius:0;box-shadow:none;display:flex;align-items:center;justify-content:center;flex:none}
+.card .c-in{position:relative}
+.card .c-name{margin-top:auto}
 .card .c-name{font-size:9.4cqw}
 .card .c-ev,.card .c-meta{font-size:6.5cqw;margin-top:1.8cqw}
 .card .new{top:6.25cqw;right:-15cqw;font-size:5.6cqw;padding:1.25cqw 17.5cqw}
@@ -538,8 +540,8 @@ html,body{touch-action:pan-x pan-y}
 .card .c-ev i{display:inline-block;width:4.4cqw;height:4.4cqw;border-radius:50%;margin-right:2.5cqw;vertical-align:.4cqw}
 /* stamp art + faint real-size ruler (1cm ticks, 5mm half ticks) */
 .c-art{container-type:size;position:relative}
-.fig{position:relative;width:80%;height:80%}
-@supports (width:1cqw){.fig{width:min(84cqw,100cqh * var(--ar));height:min(100cqh,84cqw / var(--ar))}.fig.hr{width:min(76cqw,100cqh * var(--ar));height:min(100cqh,76cqw / var(--ar));margin-left:7%}}
+.fig{position:relative;width:80%;height:80%;transform:translateY(-4%)}
+@supports (width:1cqw){.fig{width:min(84cqw,100cqh * var(--ar));height:min(100cqh,84cqw / var(--ar))}.fig.hr{width:min(76cqw,100cqh * var(--ar));height:min(100cqh,76cqw / var(--ar))}}
 .fig img{position:absolute;inset:0;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:contain;display:block}
 .card.digi .fig img{mix-blend-mode:normal}
 .rul{position:absolute;top:0;bottom:0;right:calc(100% + 3cqw);width:3.4cqw;color:rgba(70,58,38,.26);pointer-events:none;border-right:1px solid currentColor;
