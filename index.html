@@ -3992,7 +3992,7 @@ const PlacePick = {
     const q = $("#pmQ"), box = $("#pmRes");
     if (q) {
       let t = 0;
-      q.oninput = () => { clearTimeout(t); const v = q.value.trim(); if (!v) { box.hidden = true; return; } t = setTimeout(() => this.search(v, false), 350); };
+      q.oninput = () => { clearTimeout(t); const v = q.value.trim(); if (!v) { box.hidden = true; return; } t = setTimeout(() => this.search(v, false), 600); };
       q.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); const v = q.value.trim(); if (v) this.search(v, true); } };
       q.onfocus = () => { const s = $("#pmapWrap"); if (s && s.scrollIntoView) s.scrollIntoView({ block: "start", behavior: "smooth" }); };
       box.onclick = e => {
@@ -4020,7 +4020,8 @@ const PlacePick = {
     const seen = new Set(); let top = res.filter(r => { const k = norm(r.t); if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 8);
     this.show(top, deep);
     const more = [];
-    const ctr = this.map ? this.map.getCenter() : null; const ovP = overpassSearch(v, ctr && this.map.getZoom() >= 8 ? { lat: ctr.lat, lng: ctr.lng } : (() => { const g = this.c && this.guess(this.c); return g ? { lat: +g.lat, lng: +g.lng } : null; })()).catch(() => []);
+    const ctr = this.map ? this.map.getCenter() : null; if (this.ovAc) this.ovAc.abort(); const ovAc = new AbortController(); this.ovAc = ovAc;
+    const ovP = overpassSearch(v, ctr && this.map.getZoom() >= 8 ? { lat: ctr.lat, lng: ctr.lng } : (() => { const g = this.c && this.guess(this.c); return g ? { lat: +g.lat, lng: +g.lng } : null; })(), ovAc.signal).catch(() => []);
     const [ph, g] = await Promise.all([placeSearch(v, ctr).catch(() => []), MapV.gsi(v).catch(() => [])]);
     if (my !== this.seq) return;
     more.push(...ph); g.forEach(x => more.push({ ...x, sub: "住所・地名" }));
@@ -4579,12 +4580,12 @@ function unrotPt(c, x, y) {
 
 /* ---------- お店の名前と支店名で探す（OpenStreetMap / Overpass）: 「スタバ丸の内オアゾ」など ---------- */
 const nz = t => toKata(String(t || "")).toLowerCase().replace(/[\s・･　]/g, "");
-async function overpassSearch(v, ctr) {
+async function overpassSearch(v, ctr, signal) {
   const toks = queryVariants(v)[0].split(" ").map(t => t.replace(/店$/, "")).filter(t => t && (t.length >= 2 || /[一-鿿]/.test(t))); if (!toks.length) return [];
   const chains = new Set(Object.values(NICK).map(nz));
   const lead = toks.find(t => chains.has(nz(t))) || [...toks].sort((a, b) => b.length - a.length)[0]; const rest = toks.filter(t => t !== lead);
   // where to look: near the map, and — anywhere in Japan — around the place words in the query (駅名・地名・建物名)
-  const centers = []; if (ctr) centers.push({ lat: ctr.lat, lng: ctr.lng, r: 30000 });
+  const centers = []; if (ctr) centers.push({ lat: ctr.lat, lng: ctr.lng, r: 6000 });
   if (rest.length) {
     const pq = rest.join(" ");
     for (const t of rest) GEO.stations.filter(s => norm(s.n) === norm(t)).slice(0, 3).forEach(s => centers.push({ lat: s.lat, lng: s.lng, r: 3000 }));
@@ -4598,16 +4599,15 @@ async function overpassSearch(v, ctr) {
   const re = lead.replace(/[.*+?^${}()|[\]\\"]/g, "\\$&");
   const parts = C.slice(0, 7).flatMap(c => ["name", "name:ja", "name:en", "branch", "brand"].map(k => `nwr(around:${c.r},${c.lat.toFixed(5)},${c.lng.toFixed(5)})["${k}"~"${re}",i];`));
   const q = `[out:json][timeout:15];(${parts.join("")});out center tags 200;`;
-  const ac = new AbortController(); const tm = setTimeout(() => ac.abort(), 16000);
+  const j = await overpassAsk(q, signal); if (!j) return [];
   try {
-    const r = await fetch("https://overpass-api.de/api/interpreter", { method: "POST", body: "data=" + encodeURIComponent(q), headers: { "content-type": "application/x-www-form-urlencoded" }, signal: ac.signal }); if (!r.ok) return [];
-    const j = await r.json(); const out = []; const seen = new Set();
+    const out = []; const seen = new Set();
     for (const e of j.elements || []) {
       if (seen.has(e.type + e.id)) continue; seen.add(e.type + e.id);
       const t = e.tags || {}; const la = e.lat != null ? e.lat : e.center && e.center.lat, lo = e.lon != null ? e.lon : e.center && e.center.lon; if (la == null) continue;
       const text = nz([t.name, t["name:ja"], t["name:en"], t.branch, t.brand, t["brand:ja"], t.official_name, t["addr:province"], t["addr:city"], t["addr:quarter"], t["addr:neighbourhood"], t["addr:street"], t.operator].filter(Boolean).join(" "));
       let hit = toks.filter(k => text.includes(nz(k))).length;
-      const near = C.filter(c => c.r < 30000).some(c => kmBetween(c.lat, c.lng, la, lo) < c.r / 1000); if (near) hit += 0.5;   // found around a place named in the query
+      const near = C.filter(c => c.r < 6000).some(c => kmBetween(c.lat, c.lng, la, lo) < c.r / 1000); if (near) hit += 0.5;   // found around a place named in the query
       if (hit < 1) continue;
       let name = (t["name:ja"] || t.name || t.brand || "").trim(); if (t.branch && !name.includes(t.branch)) name += " " + t.branch; if (!name) continue;
       const rail = /^(station|halt)$/.test(t.railway || ""); if (rail && !/駅$/.test(name)) name += "駅";
@@ -4616,7 +4616,16 @@ async function overpassSearch(v, ctr) {
     }
     const best = Math.max(0, ...out.map(o => o.hit)); const need = Math.min(best, Math.max(1, toks.length - 0.5));
     return out.filter(o => o.hit >= need).sort((a, b) => b.hit - a.hit || a.km - b.km).slice(0, 12);
-  } catch { return []; } finally { clearTimeout(tm); }
+  } catch { return []; }
+}
+// ask the OpenStreetMap server; when it is busy or slow, ask a second server
+async function overpassAsk(q, signal) {
+  for (const host of ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter"]) {
+    if (signal && signal.aborted) return null; const ac = new AbortController(); const stop = () => ac.abort(); if (signal) signal.addEventListener("abort", stop); const tm = setTimeout(stop, 15000);
+    try { const r = await fetch(host, { method: "POST", body: "data=" + encodeURIComponent(q), headers: { "content-type": "application/x-www-form-urlencoded" }, signal: ac.signal }); if (r.ok) { const j = await r.json(); if (j && Array.isArray(j.elements) && (j.elements.length || !j.remark)) return j; } }
+    catch {} finally { clearTimeout(tm); if (signal) signal.removeEventListener("abort", stop); }
+  }
+  return null;
 }
 
 /* ================= boot ================= */
