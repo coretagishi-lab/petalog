@@ -30,7 +30,7 @@ const CORS = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...CORS, "Content-Type": "application/json" } });
 
-const GENRES = ["駅", "空港", "イベント", "施設"];
+const GENRES = ["駅", "空港", "道の駅", "インターチェンジ", "イベント", "施設"];
 const REFS = "500円玉=2.65cm、100円玉=2.26cm、10円玉=2.35cm、1円玉=2cm、カード（横の長さ）=8.56cm、カード（縦の長さ）=5.4cm";
 const clip = (v: unknown, n: number) => String(v ?? "").replace(/[\u0000-\u001f]/g, " ").slice(0, n);
 

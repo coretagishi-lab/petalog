@@ -33,7 +33,7 @@ language sql stable security definer set search_path = '' as $$
   select s.id, s.cut_path, jsonb_strip_nulls(
       jsonb_build_object('name', s.data->'name', 'cat', s.data->'cat', 'medium', s.data->'medium', 'type', s.data->'type',
         'overlap', s.data->'overlap', 'multi', s.data->'multi', 'colors', s.data->'colors', 'shape', s.data->'shape',
-        'cw', s.data->'cw', 'ch', s.data->'ch', 'corner', s.data->'corner', 'sizeMm', s.data->'sizeMm', 'created', s.data->'created',
+        'cw', s.data->'cw', 'ch', s.data->'ch', 'sheet', s.data->'sheet', 'sheetView', s.data->'sheetView', 'corner', s.data->'corner', 'sizeMm', s.data->'sizeMm', 'created', s.data->'created',
         'nv', to_jsonb(coalesce(jsonb_array_length(case when jsonb_typeof(s.data->'visits') = 'array' then s.data->'visits' end), 0)))
       || case when (v.v->>'date')::boolean then jsonb_build_object('date', s.data->'date') else '{}'::jsonb end
       || case when (v.v->>'place')::boolean then jsonb_build_object('place', s.data->'place', 'pref', s.data->'pref', 'lat', s.data->'lat', 'lng', s.data->'lng') else '{}'::jsonb end
@@ -68,6 +68,9 @@ begin
   if p_bucket = 'photos' then
     k := split_part(p_name, '/', 2);
     if k like 'bg\_%' then return true; end if;
+    if k like 'sh\_%' then
+      return exists (select 1 from public.stamps s where s.user_id = owner and k = ('sh_' || s.id) and coalesce((s.data->>'priv')::boolean, false) = false);
+    end if;
     if not (v->>'photo')::boolean then return false; end if;
     return exists (select 1 from public.stamps s where s.user_id = owner and coalesce((s.data->>'priv')::boolean, false) = false
       and (k = ('ph_' || s.id) or k like ('sc\_' || s.id || '\_%')));

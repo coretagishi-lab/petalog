@@ -194,7 +194,7 @@
       if (error) fail(error);
       const st = cutState.get(s.id); cutState.delete(s.id);
       if (st && st.path) { removeFiles("cuts", [st.path]); Cache.del("cuts", st.path); }
-      const keys = ["ph_" + s.id, s.id, ...(s.scenes || []).map((k) => "sc_" + s.id + "_" + k)];
+      const keys = ["ph_" + s.id, "sh_" + s.id, s.id, ...(s.scenes || []).map((k) => "sc_" + s.id + "_" + k)];
       removeFiles("photos", keys.map((k) => `${uid}/${safeKey(k)}`));
     },
     async putPhoto(key, url) {

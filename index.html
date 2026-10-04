@@ -502,42 +502,54 @@ html,body{touch-action:pan-x pan-y}
 #bkTitle{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif!important;letter-spacing:.04em}
 /* ---------- v10 ---------- */
 .fall-note{display:none!important}
-/* trading-card list: 5 / 3 / 2 columns */
-.cards.c5{grid-template-columns:repeat(5,minmax(0,1fr));gap:12px 7px;padding:4px 12px 24px}
-.cards.c3{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 10px;padding:4px 14px 24px}
-.cards.c2{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:2px 16px 20px}
-@media (min-width:640px){.cards.c5{grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}.cards.c3{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}.cards.c2{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}}
-.cell{display:flex;flex-direction:column;gap:4px;min-width:0}
-.cell .card{width:100%}
-.card.mini{border-radius:7px;box-shadow:0 0 0 1px var(--page-edge),0 1px 2px rgba(20,30,50,.16),0 4px 10px rgba(20,30,50,.10)}
-.card.mini .band{height:3px;flex:0 0 auto}
-.card.mini .c-art{position:absolute;left:8%;right:8%;top:calc(3px + 8%);bottom:11%;margin:0;padding:0;box-shadow:none;border-radius:0;flex:none}
-.cno{font-family:var(--f-mono);font-size:9px;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums;line-height:1.25;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.cno b{display:block;font-family:var(--f-hand);font-weight:600;font-size:12px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.cards.c5 .cno{font-size:8.5px}
-.card.mini .new{top:5px;right:-22px;font-size:6.5px;padding:1px 22px;letter-spacing:.1em}
-.card.mini .visits{top:auto;bottom:3px;right:3px;font-size:7.5px;padding:0 4px}
-.card.mini .pick{width:20px;height:20px;left:4px;bottom:4px;font-size:11px}
-.card .c-ev i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:1px}
+/* trading-card list: 1-5 columns (pinch), the same card design at any size (1 unit = card width / 160) */
+.cards{--cols:5;display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));gap:calc(20px - var(--cols) * 2.6px);padding:4px 12px 24px}
+.cards.c1{grid-template-columns:minmax(0,320px);justify-content:center}
+@media (min-width:700px){.cards{grid-template-columns:repeat(auto-fill,minmax(calc(560px / var(--cols)),1fr))}}
+.card{container-type:inline-size;border-radius:6.25%/4.5%}
+.card .band{height:3.125cqw;flex:0 0 auto}
+.card .c-in{padding:5cqw 6.25cqw 5.6cqw}
+.card .c-top{font-size:6.25cqw}
+.card .c-art{margin:3.75cqw 0;padding:3.75cqw 1.25cqw;border-radius:3.75cqw;box-shadow:inset 0 0 0 max(.5px,.6cqw) rgba(60,50,30,.08)}
+.card .c-name{font-size:9.4cqw}
+.card .c-ev,.card .c-meta{font-size:6.5cqw;margin-top:1.8cqw}
+.card .new{top:6.25cqw;right:-15cqw;font-size:5.6cqw;padding:1.25cqw 17.5cqw}
+.card .visits{top:17.5cqw;right:5cqw;font-size:6.25cqw;padding:.6cqw 4.4cqw}
+.card .dg{font-size:5.3cqw;padding:0 2.5cqw;border-radius:2.5cqw;margin-left:3cqw}
+.card .pick{left:5cqw;bottom:5cqw;width:16cqw;height:16cqw;font-size:9cqw;border-width:1.2cqw}
+.card .rul::after{content:"cm";position:absolute;right:-.6cqw;top:100%;margin-top:.6cqw;font:500 4.4cqw var(--f-mono);color:currentColor;line-height:1}
+.fig.sh img{mix-blend-mode:normal!important;box-shadow:0 .6cqw 2cqw rgba(0,0,0,.18)}
+/* 重ね押しの台紙 */
+.sheetbox{border:1px dashed #D4AF4F;border-radius:12px;padding:10px;background:linear-gradient(135deg,#FFFBEE,#FFF6DD)}
+.shrow{display:flex;gap:10px;align-items:center}
+.shthumb{flex:0 0 auto;width:64px;height:64px;border-radius:8px;background:#fff;box-shadow:inset 0 0 0 1px #E6CF8A;display:flex;align-items:center;justify-content:center;font-size:11px;color:#9A7420;overflow:hidden}
+.shthumb img{max-width:100%;max-height:100%}
+.shctl{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.shnote{font-size:11px;color:#6B5A2E}
+#shCrop{margin-top:10px}
+.tray button.ovl{box-shadow:0 0 0 2px #D4AF4F,0 2px 8px rgba(168,132,44,.3);position:relative}
+.tray button.ovl::after{content:"重ね押し";position:absolute;left:3px;bottom:3px;font-size:8px;font-weight:700;color:#fff;background:linear-gradient(135deg,#E9C766,#B8892E);border-radius:99px;padding:0 4px}
+.pickv{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.pickv button{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:10px;display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--ink);font-size:14px}
+.pvimg{width:100%;aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#fff;overflow:hidden}
+.pvimg img{max-width:88%;max-height:88%}
+.pvimg img.mul{mix-blend-mode:multiply}
+.rotbtns{display:inline-flex;gap:4px;margin-left:auto}
+.card .c-ev i{display:inline-block;width:4.4cqw;height:4.4cqw;border-radius:50%;margin-right:2.5cqw;vertical-align:.4cqw}
 /* stamp art + faint real-size ruler (1cm ticks, 5mm half ticks) */
 .c-art{container-type:size;position:relative}
 .fig{position:relative;width:80%;height:80%}
 @supports (width:1cqw){.fig{width:min(84cqw,100cqh * var(--ar));height:min(100cqh,84cqw / var(--ar))}.fig.hr{width:min(76cqw,100cqh * var(--ar));height:min(100cqh,76cqw / var(--ar));margin-left:7%}}
 .fig img{position:absolute;inset:0;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:contain;display:block}
 .card.digi .fig img{mix-blend-mode:normal}
-.rul{position:absolute;top:0;bottom:0;right:calc(100% + 3px);width:4px;color:rgba(70,58,38,.5);pointer-events:none;border-right:1px solid currentColor;
+.rul{position:absolute;top:0;bottom:0;right:calc(100% + 3cqw);width:3.4cqw;color:rgba(70,58,38,.26);pointer-events:none;border-right:1px solid currentColor;
   background:repeating-linear-gradient(to top,currentColor 0 1px,transparent 1px calc(100% / var(--n))) right top/100% 100% no-repeat,repeating-linear-gradient(to top,currentColor 0 1px,transparent 1px calc(50% / var(--n))) right top/55% 100% no-repeat}
-.card:not(.mini) .rul{width:6px;right:calc(100% + 5px)}
-.card:not(.mini) .rul::after{content:"cm";position:absolute;right:-1px;top:100%;margin-top:1px;font:500 7px var(--f-mono);color:currentColor;line-height:1}
 /* 重ね押し: gold edge + a slow foil shine */
 .card.ovl{box-shadow:0 0 0 1.5px #D4AF4F,0 0 0 3.5px rgba(212,175,79,.22),0 6px 16px rgba(20,30,50,.12)}
-.card.mini.ovl{box-shadow:0 0 0 1.5px #D4AF4F,0 1px 2px rgba(20,30,50,.16),0 4px 12px rgba(168,132,44,.28)}
 .card.ovl::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;z-index:1;background:linear-gradient(115deg,transparent 30%,rgba(255,244,200,.62) 44%,rgba(190,222,255,.42) 51%,rgba(255,196,232,.36) 57%,transparent 70%);background-size:260% 100%;background-position:120% 0;mix-blend-mode:soft-light;animation:foil 4.2s ease-in-out infinite}
 @keyframes foil{0%{background-position:120% 0}55%,100%{background-position:-60% 0}}
 @media (prefers-reduced-motion:reduce){.card.ovl::after{animation:none;background-position:50% 0}}
-.ovlb{position:absolute;z-index:2;left:12px;top:30px;background:linear-gradient(135deg,#E9C766,#B8892E);color:#fff;font-size:9px;font-weight:700;letter-spacing:.06em;border-radius:99px;padding:1px 7px;box-shadow:0 1px 2px rgba(0,0,0,.2);pointer-events:none}
-.card.mini .ovlb{left:3px;top:auto;bottom:3px;font-size:6.5px;padding:0 4px;letter-spacing:0}
-.cards.selecting .card.mini .ovlb{display:none}
+.ovlb{position:absolute;z-index:2;left:7.5cqw;top:19cqw;background:linear-gradient(135deg,#E9C766,#B8892E);color:#fff;font-size:5.6cqw;font-weight:700;letter-spacing:.06em;border-radius:99px;padding:.6cqw 4.4cqw;box-shadow:0 1px 2px rgba(0,0,0,.2);pointer-events:none}
 .chips .ovlchip{border-color:#D4AF4F;color:#7A5C14;background:linear-gradient(135deg,#FFF8E1,#F6E6B4);font-weight:700}
 .chips .ovlchip[aria-pressed="true"]{background:linear-gradient(135deg,#E9C766,#B8892E);border-color:#B8892E;color:#fff}
 .chip.ovlc{color:#7A5C14!important;background:#FFF3CF}
@@ -691,7 +703,6 @@ html,body{touch-action:pan-x pan-y}
           <button class="btn small" type="button" id="gFilt" aria-expanded="false">絞り込み</button>
           <button class="btn small" type="button" id="gSort">新しい順</button>
           <button class="btn small" type="button" id="gSel">選択</button>
-          <button class="btn small" type="button" id="gCols" aria-label="1列のまい数を変える">5列</button>
         </div>
         <div class="filters" id="gFilters" hidden></div>
         <div class="chips" id="gChips"></div>
@@ -820,10 +831,10 @@ function imgFor(url) { if (!url) return null; let im = imgCache.get(url); if (!i
 const fmtCm = mm => mm ? (mm / 10).toFixed(1) + "cm" : "";
 const norm = s => String(s || "").replace(/[\s　]/g, "").replace(/駅$/, "").replace(/ヶ/g, "ケ");
 
-const GENRES = ["駅","空港","イベント","施設"];
-const GCOL = { "駅":"#2B4C9B","空港":"#1F6F82","イベント":"#C0396A","施設":"#2F7A4F","御朱印":"#B8322A" };
-const OLD_CAT = { "観光地":"施設","商業施設":"施設","道の駅":"施設","博物館・美術館":"施設","寺社":"施設","鉄道・乗り物":"駅","乗り物":"駅","その他":"施設" };
-const catNorm = c => GENRES.includes(c) || c === "御朱印" ? c : OLD_CAT[c] || (/空港/.test(c || "") ? "空港" : /駅/.test(c || "") ? "駅" : /イベント|祭|フェス/.test(c || "") ? "イベント" : "施設");
+const GENRES = ["駅","空港","道の駅","インターチェンジ","イベント","施設"];
+const GCOL = { "駅":"#2B4C9B","空港":"#1F6F82","道の駅":"#5F7F1E","インターチェンジ":"#B0641A","イベント":"#C0396A","施設":"#2F7A4F","御朱印":"#B8322A" };
+const OLD_CAT = { "観光地":"施設","商業施設":"施設","博物館・美術館":"施設","寺社":"施設","鉄道・乗り物":"駅","乗り物":"駅","その他":"施設" };
+const catNorm = c => GENRES.includes(c) || c === "御朱印" ? c : OLD_CAT[c] || (/道の駅/.test(c || "") ? "道の駅" : /インター|^IC$|ＩＣ/.test(c || "") ? "インターチェンジ" : /空港/.test(c || "") ? "空港" : /駅/.test(c || "") ? "駅" : /イベント|祭|フェス/.test(c || "") ? "イベント" : "施設");
 const gcol = g => GCOL[g] || `hsl(${Math.round(hash(g) * 360)} 45% 42%)`;
 
 /* ================= washi texture ================= */
@@ -890,7 +901,7 @@ const Store = {
     this.mem.stamps.set(s.id, body);
   },
   async removeStamp(s) {
-    const keys = ["ph_" + s.id, ...(s.scenes || []).map(k => "sc_" + s.id + "_" + k)];
+    const keys = ["ph_" + s.id, "sh_" + s.id, ...(s.scenes || []).map(k => "sc_" + s.id + "_" + k)];
     if (this.mode === "cloud") { await this.col.doc(s.id).delete(); for (const k of keys) { try { await this.col.doc(k).delete(); } catch {} } return; }
     if (this.mode === "local") { await this.idbDo("stamps", "readwrite", st => st.delete(s.id)); for (const k of [...keys, s.id]) await this.idbDo("photos", "readwrite", st => st.delete(k)); return; }
     this.mem.stamps.delete(s.id); keys.forEach(k => this.mem.photos.delete(k));
@@ -1187,22 +1198,20 @@ function hayOf(s) {
 }
 
 /* ================= GRID (トレカ) ================= */
-const GRID_COLS = [5, 3, 2];
 function rulerHTML(s) {
   if (!s || !s.sizeMm || isDigi(s) || s.type === "goshuin") return "";
   const n = s.sizeMm / 10 * ((s.ch || 1) / Math.max(s.cw || 1, s.ch || 1));
   return n > 0.3 ? `<i class="rul" style="--n:${n.toFixed(3)}" aria-hidden="true"></i>` : "";
 }
 function figHTML(s) {
-  const ar = clamp((s.cw || 1) / (s.ch || 1), 0.2, 5); const r = rulerHTML(s);
-  return `<div class="fig${r ? " hr" : ""}" style="--ar:${ar.toFixed(4)}"><img src="${s.cut}" alt="" loading="lazy" draggable="false" data-ck="${esc(s.id)}">${r}</div>`;
+  const A = artOf(s); const ar = clamp((A.w || 1) / (A.h || 1), 0.2, 5); const r = A.sheet ? "" : rulerHTML(s);
+  return `<div class="fig${r ? " hr" : ""}${A.sheet ? " sh" : ""}" style="--ar:${ar.toFixed(4)}"><img src="${A.url}" alt="" loading="lazy" draggable="false" data-ck="${esc(s.id)}">${r}</div>`;
 }
 function cardHTML(s, no, o = {}) {
   const g = catNorm(s.cat), cols = o.cols || 2; const isNew = !s.sample && !o.other && s.created && Date.now() - s.created < 3 * 864e5;
   const nv = s.visits ? s.visits.length : (s.nv || 0); const num = "No." + String(no || 0).padStart(3, "0");
-  const cls = `card washi${isDigi(s) ? " digi" : ""}${s.overlap ? " ovl" : ""}${o.picked ? " picked" : ""}${cols > 2 ? " mini" : ""}`;
+  const cls = `card washi${isDigi(s) ? " digi" : ""}${s.overlap ? " ovl" : ""}${o.picked ? " picked" : ""}`;
   const badges = `<span class="pick" aria-hidden="true">✓</span>${isNew ? '<span class="new">NEW</span>' : ""}${nv ? `<span class="visits">×${nv + 1}</span>` : ""}${s.overlap ? '<span class="ovlb">重ね押し</span>' : ""}`;
-  if (cols > 2) return `<div class="cell"><button type="button" class="${cls}" data-open="${esc(s.id)}" style="--g:${gcol(g)}" aria-label="${esc(s.name || "スタンプ")}"><div class="band"></div>${badges}<div class="c-art">${figHTML(s)}</div></button><span class="cno">${cols === 3 ? `<b>${esc(s.name || "名前未設定")}</b>` : ""}${num}</span></div>`;
   const ev = evlOf(s);
   return `<button type="button" class="${cls}" data-open="${esc(s.id)}" style="--g:${gcol(g)}"><div class="band"></div>${badges}<div class="c-in">
     <div class="c-top"><span>${num}${isDigi(s) ? '<span class="dg">DIGITAL</span>' : ""}</span><span>${esc(fmtDate(s.date))}</span></div>
@@ -1212,7 +1221,7 @@ function cardHTML(s, no, o = {}) {
     <div class="c-meta"><span class="c-g">${esc(g)}</span><span>${esc(s.pref || "")}${s.sizeMm ? " · " + fmtCm(s.sizeMm) : ""}</span></div></div></button>`;
 }
 const Grid = {
-  on: true, g: "all", q: "", desc: true, f: {}, open: false, selMode: false, sel: new Set(), items: [], cols: GRID_COLS.includes(+lsGet("petalog.gridCols")) ? +lsGet("petalog.gridCols") : 5,
+  on: true, g: "all", q: "", desc: true, f: {}, open: false, selMode: false, sel: new Set(), items: [], cols: clamp(Math.round(+lsGet("petalog.gridCols") || 5), 1, 5),
   setMode(on) { setColl(on ? "grid" : "flip"); },
   facets() {
     const L = list(); const cnt = arr => { const m = new Map(); arr.forEach(v => v && m.set(v, (m.get(v) || 0) + 1)); return [...m.entries()].sort((a, b) => b[1] - a[1]); };
@@ -1263,7 +1272,7 @@ const Grid = {
     $("#gFilt").textContent = nf ? `絞り込み ${nf}` : "絞り込み"; $("#gFilt").classList.toggle("primary", nf > 0);
     $("#gCount").innerHTML = (nf || toks.length || this.g !== "all") ? `<span>${items.length} まい見つかりました</span><button type="button" id="gClear">条件をクリア</button>` : "";
     const cl = $("#gClear"); if (cl) cl.onclick = () => { this.f = {}; this.q = ""; this.g = "all"; $("#gSearch").value = ""; this.render(); };
-    const box = $("#cards"); box.className = `cards c${this.cols}${this.selMode ? " selecting" : ""}`; $("#gCols").textContent = this.cols + "列";
+    const box = $("#cards"); box.className = `cards c${this.cols}${this.selMode ? " selecting" : ""}`; box.style.setProperty("--cols", this.cols);
     box.innerHTML = !ready ? `<div class="empty" style="grid-column:1/-1"><span class="spin"></span></div>` : items.length ? items.map(s => cardHTML(s, numOf.get(s.id), { cols: this.cols, picked: this.sel.has(s.id) })).join("")
       : `<div class="empty" style="grid-column:1/-1">見つかりませんでした。</div>`;
     $("#gSort").textContent = this.desc ? "新しい順" : "古い順";
@@ -1276,7 +1285,6 @@ $("#gFilt").onclick = () => { Grid.open = !Grid.open; $("#gFilters").hidden = !G
 $("#gFilters").onclick = e => { const b = e.target.closest("[data-fk]"); if (!b) return; const k = b.dataset.fk, v = k === "multi" ? true : b.dataset.fv; if (Grid.f[k] === v) delete Grid.f[k]; else Grid.f[k] = v; Grid.render(); };
 $("#cards").onclick = e => { const c = e.target.closest("[data-open]"); if (!c) return; if (Grid.selMode) { const id = c.dataset.open; Grid.sel.has(id) ? Grid.sel.delete(id) : Grid.sel.add(id); c.classList.toggle("picked", Grid.sel.has(id)); renderSelBar(); return; } openStamp("edit", findStamp(c.dataset.open)); };
 $("#gSel").onclick = () => setSelMode(!Grid.selMode);
-$("#gCols").onclick = () => { const i = GRID_COLS.indexOf(Grid.cols); Grid.cols = GRID_COLS[(i + 1) % GRID_COLS.length]; lsSet("petalog.gridCols", Grid.cols); Grid.render(); };
 </script>
 <script>
 "use strict";
@@ -1321,11 +1329,11 @@ const Fall = {
     const mms = singles.map(s => s.sizeMm).filter(Boolean).sort((a, b) => a - b); const med = mms.length ? mms[mms.length >> 1] : 0;
     const mk = (s, i) => {
       const f = s.sizeMm && med ? clamp(s.sizeMm / med, 0.65, 1.5) : 1; const sz = size * f;
-      const ar = (s.cw || 1) / (s.ch || 1); const bw = ar >= 1 ? sz : sz * ar, bh = ar >= 1 ? sz / ar : sz;
+      const A = artOf(s); const ar = (A.w || 1) / (A.h || 1); const bw = ar >= 1 ? sz : sz * ar, bh = ar >= 1 ? sz / ar : sz;
       const x = sz/2 + hash(s.id + "x") * (W - sz), y = -sz - i * (size * 0.5) - hash(s.id) * 60;
       const opts = { restitution: 0.25, friction: 0.35, frictionAir: 0.012, density: 0.002, angle: (hash(s.id + "a") - 0.5) * 1.2 };
-      const b = s.shape === "circle" ? M.Bodies.circle(x, y, Math.min(bw, bh) / 2, opts) : M.Bodies.rectangle(x, y, bw, bh, { ...opts, chamfer: { radius: Math.min(bw, bh) * 0.08 } });
-      b.plugin = { s, w: bw, h: bh, img: imgFor(s.cut) }; return b;
+      const b = s.shape === "circle" && !A.sheet ? M.Bodies.circle(x, y, Math.min(bw, bh) / 2, opts) : M.Bodies.rectangle(x, y, bw, bh, { ...opts, chamfer: { radius: Math.min(bw, bh) * 0.08 } });
+      b.plugin = { s, w: bw, h: bh, img: imgFor(A.url), sheet: A.sheet }; return b;
     };
     this.bodies = singles.map(mk);
     bundles.forEach((bd, j) => {
@@ -1373,7 +1381,7 @@ const Fall = {
         x.fillStyle = "#1B2130"; x.textAlign = "center"; x.textBaseline = "middle";
         x.font = `700 ${Math.round(r * 0.42)}px 'Zen Kaku Gothic New',sans-serif`; x.fillText(p.bundle.label, 0, -r * 0.08);
         x.font = `500 ${Math.round(r * 0.26)}px 'IBM Plex Mono',monospace`; x.fillStyle = "#2B4C9B"; x.fillText("×" + p.bundle.items.length, 0, r * 0.38);
-      } else if (p.img && p.img.complete) { x.globalCompositeOperation = this.bgMul && !isDigi(p.s) ? "multiply" : "source-over"; x.drawImage(p.img, -p.w / 2, -p.h / 2, p.w, p.h); x.globalCompositeOperation = "source-over"; }
+      } else if (p.img && p.img.complete) { x.globalCompositeOperation = this.bgMul && !isDigi(p.s) && !p.sheet ? "multiply" : "source-over"; x.drawImage(p.img, -p.w / 2, -p.h / 2, p.w, p.h); x.globalCompositeOperation = "source-over"; }
       x.restore();
     }
   },
@@ -1501,7 +1509,7 @@ const MapV = {
     m.attributionControl.addAttribution("駅・路線: 駅データ.jp");
     m.setView([36.6, 137.8], 5);
     this.map = m; this.layer = new RailLayer().addTo(m);
-    const t = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", { maxZoom: 18, maxNativeZoom: 18, minZoom: 4, attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>' });
+    const t = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png", { maxZoom: 18, maxNativeZoom: 18, minZoom: 4, attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>' });
     let ok = 0, bad = 0;
     t.on("tileload", () => { if (!ok++) this.setReal(true); });
     t.on("tileerror", () => { bad++; if (!ok && bad >= 3) this.setReal(false); });
@@ -1542,7 +1550,7 @@ const MapV = {
       x.fillStyle = C.water; for (const r of GEO.lakes) { x.beginPath(); r.forEach(([a, b], i) => i ? x.lineTo(X(a), Y(b)) : x.moveTo(X(a), Y(b))); x.closePath(); x.fill(); }
     }
     // railway lines, colored per line
-    const types = z < 7 ? [0] : z < 9 ? [2, 1, 0] : [3, 2, 1, 0];
+    const types = !fallback ? [] : z < 7 ? [0] : z < 9 ? [2, 1, 0] : [3, 2, 1, 0];
     const lw = t => t === 0 ? clamp(1.4 + (z - 5) * 0.45, 1.4, 6) : clamp(0.9 + (z - 7) * 0.5, 0.9, 5.5);
     const pad = 4 / S;
     for (const t of types) {
@@ -1584,12 +1592,13 @@ const MapV = {
     if (z >= 10) {
       const minR = z >= 12.5 ? 0 : z >= 11.5 ? 3 : 5; const r = clamp(1.6 + (z - 10) * 0.9, 2.4, 6.5);
       const vs = GEO.stations.filter(s => s.r >= minR && s.x > vx0 - pad && s.x < vx1 + pad && s.y > vy0 - pad && s.y < vy1 + pad);
-      for (const s of vs) { const px = X(s.x), py = Y(s.y); const big = s.r >= 5; x.beginPath(); x.arc(px, py, big ? r * 1.3 : r, 0, 7); x.fillStyle = "#FFFFFF"; x.fill(); x.lineWidth = big ? 2.2 : 1.6; x.strokeStyle = "#2A2F3A"; x.stroke(); this.stHits.push({ s, px, py }); }
+      for (const s of vs) { const px = X(s.x), py = Y(s.y); const big = s.r >= 5; if (!fallback) { this.stHits.push({ s, px, py }); continue; } x.beginPath(); x.arc(px, py, big ? r * 1.3 : r, 0, 7); x.fillStyle = "#FFFFFF"; x.fill(); x.lineWidth = big ? 2.2 : 1.6; x.strokeStyle = "#2A2F3A"; x.stroke(); this.stHits.push({ s, px, py }); }
       const lmin = z >= 13.5 ? 0 : z >= 12 ? 3 : 5;
-      let n = 0; for (const s of vs) { if (s.r < lmin) continue; if (n > 220) break; if (label(s.n + "駅", X(s.x), Y(s.y), { s: s.r >= 5 ? 13 : 11.5, w: s.r >= 5 ? 700 : 600 })) n++; }
+      let n = 0; if (fallback) for (const s of vs) { if (s.r < lmin) continue; if (n > 220) break; if (label(s.n + "駅", X(s.x), Y(s.y), { s: s.r >= 5 ? 13 : 11.5, w: s.r >= 5 ? 700 : 600 })) n++; }
     }
     // big facilities
     if (z >= 7.5) for (const f of GEO.facs) { if (f.k === "spot" && z < 10) continue; const px = X(f.x), py = Y(f.y); if (px < -20 || py < -20 || px > Wd + 20 || py > Hd + 20) continue;
+      if (!fallback) { this.stHits.push({ f, px, py }); continue; }
       x.beginPath(); x.arc(px, py, 10, 0, 7); x.fillStyle = f.k === "air" ? "#4A6A8F" : "#C0622E"; x.fill(); x.lineWidth = 2; x.strokeStyle = "#FFFFFF"; x.stroke();
       x.fillStyle = "#FFFFFF"; x.font = "700 11px sans-serif"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(f.k === "air" ? "✈" : "★", px, py + 0.5); x.textAlign = "left";
       boxes.push([px - 11, py - 11, px + 11, py + 11]); this.stHits.push({ f, px, py });
@@ -1678,7 +1687,7 @@ const MapV = {
     card.hidden = false;
     $("#mcX").onclick = () => this.closeCard();
     card.querySelectorAll("[data-open]").forEach(b => b.onclick = () => openStamp("edit", findStamp(b.dataset.open)));
-    $("#mcAdd").onclick = () => { const name = it.kind === "st" ? o.n + "駅" : o.n; const pre = { name, place: name, cat: it.kind === "st" ? "駅" : o.k === "air" ? "空港" : "施設", lat: +o.lat.toFixed(6), lng: +o.lng.toFixed(6), pref: prefAt(o.lat, o.lng) || "", locSrc: it.kind === "st" ? "駅の位置" : "施設の位置" }; this.closeCard(); openStamp("add", null, pre); };
+    $("#mcAdd").onclick = () => { const name = it.kind === "st" ? o.n + "駅" : o.n; const pre = { name, place: name, cat: it.kind === "st" ? "駅" : o.k === "air" ? "空港" : /道の駅/.test(o.n) ? "道の駅" : "施設", lat: +o.lat.toFixed(6), lng: +o.lng.toFixed(6), pref: prefAt(o.lat, o.lng) || "", locSrc: it.kind === "st" ? "駅の位置" : "施設の位置" }; this.closeCard(); openStamp("add", null, pre); };
     const mr = $("#mcRally"); if (mr) mr.onclick = () => { const r = rallyChoices(o)[0]; if (!r) return; Rally.cur = r.id; Rally.hl = o.n; show("rally"); Rally.render(); };
   },
   closeCard() { const c = $("#mapCard"); if (c) c.hidden = true; },
@@ -1743,7 +1752,7 @@ const bookColor = c => OLD_BOOK_COLORS[c] || c || BOOK_COLORS[0];
 const fontCss = (it, px) => { const [f, w] = TFONT[it.font] || TFONT.hand; return `${w} ${Math.max(1, px).toFixed(1)}px '${f}','Hiragino Sans','Noto Sans JP',sans-serif`; };
 const measCtx = mkCanvas(4, 4).getContext("2d");
 const isDigi = s => !!s && s.medium === "digital";
-function stampDims(s, it, base = 420) { const L = (s.sizeMm ? s.sizeMm * 10 : base) * (it.s || 1); const ar = (s.cw || 1) / (s.ch || 1); return ar >= 1 ? [L, L / ar] : [L * ar, L]; }
+function stampDims(s, it, base = 420) { const sh = it && it.v === "sheet" && s.sheet; const L = (sh ? (s.sizeMm ? s.sizeMm * 16 : base * 1.6) : s.sizeMm ? s.sizeMm * 10 : base) * (it.s || 1); const ar = sh ? (s.sheet.w || 1) / (s.sheet.h || 1) : (s.cw || 1) / (s.ch || 1); return ar >= 1 ? [L, L / ar] : [L * ar, L]; }
 function textDims(it) { const fs = it.fs * (it.s || 1); measCtx.font = fontCss(it, fs); const lines = String(it.text || " ").split("\n"); const w = Math.max(fs * 0.6, ...lines.map(l => measCtx.measureText(l).width)); return [w + fs * 0.4, lines.length * fs * 1.3 + fs * 0.2]; }
 function itemDims(it) { if (it.t === "text") return textDims(it); const s = findStamp(it.sid); return s ? stampDims(s, it) : [0, 0]; }
 async function fontsReady(items) { const want = new Set(["disp"]); (items || []).forEach(i => i.t === "text" && want.add(i.font || "hand")); try { await Promise.race([Promise.all([...want].map(k => document.fonts.load(fontCss({ font: k }, 40)))), sleep(1800)]); } catch {} }
@@ -1850,7 +1859,7 @@ async function renderPage(p, o = {}) {
       const fs = it.fs * (it.s || 1); x.font = fontCss(it, fs); x.fillStyle = it.color || "#1D2230"; x.textAlign = "center"; x.textBaseline = "middle";
       const lines = String(it.text || "").split("\n"); lines.forEach((l, i) => x.fillText(l, 0, (i - (lines.length - 1) / 2) * fs * 1.3));
     } else {
-      const s = findStamp(it.sid); if (s) { let im = null; try { im = await loadImg(s.cut); } catch {} if (im) { const [w, h] = stampDims(s, it); x.globalCompositeOperation = !o.transparent && !isDigi(s) && p.paper !== "photo" ? "multiply" : "source-over"; x.drawImage(im, -w / 2, -h / 2, w, h); } }
+      const s = findStamp(it.sid); if (s) { let im = null; try { im = await loadImg(it.v === "sheet" && s._sheet ? s._sheet : s.cut); } catch {} if (im) { const [w, h] = stampDims(s, it); x.globalCompositeOperation = !o.transparent && !isDigi(s) && it.v !== "sheet" && p.paper !== "photo" ? "multiply" : "source-over"; x.drawImage(im, -w / 2, -h / 2, w, h); } }
     }
     x.restore();
   }
@@ -1867,7 +1876,7 @@ const Board = {
     if (page.paper === "photo") Books.bgImg(page).then(() => { if (this.data === page) this.renderPaper(); });
   },
   save() { if (!this.data) return; this.dirty = true; this.data.updated = Date.now(); Books.save(); },
-  renderTray() { const t = $("#tray"); if (!t) return; t.innerHTML = byDate(false).filter(s => s.type !== "goshuin").map(s => `<button type="button" class="washi${isDigi(s) ? " digi" : ""}" data-add="${s.id}" aria-label="${esc(s.name)}を貼る"><img src="${s.cut}" alt="" draggable="false"></button>`).join("") || `<span class="cap" style="padding:18px 4px">スタンプを追加すると、ここから貼れます。</span>`; },
+  renderTray() { const t = $("#tray"); if (!t) return; t.innerHTML = byDate(false).filter(s => s.type !== "goshuin").map(s => `<button type="button" class="washi${isDigi(s) ? " digi" : ""}${s.overlap ? " ovl" : ""}" data-add="${s.id}" aria-label="${esc(s.name)}を貼る"><img src="${s.cut}" alt="" draggable="false"></button>`).join("") || `<span class="cap" style="padding:18px 4px">スタンプを追加すると、ここから貼れます。</span>`; },
   mul(s) { return !isDigi(s) && this.data.paper !== "photo"; },
   render() {
     const p = this.data; if (!p) return;
@@ -1876,7 +1885,7 @@ const Board = {
     for (const it of p.items) {
       const [w, hh] = itemDims(it); const tr = `width:${w}px;height:${hh}px;transform:translate(${it.x - w / 2}px,${it.y - hh / 2}px) rotate(${it.r || 0}deg)`; const sel = this.sel === it.k ? " sel" : "";
       if (it.t === "text") { const fs = it.fs * (it.s || 1); h += `<div class="bi bt${sel}" data-k="${it.k}" style="${tr}"><span style="font:${fontCss(it, fs)};line-height:1.3;padding-top:${(fs * 0.1).toFixed(1)}px;color:${it.color || "#1D2230"}">${esc(it.text)}</span><div class="hdl" data-h="1"></div></div>`; }
-      else { const s = findStamp(it.sid); h += `<div class="bi${this.mul(s) ? "" : " nomul"}${sel}" data-k="${it.k}" style="${tr}"><img src="${s.cut}" alt="" draggable="false"><div class="hdl" data-h="1"></div></div>`; }
+      else { const s = findStamp(it.sid); h += `<div class="bi${this.mul(s) && it.v !== "sheet" ? "" : " nomul"}${sel}" data-k="${it.k}" style="${tr}"><img src="${it.v === "sheet" && s._sheet ? s._sheet : s.cut}" alt="" draggable="false"><div class="hdl" data-h="1"></div></div>`; }
     }
     $("#items").innerHTML = h; this.applyView();
     const si = p.items.find(i => i.k === this.sel);
@@ -1924,11 +1933,11 @@ const Board = {
     }
     return best;
   },
-  add(sid) {
+  add(sid, kind) {
     if (!this.data) return; const vp = $("#boardVp"), v = this.view, s = findStamp(sid); if (!s) return; const [cx, cy] = this.center();
     const k = uid("k"); const pw = this.data.size === "inf" ? vp.clientWidth / v.z : this.sz.w; const sc = s.sizeMm ? 1 : clamp(pw * 0.3 / this.base, 0.3, 8);
-    const [w, h] = stampDims(s, { s: sc }); const [x, y] = this.spot(w * 1.05, h * 1.05, this.data.size === "inf" ? [cx, cy] : null);
-    this.data.items.push({ k, sid, x, y, s: sc, r: (Math.random() - 0.5) * 14 });
+    const [w, h] = stampDims(s, { s: sc, v: kind }); const [x, y] = this.spot(w * 1.05, h * 1.05, this.data.size === "inf" ? [cx, cy] : null);
+    this.data.items.push({ k, sid, x, y, s: sc, r: (Math.random() - 0.5) * 14, ...(kind === "sheet" ? { v: kind } : {}) });
     this.sel = k; this.render(); this.save();
     if (s.sizeMm) toast(`実寸 ${fmtCm(s.sizeMm)} で貼りました`);
   },
@@ -1996,7 +2005,7 @@ function openTextSheet(it) {
   };
   vp.addEventListener("pointerup", up); vp.addEventListener("pointercancel", up);
   vp.addEventListener("wheel", e => { e.preventDefault(); const v = Board.view, r = vp.getBoundingClientRect(); const nz = clamp(v.z * Math.exp(-e.deltaY * 0.0015), 0.03, 3); const px = e.clientX - r.left, py = e.clientY - r.top; v.tx = px - (px - v.tx) * nz / v.z; v.ty = py - (py - v.ty) * nz / v.z; v.z = nz; Board.applyView(); }, { passive: false });
-  $("#tray").addEventListener("click", e => { const b = e.target.closest("[data-add]"); if (b) Board.add(b.dataset.add); });
+  $("#tray").addEventListener("click", e => { const b = e.target.closest("[data-add]"); if (b) pickForBoard(b.dataset.add); });
   $("#bFit").onclick = () => Board.fit();
   $("#bDel").onclick = () => { Board.data.items = Board.data.items.filter(i => i.k !== Board.sel); Board.sel = null; Board.render(); Board.save(); };
   $("#bFront").onclick = () => { const I = Board.data.items, i = I.findIndex(x => x.k === Board.sel); if (i >= 0) { I.push(I.splice(i, 1)[0]); Board.render(); Board.save(); } };
@@ -2221,7 +2230,7 @@ function wrapLines(x, text, maxW, maxLines) {
 function roundRect(x, X, Y, W, H, r) { x.beginPath(); x.moveTo(X + r, Y); x.arcTo(X + W, Y, X + W, Y + H, r); x.arcTo(X + W, Y + H, X, Y + H, r); x.arcTo(X, Y + H, X, Y, r); x.arcTo(X, Y, X + W, Y, r); x.closePath(); }
 // faint real-size ruler beside the stamp (1mm ticks, a number every cm)
 function drawRuler(x, X, Y, H, hmm, K) {
-  if (!(hmm > 0)) return; const ppm = H / hmm; x.save(); x.strokeStyle = x.fillStyle = "rgba(70,58,38,.5)"; x.lineWidth = Math.max(1, 0.45 * K);
+  if (!(hmm > 0)) return; const ppm = H / hmm; x.save(); x.strokeStyle = x.fillStyle = "rgba(70,58,38,.32)"; x.lineWidth = Math.max(1, 0.4 * K);
   x.beginPath(); x.moveTo(X, Y); x.lineTo(X, Y + H);
   for (let mm = 0; mm <= hmm + 1e-6; mm++) { if (ppm < 3 && mm % 5) continue; const y = Y + H - mm * ppm, L = mm % 10 === 0 ? 4 * K : mm % 5 === 0 ? 2.6 * K : 1.5 * K; x.moveTo(X, y); x.lineTo(X - L, y); }
   x.stroke(); x.font = `500 ${5.5 * K}px 'IBM Plex Mono',monospace`; x.textAlign = "right"; x.textBaseline = "middle";
@@ -2247,11 +2256,11 @@ async function renderCard(s, no) {
   x.save(); roundRect(x, px, artTop, W - px * 2, artBot - artTop, 6 * K); x.strokeStyle = "rgba(60,50,30,.08)"; x.lineWidth = K; x.stroke(); x.restore();
   if (isDigi(s)) { x.save(); x.textAlign = "left"; x.font = `500 ${8 * K}px 'IBM Plex Mono',monospace`; const lw = x.measureText("DIGITAL").width + 6 * K; x.fillStyle = "#1B2130"; roundRect(x, px + 4 * K, artTop + 4 * K, lw, 10 * K, 2.5 * K); x.fill(); x.fillStyle = "#fff"; x.fillText("DIGITAL", px + 7 * K, artTop + 11.6 * K); x.restore(); }
   try {
-    const im = await loadImg(s.cut); const rul = !!(s.sizeMm && !isDigi(s) && s.type !== "goshuin");
+    const A = artOf(s); const im = await loadImg(A.url); const rul = !A.sheet && !!(s.sizeMm && !isDigi(s) && s.type !== "goshuin");
     const mw = (W - px * 2) * (rul ? 0.8 : 0.88), mh = artBot - artTop - 12 * K; const sc = Math.min(mw / im.width, mh / im.height);
     const iw = im.width * sc, ih = im.height * sc, ix = (W - iw) / 2 + (rul ? 6 * K : 0), iy = artTop + (artBot - artTop - ih) / 2;
-    x.save(); x.globalCompositeOperation = isDigi(s) || s.type === "goshuin" ? "source-over" : "multiply";
-    if (s.type === "goshuin") { x.shadowColor = "rgba(0,0,0,.18)"; x.shadowBlur = 4 * K; x.shadowOffsetY = K; }
+    x.save(); x.globalCompositeOperation = isDigi(s) || s.type === "goshuin" || A.sheet ? "source-over" : "multiply";
+    if (s.type === "goshuin" || A.sheet) { x.shadowColor = "rgba(0,0,0,.18)"; x.shadowBlur = 4 * K; x.shadowOffsetY = K; }
     x.imageSmoothingQuality = "high"; x.drawImage(im, ix, iy, iw, ih); x.restore();
     if (rul) drawRuler(x, ix - 5 * K, iy, ih, s.sizeMm * (im.height / Math.max(im.width, im.height)), K);
   } catch {}
@@ -3104,7 +3113,7 @@ function wireForm() {
   $("#f_evNew").onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); $("#evAdd").click(); } };
   $("#lnQ").oninput = e => lnSearch(e.target.value);
   $("#lnRes").onclick = e => { const b = e.target.closest("[data-ln]"); if (!b) return; const id = b.dataset.ln, r = RALLY_BY_ID.get(id); if (!r) return; if (!Profile.lines.includes(id)) { Profile.lines.push(id); Profile.save(); } evl.innerHTML = evlOptions({ line: id }); evl.value = "l:" + id; $("#lnBox").hidden = true; refreshRallySel(); toast(`「${r.name}」を登録しました`); };
-  refreshRallySel();
+  refreshRallySel(); wireSheet(c);
   const ob = $("#f_overlap"); if (ob) ob.onchange = () => { const h = $("#ovlHint"); if (h && ob.checked) h.hidden = true; };
   if (c.exif && c.exif.lat != null) { const b = $("#exifBtn"); b.hidden = false; b.onclick = () => setLoc(c.exif.lat, c.exif.lng, "写真の位置情報"); }
   const lc = $("#locClear"); if (lc) lc.onclick = () => setLoc(null, null, "");
@@ -3446,7 +3455,7 @@ function formHTML(d, ro) {
     <label class="fld full"><span>${gos ? "寺社名" : "スタンプの名前"}</span><input id="f_name" class="hand" value="${esc(d.name)}" placeholder="${gos ? "例: ○○神社" : "例: 東京駅"}"${dis}></label>
     ${gos ? "" : `<label class="fld"><span>ジャンル</span><select id="f_cat" aria-label="ジャンル"${dis}>${GENRES.map(g => `<option${g === cat ? " selected" : ""}>${g}</option>`).join("")}</select></label><label class="fld"><span>種類</span><select id="f_medium" aria-label="リアルかデジタルか"${dis}><option value="real"${digi ? "" : " selected"}>リアルスタンプ</option><option value="digital"${digi ? " selected" : ""}>デジタルスタンプ</option></select></label>`}
     <label class="fld full"><span>押した日</span><input id="f_date" type="date" value="${esc(d.date || "")}"${dis}></label>
-    ${gos ? "" : `<label class="toggle ovltog full"><input type="checkbox" id="f_overlap"${d.overlap ? " checked" : ""}${dis}><span><b>重ね押し</b><br><small>2つ以上のスタンプを重ねて押した特別な1まい。トレカ一覧の「重ね押し」に入ります。</small><em class="ovlhint" id="ovlHint" hidden>インクが2色以上あります。重ね押しならチェックを入れてください。</em></span></label>`}
+    ${gos ? "" : `<label class="toggle ovltog full"><input type="checkbox" id="f_overlap"${d.overlap ? " checked" : ""}${dis}><span><b>重ね押し</b><br><small>2つ以上のスタンプを重ねて押した特別な1まい。トレカ一覧の「重ね押し」に入ります。</small><em class="ovlhint" id="ovlHint" hidden>インクが2色以上あります。重ね押しならチェックを入れてください。</em></span></label>${ro ? "" : sheetBoxHTML(d)}`}
     <div class="fld full"><span>イベント・路線</span><select id="f_evl" aria-label="イベント・路線"${dis}>${evlOptions(d)}</select><div class="evlhint" id="evlHint"></div>
       <div class="row2" id="evNewBox" style="margin-top:6px" hidden><input id="f_evNew" class="grow ninput" maxlength="30" placeholder="例: 謎解き"><button class="btn small primary" type="button" id="evAdd">追加</button></div>
       <div class="evsug" id="evSug" hidden>${["謎解き", "デート", "旅行", "ひとり旅", "スタンプラリー", "ドライブ", "推し活"].filter(e => !Profile.allEvents().includes(e)).map(e => `<button type="button" data-evs="${e}">${e}</button>`).join("")}</div>
@@ -3474,9 +3483,9 @@ function addStepHTML(c) {
   <div id="cropStep" hidden>
     <div class="multibar" id="multiBar" hidden></div>
     <div class="crop-wrap"><canvas id="cropCv"></canvas></div>
-    <div class="toolrow">${g ? `<span class="cap" style="margin:0">黄色い四隅をページの角に合わせてください</span>` : dg ? `<span class="cap" style="margin:0">青い枠をスタンプに合わせてください</span>` : `<div class="seg" role="group" aria-label="操作"><button type="button" data-tool="box" aria-pressed="true">範囲</button><button type="button" data-tool="corners" aria-pressed="false">四隅でゆがみ補正</button></div><label class="mini"><input type="checkbox" id="warpAuto" checked>ゆがみ自動補正</label>`}</div>
+    <div class="toolrow">${g ? `<span class="cap" style="margin:0">黄色い四隅をページの角に合わせてください</span>` : dg ? `<span class="cap" style="margin:0">青い枠をスタンプに合わせてください</span>` : `<div class="seg" role="group" aria-label="操作"><button type="button" data-tool="box" aria-pressed="true">範囲</button><button type="button" data-tool="corners" aria-pressed="false">四隅でゆがみ補正</button></div><label class="mini"><input type="checkbox" id="warpAuto" checked>ゆがみ自動補正</label>`}${g ? "" : `<span class="rotbtns"><button class="btn small" type="button" data-rot="-90" aria-label="左に90度回す">↺ 90°</button><button class="btn small" type="button" data-rot="90" aria-label="右に90度回す">↻ 90°</button></span>`}</div>
     <p class="cap" id="cropCap"></p>
-    <div class="adjrow"><label>明るさ<input type="range" id="adjB" min="-60" max="60" value="0"></label><label>コントラスト<input type="range" id="adjC" min="-40" max="80" value="0"></label><label class="mini"><input type="checkbox" id="adjAuto" checked>自動補正</label></div>
+    <div class="adjrow"><label>明るさ<input type="range" id="adjB" min="-60" max="60" value="0"></label><label>コントラスト<input type="range" id="adjC" min="-40" max="80" value="0"></label><label class="mini"><input type="checkbox" id="adjAuto" checked>自動補正</label>${g ? "" : `<label>傾き<input type="range" id="rotFine" min="-20" max="20" step="0.5" value="0"></label>`}</div>
     <div class="result">
       <div class="res-wrap${g ? " gos" : dg ? " digi" : " washi"}"><canvas id="resCv"></canvas></div>
       <div class="ctl-col">
@@ -3504,7 +3513,7 @@ function openStamp(mode, s, preset, extra = {}) {
   sheetCtx = { mode, d, orig: s, ro, type, newScenes: [], delScenes: [], sceneUrls: new Map(), colorMode: "auto", offset: 0, erase: [], ghost: false, whiten: true, digital: type !== "goshuin" && d.medium === "digital", dmode: "auto", dtol: 36, adj: extra.adj || { auto: d.medium !== "digital", bright: 0, contrast: 0 }, warp: { auto: true, manual: false, quad: null }, queue: extra.queue || null, fixedType: !!(preset && preset.rally), catTouched: mode === "edit" || !!(preset && preset.cat) };
   const c = sheetCtx; const g = catNorm(d.cat); const ev = evlOf(d);
   const rk = rallyOf(rallyKeyOf(d)); const a = areaOf(d.lat, d.lng) || {};
-  const hero = mode === "edit" ? `<div class="hero washi${type === "goshuin" ? " gos" : isDigi(d) ? " digi" : ""}${d.overlap ? " ovl" : ""}"><button type="button" class="hi" data-pv="1" aria-label="スタンプを白い紙の上で大きく見る"><img src="${d.cut}" alt="${esc(d.name)}"><span class="zoomi" aria-hidden="true"></span></button><div><span class="datestamp" style="display:inline-block">${esc(fmtDate(d.date))}</span><h3>${esc(d.name || "名前未設定")}</h3>
+  const hero = mode === "edit" ? `<div class="hero washi${type === "goshuin" ? " gos" : isDigi(d) ? " digi" : ""}${d.overlap ? " ovl" : ""}"><button type="button" class="hi" data-pv="1" aria-label="スタンプを白い紙の上で大きく見る"><img src="${artOf(d).url}" alt="${esc(d.name)}"${artOf(d).sheet ? ' style="mix-blend-mode:normal"' : ""}><span class="zoomi" aria-hidden="true"></span></button><div><span class="datestamp" style="display:inline-block">${esc(fmtDate(d.date))}</span><h3>${esc(d.name || "名前未設定")}</h3>
       <div class="meta">${d.pref || a.city ? `<span>${esc(d.pref || "")}${esc(a.city || "")}</span>` : ""}<span class="chip" style="color:${gcol(g)}">${esc(g)}</span>${isDigi(d) ? `<span class="chip">デジタル</span>` : ""}${d.overlap ? `<span class="chip ovlc">重ね押し</span>` : ""}${ev ? `<span class="chip" style="color:${ev.c || "#2B4C9B"}">${ev.k === "l" ? "" : "#"}${esc(ev.t)}</span>` : ""}${d.sizeMm ? `<span>⌀ ${fmtCm(d.sizeMm)}</span>` : ""}${rk ? `<span>${esc(rk.st.n)}駅</span>` : ""}</div>
       ${d.visits && d.visits.length ? `<div class="meta" style="margin-top:4px">押した回数 ${d.visits.length + 1}回（${[...d.visits.map(v => v.date), d.date].filter(Boolean).map(fmtDate).join("・")}）</div>` : ""}
       ${d.spot ? `<div class="meta" style="margin-top:4px">置き場所: ${esc(d.spot)}</div>` : ""}${d.lat != null ? `<div class="meta" style="margin-top:6px"><a href="${gmapsDir(d.lat, d.lng)}" target="_blank" rel="noopener">ここへ行く（Googleマップ）</a></div>` : ""}${ro ? `<div class="meta" style="margin-top:6px">サンプルは編集できません。</div>` : d.priv ? `<div class="meta" style="margin-top:4px">🔒 非公開のトレカ</div>` : ""}</div></div>` : "";
@@ -3557,7 +3566,7 @@ function wireAdd() {
   if ($("#adjB")) { $("#adjB").value = c.adj.bright; $("#adjC").value = c.adj.contrast; $("#adjAuto").checked = c.adj.auto; }
   const eb = $("#eraseBtn"); if (eb) eb.onclick = () => { c.erasing = !c.erasing; eb.setAttribute("aria-pressed", c.erasing); eb.classList.toggle("primary", c.erasing); $("#eraseSizeL").hidden = !c.erasing; $("#resCv").classList.toggle("erasing", c.erasing); };
   const eu = $("#eraseUndo"); if (eu) eu.onclick = () => { c.erase.pop(); eu.disabled = !c.erase.length; recut(); };
-  wireEraser();
+  wireEraser(); wireRotate();
 }
 function rebuildForm() {
   const c = sheetCtx; const fa = $("#formArea");
@@ -3580,7 +3589,7 @@ async function handleFile(file) {
   startFromOrig(orig, exif);
 }
 function startFromOrig(orig, exif) {
-  const c = sheetCtx; c.orig = orig; c.exif = exif;
+  const c = sheetCtx; c.orig = orig; c.orig0 = orig; c.rot = 0; c.fine = 0; c.exif = exif;
   document.querySelectorAll(".typeseg").forEach(x => x.hidden = true);
   $("#drop").hidden = true; $("#cropStep").hidden = false; $("#formArea").hidden = false;
   prepareSrc(false);
@@ -3732,6 +3741,7 @@ async function updateExisting(t) {
 async function commitSave(c, d) {
   const btn = $("#saveBtn"); if (btn) { btn.disabled = true; btn.innerHTML = `<span class="spin"></span> 保存中`; }
   try {
+    if (c.sheetNew) { await Store.putPhoto("sh_" + d.id, c.sheetNew.url); d.sheet = { w: c.sheetNew.w, h: c.sheetNew.h }; d._sheet = c.sheetNew.url; if (!d.sheetView) d.sheetView = "sheet"; }
     if ((c.mode === "add" || c.mode === "update") && c.photoUrl) { try { await Store.putPhoto("ph_" + d.id, c.photoUrl); d.hasPhoto = true; } catch { if (c.mode === "add") d.hasPhoto = false; } }
     for (const n of c.newScenes) { try { await Store.putPhoto("sc_" + d.id + "_" + n.k, n.url); d.scenes.push(n.k); } catch { toast("保存できない写真がありました"); } }
     for (const k of c.delScenes) { d.scenes = d.scenes.filter(x => x !== k); Store.delPhoto("sc_" + d.id + "_" + k).catch(() => {}); }
@@ -3799,6 +3809,7 @@ async function exportBackup() {
   const photos = {};
   for (const s of stamps) {
     if (s.hasPhoto) { const u = await Store.getPhoto("ph_" + s.id, s.id).catch(() => null); if (u) photos["ph_" + s.id] = u; }
+    if (s.sheet) { const u = s._sheet || await Store.getPhoto("sh_" + s.id).catch(() => null); if (u) photos["sh_" + s.id] = u; }
     for (const k of s.scenes || []) { const u = await Store.getPhoto("sc_" + s.id + "_" + k).catch(() => null); if (u) photos["sc_" + s.id + "_" + k] = u; }
   }
   const books = Books.sample ? [] : Books.data.books;
@@ -3816,7 +3827,7 @@ async function importBackup(file) {
   const have = new Set(stamps.map(s => s.id)); let n = 0;
   for (const s of j.stamps) {
     if (!s || !s.id || have.has(s.id)) continue;
-    try { if (s.type !== "goshuin") s.cat = catNorm(s.cat); await Store.saveStamp(s); for (const [k, u] of Object.entries(j.photos || {})) if (k === "ph_" + s.id || k.startsWith("sc_" + s.id + "_")) await Store.putPhoto(k, u); stamps.push(s); n++; }
+    try { if (s.type !== "goshuin") s.cat = catNorm(s.cat); await Store.saveStamp(s); for (const [k, u] of Object.entries(j.photos || {})) if (k === "ph_" + s.id || k === "sh_" + s.id || k.startsWith("sc_" + s.id + "_")) await Store.putPhoto(k, u); stamps.push(s); n++; }
     catch { toast("途中で保存できなくなりました（容量の上限かもしれません）", 4000); break; }
   }
   const p = j.profile || {}; (p.events || []).forEach(e => Profile.events.includes(e) || Profile.events.push(e)); (p.refs || []).forEach(r => Profile.refs.some(x => x.n === r.n) || Profile.refs.push(r)); (p.lines || []).forEach(l => Profile.lines.includes(l) || Profile.lines.push(l)); await Profile.save();
@@ -3909,7 +3920,7 @@ const PlacePick = {
     const d = c.d, has = d.lat != null && d.lng != null;
     const m = L.map(el, { zoomControl: false, attributionControl: true, minZoom: 4, maxZoom: 18, zoomSnap: 0.5, tap: false, scrollWheelZoom: "center", maxBounds: [[17, 115], [49, 160]], maxBoundsViscosity: 0.7, bounceAtZoomLimits: false });
     m.attributionControl.setPrefix(false);
-    L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", { maxZoom: 18, attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>' }).addTo(m);
+    L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png", { maxZoom: 18, attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>' }).addTo(m);
     L.control.zoom({ position: "bottomright", zoomInTitle: "拡大", zoomOutTitle: "縮小" }).addTo(m);
     const g = has ? null : this.guess(c);
     m.setView(has ? [d.lat, d.lng] : g ? [g.lat, g.lng] : [36.3, 138.3], has ? 16 : g ? 15 : 5);
@@ -4112,9 +4123,9 @@ const PaperView = {
   layout() {
     const st = $("#pvStage"), s = this.s; if (!st || !s) return; const P = Math.max(120, Math.min(st.clientWidth, st.clientHeight) - 28); const paper = $("#pvPaper");
     paper.style.width = paper.style.height = P + "px";
-    const ar = clamp((s.cw || 1) / (s.ch || 1), 0.2, 5); const M = P * 0.7; const w = ar >= 1 ? M : M * ar, h = ar >= 1 ? M / ar : M;
-    const hmm = s.sizeMm && !isDigi(s) && s.type !== "goshuin" ? s.sizeMm * ((s.ch || 1) / Math.max(s.cw || 1, s.ch || 1)) : 0;
-    paper.innerHTML = `<div class="pv-fig" style="width:${w.toFixed(1)}px;height:${h.toFixed(1)}px"><img src="${s.cut}" alt="${esc(s.name || "")}" draggable="false"${isDigi(s) ? "" : ' class="mul"'}>${hmm ? rulerSVG(hmm, h) : ""}</div>`;
+    const A = artOf(s); const ar = clamp((A.w || 1) / (A.h || 1), 0.2, 5); const M = P * (A.sheet ? 0.84 : 0.7); const w = ar >= 1 ? M : M * ar, h = ar >= 1 ? M / ar : M;
+    const hmm = !A.sheet && s.sizeMm && !isDigi(s) && s.type !== "goshuin" ? s.sizeMm * ((s.ch || 1) / Math.max(s.cw || 1, s.ch || 1)) : 0;
+    paper.innerHTML = `<div class="pv-fig" style="width:${w.toFixed(1)}px;height:${h.toFixed(1)}px"><img src="${A.url}" alt="${esc(s.name || "")}" draggable="false"${isDigi(s) || A.sheet ? "" : ' class="mul"'}>${hmm ? rulerSVG(hmm, h) : ""}</div>`;
     this.apply();
   },
   apply() { const p = $("#pvPaper"); if (p) p.style.transform = `translate(${this.tx.toFixed(1)}px,${this.ty.toFixed(1)}px) scale(${this.z.toFixed(4)})`; },
@@ -4170,16 +4181,13 @@ async function openRecrop(s) {
   else { c.an = analyze(c.src); c.boxes = findBoxes(c.src, c.an, c.an.t); }
   const sb = s.box ? { x: s.box.x * ps, y: s.box.y * ps, w: s.box.w * ps, h: s.box.h * ps } : null;
   c.box = sb && sb.w > 8 && sb.h > 8 && sb.x + sb.w <= orig.width + 2 && sb.y + sb.h <= orig.height + 2 ? sb : (c.boxes && c.boxes[0]) || (c.digital ? { x: 0, y: 0, w: orig.width, h: orig.height } : findBox(c.src, c.an, c.an.t));
-  c.crop = CropView($("#cropCv"), c.src, { box: c.box, quad: c.warp.quad, editable: true, tool: "box",
-    onBox: b => { c.box = b; if (b.w < 12 || b.h < 12) { c.box = c.digital ? c.boxes[0] : findBox(c.src, c.an, c.an.t); c.crop.box = c.box; } c.warp.manual = false; refresh("box"); },
-    onQuad: q => { c.warp.quad = q; c.warp.manual = true; refresh("quad"); },
-    onLine: () => {} });
-  refresh("box", true);
+  c.orig0 = orig; c.rot = 0; c.fine = 0; newCrop(c); refresh("box", true);
 }
 async function saveRecrop() {
   const c = sheetCtx; if (!c || !c.recrop || !c.cut) return; const s = c.origStamp; const ps = s.photoScale || 1;
   const btn = $("#saveBtn"); btn.disabled = true; btn.innerHTML = `<span class="spin"></span> 保存中`;
   const d = { ...s, cut: c.cut.url, cw: c.cut.w, ch: c.cut.h, shape: c.cut.shape, ink: c.cut.ink || "", inkPx: c.cut.inkPx ? { w: c.cut.inkPx.w / ps, h: c.cut.inkPx.h / ps } : s.inkPx, box: c.box ? { x: c.box.x / ps, y: c.box.y / ps, w: c.box.w / ps, h: c.box.h / ps } : s.box, colors: c.cut.colors || [], multi: !!c.cut.multi, corner: c.cut.corner, recut: Date.now() };
+  if (c.rotated) { const ph = makePhoto(c.orig); if (ph) { try { await Store.putPhoto("ph_" + s.id, ph.url); d.photoScale = ph.scale; d.box = c.box; d.inkPx = c.cut.inkPx; d.hasPhoto = true; } catch {} } }
   delete d._sig; delete d._hay;
   try { await Store.saveStamp(d); } catch { btn.disabled = false; btn.textContent = "もう一度保存"; toast("保存できませんでした。通信を確かめてもう一度どうぞ", 4000); return; }
   stamps = stamps.map(x => x.id === d.id ? d : x); Books.thumbs.clear(); imgCache.delete(s.cut);
@@ -4235,7 +4243,8 @@ const Others = {
     if (this.user !== r) return;
     this.stamps = rows.map(x => { const s = { ...(x.data || {}), id: x.id, cutPath: x.cut_path, cut: x.cut_path ? this.cutNow(x.cut_path) : BLANK, owner: u, other: true }; if (s.type !== "goshuin") s.cat = catNorm(s.cat); return s; });
     this.stamps.forEach(s => this.byId.set(s.id, s)); this.uLoading = false; this.renderUser();
-    this.cutsReady = inPool(this.stamps.filter(s => s.cutPath), 6, async s => { const url = await this.cut(s.cutPath); if (!url || this.user !== r) return; s.cut = url; document.querySelectorAll(`#othersMode img[data-ck="${CSS.escape(s.id)}"]`).forEach(im => { im.src = url; }); });
+    inPool(this.stamps.filter(s => s.sheet && Store.photoOf), 3, async s => { const url = await Store.photoOf(u, "sh_" + s.id).catch(() => null); if (url && this.user === r) { s._sheet = url; if (s.sheetView !== "stamp") document.querySelectorAll(`#othersMode img[data-ck="${CSS.escape(s.id)}"]`).forEach(im => { im.src = url; }); } });
+    this.cutsReady = inPool(this.stamps.filter(s => s.cutPath), 6, async s => { const url = await this.cut(s.cutPath); if (!url || this.user !== r) return; s.cut = url; if (s._sheet && s.sheetView !== "stamp") return; document.querySelectorAll(`#othersMode img[data-ck="${CSS.escape(s.id)}"]`).forEach(im => { im.src = url; }); });
   },
   renderUser() {
     const box = this.box(); const r = this.user; if (!box || !r) return; const me = r.user_id === Store.uid;
@@ -4252,7 +4261,7 @@ const Others = {
     if (this.uErr) { body.innerHTML = `<div class="empty">読み込めませんでした。通信を確かめてください。</div>`; return; }
     if (this.tab === "cards") {
       const nOv = L.filter(s => s.overlap).length;
-      body.innerHTML = L.length ? `${nOv ? `<p class="cap" style="padding:0 16px;margin:0 0 8px">重ね押し ${nOv} まい</p>` : ""}<div class="cards c${Grid.cols}">${L.map(s => cardHTML(s, numOf.get(s.id), { cols: Grid.cols, other: true })).join("")}</div>` : `<div class="empty">公開しているトレカはありません。</div>`;
+      body.innerHTML = L.length ? `${nOv ? `<p class="cap" style="padding:0 16px;margin:0 0 8px">重ね押し ${nOv} まい</p>` : ""}<div class="cards c${Grid.cols}" style="--cols:${Grid.cols}">${L.map(s => cardHTML(s, numOf.get(s.id), { cols: Grid.cols, other: true })).join("")}</div>` : `<div class="empty">公開しているトレカはありません。</div>`;
       body.onclick = e => { const c = e.target.closest("[data-open]"); if (c) openOtherStamp(this.byId.get(c.dataset.open)); };
     } else this.renderBooks(body);
   },
@@ -4355,6 +4364,102 @@ const Party = {
   }
 };
 
+/* ---------- スタンプだけ / 台紙ごと（重ね押し） ---------- */
+const artOf = (s, v) => { const want = v || s.sheetView || "sheet"; return s && s.sheet && s._sheet && want === "sheet" ? { url: s._sheet, w: s.sheet.w, h: s.sheet.h, sheet: true } : { url: s.cut, w: s.cw, h: s.ch, sheet: false }; };
+async function loadSheets() {
+  const L = stamps.filter(s => s.sheet && !s._sheet); if (!L.length) return;
+  await inPool(L, 3, async s => { const u = await Store.getPhoto("sh_" + s.id).catch(() => null); if (u) s._sheet = u; });
+  Grid.render(); Fall.dirty = true; if (view === "fall") { Fall.stop(); Fall.start(); }
+}
+function sheetBoxHTML(d) {
+  return `<div class="sheetbox full" id="sheetBox"${d.overlap ? "" : " hidden"}>
+    <div class="shrow"><span class="shthumb" id="shThumb">${d._sheet ? `<img src="${d._sheet}" alt="台紙">` : "台紙"}</span>
+      <div class="shctl"><label class="btn small${d.sheet ? "" : " primary"}" style="position:relative">${d.sheet ? "台紙を撮り直す" : "台紙も合わせて登録する"}<input type="file" id="shIn" accept="image/*" style="position:absolute;width:1px;height:1px;opacity:0"></label>
+        <div class="seg" id="shView"${d.sheet ? "" : " hidden"} role="group" aria-label="見せ方"><button type="button" data-sv="sheet" aria-pressed="${d.sheetView !== "stamp"}">台紙ごと</button><button type="button" data-sv="stamp" aria-pressed="${d.sheetView === "stamp"}">スタンプだけ</button></div>
+        <small class="shnote">台紙ごと＝トレカ・ぜんぶ・拡大で台紙と一緒に見せます</small></div></div>
+    <div id="shCrop" hidden><div class="crop-wrap"><canvas id="shCv"></canvas></div><p class="cap">黄色い四隅を台紙の角に合わせてください。</p><div class="row2"><button class="btn small" type="button" data-shrot="-90">↺</button><button class="btn small" type="button" data-shrot="90">↻</button><span style="flex:1"></span><button class="btn small" type="button" id="shNo">やめる</button><button class="btn small primary" type="button" id="shOk">この台紙にする</button></div></div>
+  </div>`;
+}
+function wireSheet(c) {
+  const box = $("#sheetBox"); if (!box) return; const ov = $("#f_overlap");
+  if (ov) ov.addEventListener("change", () => { box.hidden = !ov.checked; });
+  let src = null, quad = null, crop = null;
+  const start = cv => { src = cv; const p = detectPage(src); quad = p.quad; $("#shCrop").hidden = false; crop = CropView($("#shCv"), src, { quad, editable: true, tool: "corners", onQuad: q => { quad = q; } }); };
+  $("#shIn").onchange = async e => { const f = e.target.files[0]; if (!f) return; try { start(await fileToCanvas(f, 2000)); } catch { toast("この写真は読み込めませんでした", 3200); } e.target.value = ""; };
+  box.addEventListener("click", e => {
+    const r = e.target.closest("[data-shrot]"); if (r && src) { start(rotCanvas(src, +r.dataset.shrot)); return; }
+    const v = e.target.closest("[data-sv]"); if (v) { c.d.sheetView = v.dataset.sv; box.querySelectorAll("[data-sv]").forEach(b => b.setAttribute("aria-pressed", b === v)); }
+  });
+  $("#shNo").onclick = () => { $("#shCrop").hidden = true; src = null; };
+  $("#shOk").onclick = () => {
+    if (!src || !quad) return; const [W, H] = quadSize(quad, false); const rect = warpQuad(src, quad, W, H, 1400);
+    let url = null; for (const q of [0.86, 0.8, 0.72]) { url = rect.toDataURL("image/jpeg", q); if (url.length < 900000) break; }
+    c.sheetNew = { url, w: rect.width, h: rect.height }; c.d._sheet = url; c.d.sheetView = "sheet";
+    $("#shThumb").innerHTML = `<img src="${url}" alt="台紙">`; $("#shView").hidden = false; box.querySelectorAll("[data-sv]").forEach(b => b.setAttribute("aria-pressed", b.dataset.sv === "sheet"));
+    $("#shCrop").hidden = true; toast("台紙を入れました。保存すると登録されます");
+  };
+}
+// stamp book: 重ね押し with a sheet asks how to stick it
+function pickForBoard(sid) {
+  const s = findStamp(sid); if (!s) return;
+  if (!(s.overlap && s.sheet && s._sheet)) return Board.add(sid);
+  const back = sheetCtx; sheetCtx = { mode: "pick" };
+  openSheet(`<div class="sheet-head"><h2>どちらを貼りますか</h2><button class="btn small ghost" type="button" data-close>やめる</button></div>
+    <div class="pickv"><button type="button" data-pk="sheet"><span class="pvimg"><img src="${s._sheet}" alt=""></span><b>台紙ごと貼る</b></button><button type="button" data-pk="stamp"><span class="pvimg washi"><img src="${s.cut}" alt="" class="mul"></span><b>スタンプだけ貼る</b></button></div>`);
+  $("#sheet").onclick = e => { const b = e.target.closest("[data-pk]"); if (!b) return; closeSheet(); void back; Board.add(sid, b.dataset.pk === "sheet" ? "sheet" : undefined); };
+}
+
+/* ---------- 切り抜くときの回転 ---------- */
+function rotCanvas(src, deg) {
+  const r = deg * Math.PI / 180, co = Math.abs(Math.cos(r)), si = Math.abs(Math.sin(r));
+  const W = Math.round(src.width * co + src.height * si), H = Math.round(src.width * si + src.height * co); const cv = mkCanvas(W, H), x = cv.getContext("2d");
+  if (deg % 90) { const d = src.getContext("2d").getImageData(0, 0, 1, 1).data; x.fillStyle = `rgb(${d[0]},${d[1]},${d[2]})`; x.fillRect(0, 0, W, H); }
+  x.translate(W / 2, H / 2); x.rotate(r); x.drawImage(src, -src.width / 2, -src.height / 2); return cv;
+}
+function newCrop(c) {
+  c.crop = CropView($("#cropCv"), c.src, { box: c.box, quad: c.warp.quad, editable: true, tool: "box",
+    onBox: b => { c.box = b; if (b.w < 12 || b.h < 12) { c.box = (c.boxes && c.boxes[0]) || findBox(c.src, c.an, c.an.t); c.crop.box = c.box; } c.warp.manual = false; refresh("box"); },
+    onQuad: q => { c.warp.quad = q; c.warp.manual = true; refresh("quad"); },
+    onLine: len => { c.lineLen = len; updateMeas(); } });
+  document.querySelectorAll("[data-tool]").forEach(x => x.setAttribute("aria-pressed", x.dataset.tool === "box"));
+}
+function applyRotation() {
+  const c = sheetCtx; if (!c || !c.orig0) return; const deg = ((c.rot || 0) + (c.fine || 0)) % 360;
+  c.orig = deg ? rotCanvas(c.orig0, deg) : c.orig0; c.rotated = !!deg; c.warp = { auto: c.warp.auto, manual: false, quad: null }; c.erase = [];
+  const eu = $("#eraseUndo"); if (eu) eu.disabled = true;
+  prepareSrc(false); if (deg && c.queue) c.box = (c.boxes && c.boxes[0]) || findBox(c.src, c.an, c.an.t);
+  if (!c.recrop && c.type !== "goshuin") { const ph = makePhoto(c.orig); c.photoUrl = ph && ph.url; c.photoScale = ph ? ph.scale : 1; renderPhotos(); }
+  newCrop(c); refresh("box", true);
+}
+function wireRotate() {
+  const c = sheetCtx; if (!c) return;
+  document.querySelectorAll("[data-rot]").forEach(b => b.onclick = () => { if (!c.orig0) return; c.rot = ((c.rot || 0) + +b.dataset.rot + 360) % 360; applyRotation(); });
+  const f = $("#rotFine"); if (f) { let t = 0; f.oninput = () => { c.fine = +f.value; clearTimeout(t); t = setTimeout(applyRotation, 160); }; }
+}
+
+/* ---------- トレカ一覧: 2本指で列の数を変える（1〜5列） ---------- */
+function setCols(n, anchor) {
+  n = clamp(n, 1, 5); if (n === Grid.cols) return; Grid.cols = n; lsSet("petalog.gridCols", n);
+  if (Grid.mode === "others" && Others.user && Others.tab === "cards") Others.renderUser(); else Grid.render();
+  if (anchor) { const el = document.querySelector(`[data-open="${CSS.escape(anchor)}"]`); if (el) el.scrollIntoView({ block: "center" }); }
+}
+(function gridPinch() {
+  const dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+  const anchorAt = (x, y) => { const el = document.elementFromPoint(x, y); const c = el && el.closest("[data-open]"); return c ? c.dataset.open : null; };
+  for (const id of ["#gridMode", "#othersMode"]) {
+    const box = $(id); if (!box) continue; let d0 = 0, acc = 0;
+    box.addEventListener("touchstart", e => { if (e.touches.length === 2) d0 = dist(e.touches); }, { passive: true });
+    box.addEventListener("touchmove", e => {
+      if (e.touches.length !== 2 || !d0 || !box.querySelector(".cards")) return; e.preventDefault();
+      const r = dist(e.touches) / d0, mx = (e.touches[0].clientX + e.touches[1].clientX) / 2, my = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      if (r > 1.25 && Grid.cols > 1) { setCols(Grid.cols - 1, anchorAt(mx, my)); d0 = dist(e.touches); }
+      else if (r < 0.8 && Grid.cols < 5) { setCols(Grid.cols + 1, anchorAt(mx, my)); d0 = dist(e.touches); }
+    }, { passive: false });
+    box.addEventListener("touchend", e => { if (e.touches.length < 2) d0 = 0; }, { passive: true });
+    box.addEventListener("wheel", e => { if (!e.ctrlKey) return; e.preventDefault(); acc += e.deltaY; if (Math.abs(acc) > 60) { setCols(Grid.cols + (acc > 0 ? 1 : -1), anchorAt(e.clientX, e.clientY)); acc = 0; } }, { passive: false });
+  }
+})();
+
 /* ================= boot ================= */
 addEventListener("resize", () => { Book.layout(); if (view === "fall") { Fall.dirty = true; Fall.stop(); Fall.start(); } if (view === "map") MapV.draw(); });
 document.addEventListener("visibilitychange", () => { if (document.hidden) Fall.stop(); else if (view === "fall") Fall.start(); });
@@ -4371,7 +4476,8 @@ document.addEventListener("contextmenu", e => { if (!e.target.closest("input,tex
   ready = true; Book.idx = 0; MapV.shown = false;
   refreshAll(); show(view);
   if (window.PetalogCloud) PetalogCloud.afterBoot();
-  setTimeout(() => Privacy.firstSync(), 2500);
+  setTimeout(() => Privacy.firstSync(), 2500); loadSheets();
+  if (!lsGet("petalog.pinchHint")) { lsSet("petalog.pinchHint", "1"); setTimeout(() => toast("トレカ一覧は、2本指でつまむと並べる列の数（1〜5列）を変えられます", 4200), 4000); }
   (async () => { let n = 0; for (const s of stamps) { if (await fillStats(s)) n++; } if (n) Grid.render(); })();
 })();
 </script>
