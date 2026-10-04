@@ -1509,7 +1509,7 @@ const MapV = {
     m.attributionControl.addAttribution("駅・路線: 駅データ.jp");
     m.setView([36.6, 137.8], 5);
     this.map = m; this.layer = new RailLayer().addTo(m);
-    const t = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png", { maxZoom: 18, maxNativeZoom: 18, minZoom: 4, attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>' });
+    const t = baseTiles();
     let ok = 0, bad = 0;
     t.on("tileload", () => { if (!ok++) this.setReal(true); });
     t.on("tileerror", () => { bad++; if (!ok && bad >= 3) this.setReal(false); });
@@ -1625,7 +1625,7 @@ const MapV = {
   go(lat, lng, z) { if (this.map) this.map.setView([lat, lng], z, { animate: true }); },
   foot() {
     const f = $("#mapFoot"); const L = list(); const no = L.filter(s => s.lat == null || s.lng == null).length;
-    if (this.mode === "me") { f.innerHTML = `<span>地図に ${L.length - no} まい${no ? ` · 場所が未設定 ${no} まい` : ""}。駅や ✈・★ をタップすると、道案内やスタンプの追加ができます。右の点線の丸ボタンでエリアを囲むと、まだのスタンプを回るルートを作ります。</span>${this.decided && !this.real ? `<span class="credit">この画面では外部の地図画像が読み込めないため、簡易地図で表示しています。</span>` : ""}`; return; }
+    if (this.mode === "me") { f.innerHTML = `<span>地図に ${L.length - no} まい${no ? ` · 場所が未設定 ${no} まい` : ""}。駅の名前のあたりをタップすると、道案内やスタンプの追加ができます。右の点線の丸ボタンでエリアを囲むと、まだのスタンプを回るルートを作ります。</span>${this.decided && !this.real ? `<span class="credit">この画面では外部の地図画像が読み込めないため、簡易地図で表示しています。</span>` : ""}`; return; }
     if (!this.pubs) { f.innerHTML = `<span><span class="spin"></span> みんなの記録を読み込み中…</span>`; return; }
     const others = this.pubs.filter(p => p.by !== Store.uid && !p.miss);
     f.innerHTML = `<div class="nick"><span>ニックネーム</span><input id="nickIn" maxlength="20" value="${esc(Profile.nick)}" placeholder="例: えきすたん"><button class="btn small" type="button" id="nickSave">保存</button><button class="btn small" type="button" id="pubReload">更新</button></div>
@@ -3844,6 +3844,11 @@ async function importBackup(file) {
 
 /* ================= v10: 場所ピッカー・イベントと路線・公開設定・みんなのコレクション・白い紙で拡大・達成のお祝い ================= */
 const BLANK = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+// the base map: a clean, Google-like street map (OpenStreetMap data, CARTO "Voyager" style)
+function baseTiles() {
+  return L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", { subdomains: "abcd", maxZoom: 19, maxNativeZoom: 19, minZoom: 4, detectRetina: false,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>' });
+}
 const fmtKm = km => km < 1 ? Math.max(10, Math.round(km * 100) * 10) + "m" : km.toFixed(1) + "km";
 
 /* ---------- イベント・路線（ひとつのプルダウン） ---------- */
@@ -3920,7 +3925,7 @@ const PlacePick = {
     const d = c.d, has = d.lat != null && d.lng != null;
     const m = L.map(el, { zoomControl: false, attributionControl: true, minZoom: 4, maxZoom: 18, zoomSnap: 0.5, tap: false, scrollWheelZoom: "center", maxBounds: [[17, 115], [49, 160]], maxBoundsViscosity: 0.7, bounceAtZoomLimits: false });
     m.attributionControl.setPrefix(false);
-    L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png", { maxZoom: 18, attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>' }).addTo(m);
+    baseTiles().addTo(m);
     L.control.zoom({ position: "bottomright", zoomInTitle: "拡大", zoomOutTitle: "縮小" }).addTo(m);
     const g = has ? null : this.guess(c);
     m.setView(has ? [d.lat, d.lng] : g ? [g.lat, g.lng] : [36.3, 138.3], has ? 16 : g ? 15 : 5);
