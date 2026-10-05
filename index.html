@@ -5038,7 +5038,6 @@ const PrintCard = {
       const gr = x.createLinearGradient(bx, by, bx + bw, by + bh); gr.addColorStop(0, "#E9C766"); gr.addColorStop(1, "#B8892E");
       x.save(); x.shadowColor = "rgba(0,0,0,.2)"; x.shadowBlur = 0.8 * cq; x.shadowOffsetY = 0.3 * cq; x.fillStyle = gr; this.rr(x, bx, by, bw, bh, bh / 2); x.fill(); x.restore();
       x.fillStyle = "#fff"; x.textAlign = "center"; x.fillText("重ね押し", bx + bw / 2, by + bh / 2);
-      const m = this.PX; x.strokeStyle = "#D4AF4F"; x.lineWidth = 0.35 * m; this.rr(x, 1.1 * m, 1.1 * m, W - 2.2 * m, H - 2.2 * m, 2.6 * m); x.stroke();
       const a = 115 * Math.PI / 180, dx = Math.sin(a), dy = -Math.cos(a), len = Math.abs(W * dx) + Math.abs(H * dy), cx = W / 2, cy = H / 2;
       const sh = x.createLinearGradient(cx - dx * len / 2, cy - dy * len / 2, cx + dx * len / 2, cy + dy * len / 2);
       [[0, "rgba(255,244,200,0)"], [0.34, "rgba(255,244,200,.62)"], [0.53, "rgba(190,222,255,.42)"], [0.68, "rgba(255,196,232,.36)"], [1, "rgba(255,196,232,0)"]].forEach(([o, c]) => sh.addColorStop(o, c));
@@ -5101,7 +5100,8 @@ const PrintCard = {
     const cw = Math.round(63 * m), ch = Math.round(88 * m), fy = Math.round((this.H - ch) / 2), fx = Math.round(this.W / 2 - 0.25 * m) - cw, bx = Math.round(this.W / 2 + 0.25 * m);
     x.save(); x.translate(fx, fy); this.front(x, s, P, cw, ch, fy); x.restore();
     x.save(); x.translate(bx, fy); this.back(x, s, P, cw, ch); x.restore();
-    x.strokeStyle = "rgba(0,0,0,.22)"; x.lineWidth = 1; x.strokeRect(fx + 0.5, fy + 0.5, cw - 1, ch - 1); x.strokeRect(bx + 0.5, fy + 0.5, cw - 1, ch - 1);
+    // 切り取り線: 表だけ・63×88mmちょうど・角は四角（重ね押しは金）
+    const lw = s.overlap ? 3 : 2; x.strokeStyle = s.overlap ? "#D4AF4F" : "rgba(40,40,40,.4)"; x.lineWidth = lw; x.lineJoin = "miter"; x.strokeRect(fx + lw / 2, fy + lw / 2, cw - lw, ch - lw);
     x.setLineDash([10, 8]); x.strokeStyle = "rgba(0,0,0,.4)"; x.beginPath(); x.moveTo(this.W / 2, 0); x.lineTo(this.W / 2, this.H); x.stroke(); x.setLineDash([]);
     const pv = $("#pcCv"); if (pv) { pv.width = cv.width; pv.height = cv.height; pv.getContext("2d").drawImage(cv, 0, 0); }
     this.blob = null; cv.toBlob(b => { if (my === this.gen) this.blob = b; }, "image/jpeg", 0.95);
