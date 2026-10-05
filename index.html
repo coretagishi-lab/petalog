@@ -744,7 +744,7 @@ html,body{touch-action:pan-x pan-y}
 .tc-no{font:500 calc(var(--u) * 3)/1 var(--f-mono);letter-spacing:.1em;white-space:nowrap}
 .tc-win{position:absolute;left:calc(var(--u) * 2.2);right:calc(var(--u) * 2.2);top:calc(var(--u) * 7);bottom:calc(var(--u) * 6.2);border-radius:calc(var(--u) * 1.4);background:#FFFFFF;
   box-shadow:inset 0 calc(var(--u) * .22) calc(var(--u) * .35) rgba(0,0,0,.26),inset 0 0 0 max(1px,calc(var(--u) * .22)) rgba(201,162,74,.85)}
-.tc-tab{position:absolute;left:50%;top:-1px;width:calc(var(--u) * 21.4);height:calc(var(--u) * 5.2);transform:translateX(-50%);z-index:2;filter:drop-shadow(0 calc(var(--u) * .2) calc(var(--u) * .25) rgba(0,0,0,.3))}
+.tc-tab{position:absolute;left:50%;top:0;width:calc(var(--u) * 21.4);height:calc(var(--u) * 5.2);transform:translateX(-50%);z-index:2;filter:drop-shadow(0 calc(var(--u) * .2) calc(var(--u) * .25) rgba(0,0,0,.3))}
 .tc-tabf{position:absolute;inset:0;clip-path:polygon(0 0,100% 0,91% 100%,9% 100%);background:linear-gradient(160deg,var(--lt) 0%,var(--g) 32%,var(--dk) 100%) calc(var(--u) * -20.8) calc(var(--u) * -7) / calc(var(--u) * 63) calc(var(--u) * 88) no-repeat}
 .tc-tab>svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .tc-tabt{position:absolute;inset:0 0 calc(var(--u) * .6);display:flex;align-items:center;justify-content:center;gap:calc(var(--u) * 1);color:#F3E2B0;font:700 calc(var(--u) * 2.7)/1 "Shippori Mincho",var(--f-hand);letter-spacing:.2em;text-indent:.2em;text-shadow:0 1px 2px rgba(0,0,0,.45);white-space:nowrap}
@@ -809,6 +809,13 @@ html.tcv-on,html.tcv-on body{overflow:hidden}
 .digchip[aria-pressed="true"]{background:linear-gradient(135deg,#7FB7EA,#2E5EA6);border-color:#2E5EA6;color:#fff}
 .tc-k{font:400 calc(var(--u) * 3)/1 var(--f-disp);letter-spacing:.02em}
 .tc-logo{font:500 calc(var(--u) * 1.8)/1 var(--f-ui);letter-spacing:.12em;opacity:.85}
+/* 並べ方・空き番号 */
+select.sortsel{-webkit-appearance:none;appearance:none;padding-right:26px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5' fill='none' stroke='%23667' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;background-size:14px;font:inherit;max-width:44vw}
+.card.tc.vac{background:transparent!important;border:2px dashed rgba(29,34,48,.22);box-shadow:none!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--u) * 2);color:#8A8F99}
+.vac-no{font:500 calc(var(--u) * 4.4)/1 var(--f-mono);letter-spacing:.06em;color:#6B7079}
+.vac-t{font:700 calc(var(--u) * 3.2)/1 var(--f-ui)}
+.vac-s{font:500 calc(var(--u) * 2.6)/1 var(--f-ui);color:var(--ai)}
+.tc-win{overflow:hidden}
 </style>
 
 <div id="app">
@@ -831,7 +838,7 @@ html.tcv-on,html.tcv-on body{overflow:hidden}
         <div class="gridtools">
           <input class="search" id="gSearch" type="search" placeholder="駅・イベント・色・日付などで探す" aria-label="スタンプを探す" autocomplete="off">
           <button class="btn small" type="button" id="gFilt" aria-expanded="false">絞り込み</button>
-          <button class="btn small" type="button" id="gSort">新しい順</button>
+          <select class="btn small sortsel" id="gSort" aria-label="並べ方"><option value="no_d">番号 新→古</option><option value="no_a">番号 古→新</option><option value="date_d">押した日 新→古</option><option value="date_a">押した日 古→新</option><option value="genre">ジャンル順</option></select>
           <button class="btn small" type="button" id="gSel">選択</button>
         </div>
         <div class="filters" id="gFilters" hidden></div>
@@ -1393,29 +1400,41 @@ const Grid = {
       row("pref", "都道府県", F.pref) + row("city", "市区町村", F.city) + row("line", "近くの路線", F.line);
   },
   render() {
-    const L = list(); const numOf = new Map(byDate(true).map((s, i) => [s.id, i + 1]));
+    const L = list();
     const gs = GENRES.filter(g => L.some(s => catNorm(s.cat) === g)); const nOv = L.filter(s => s.overlap).length, nDg = L.filter(s => isDigi(s)).length;
     if (this.g === "__ovl" ? !nOv : this.g === "__dig" ? !nDg : this.g !== "all" && !gs.includes(this.g)) this.g = "all";
     $("#gChips").innerHTML = [["all", "すべて " + L.length], ...(nOv ? [["__ovl", "重ね押し " + nOv]] : []), ...(nDg ? [["__dig", "デジスタ " + nDg]] : []), ...gs.map(g => [g, g + " " + L.filter(s => catNorm(s.cat) === g).length])].map(([k, t]) => `<button type="button" data-g="${esc(k)}" aria-pressed="${this.g === k}"${k === "__ovl" ? ' class="ovlchip"' : k === "__dig" ? ' class="digchip"' : ""}>${esc(t)}</button>`).join("");
     if (this.open) this.renderFilters();
     const toks = this.q.trim().toLowerCase().split(/[\s　]+/).filter(Boolean);
-    const items = byDate(!this.desc).filter(s => (this.g === "all" || (this.g === "__ovl" ? s.overlap : this.g === "__dig" ? isDigi(s) : catNorm(s.cat) === this.g)) && this.match(s) && (!toks.length || toks.every(t => hayOf(s).includes(t))));
+    const sorted = Grid.sorted(L);
+    const items = sorted.filter(s => (this.g === "all" || (this.g === "__ovl" ? s.overlap : this.g === "__dig" ? isDigi(s) : catNorm(s.cat) === this.g)) && this.match(s) && (!toks.length || toks.every(t => hayOf(s).includes(t))));
     this.items = items; const nf = Object.keys(this.f).length;
     $("#gFilt").textContent = nf ? `絞り込み ${nf}` : "絞り込み"; $("#gFilt").classList.toggle("primary", nf > 0);
     $("#gCount").innerHTML = (nf || toks.length || this.g !== "all") ? `<span>${items.length} まい見つかりました</span><button type="button" id="gClear">条件をクリア</button>` : "";
     const cl = $("#gClear"); if (cl) cl.onclick = () => { this.f = {}; this.q = ""; this.g = "all"; $("#gSearch").value = ""; this.render(); };
     const box = $("#cards"); box.className = `cards c${this.cols}${this.selMode ? " selecting" : ""}`; box.style.setProperty("--cols", this.cols);
-    box.innerHTML = !ready ? `<div class="empty" style="grid-column:1/-1"><span class="spin"></span></div>` : items.length ? items.map(s => cardHTML(s, numOf.get(s.id), { cols: this.cols, picked: this.sel.has(s.id) })).join("")
+    box.innerHTML = !ready ? `<div class="empty" style="grid-column:1/-1"><span class="spin"></span></div>` : items.length ? Grid.withVacant(items, toks.length || nf || this.g !== "all").map(s => s.vac ? `<button type="button" class="card tc vac" data-vac="${s.vac}"><span class="vac-no">${Numbers.fmt(s.vac)}</span><span class="vac-t">空き番号</span><span class="vac-s">＋ ここに追加</span></button>` : cardHTML(s, Numbers.of(s), { cols: this.cols, picked: this.sel.has(s.id) })).join("")
       : `<div class="empty" style="grid-column:1/-1">見つかりませんでした。</div>`;
-    $("#gSort").textContent = this.desc ? "新しい順" : "古い順";
+    $("#gSort").value = this.sortBy + (this.sortBy === "genre" ? "" : this.desc ? "_d" : "_a");
   }
 };
 $("#gChips").onclick = e => { const b = e.target.closest("[data-g]"); if (b) { Grid.g = b.dataset.g; Grid.render(); } };
 $("#gSearch").oninput = e => { Grid.q = e.target.value; Grid.render(); };
-$("#gSort").onclick = () => { Grid.desc = !Grid.desc; Grid.render(); };
+$("#gSort").onchange = e => { const v = e.target.value; Grid.sortBy = v.split("_")[0]; Grid.desc = v.endsWith("_d"); lsSet("petalog.sort", v); Grid.render(); };
+{ const v = lsGet("petalog.sort") || "no_d"; Grid.sortBy = v.split("_")[0]; Grid.desc = v === "genre" ? true : v.endsWith("_d"); }
+Grid.sorted = function (L) {
+  const byNo = (p, q) => Numbers.of(p) - Numbers.of(q);
+  if (this.sortBy === "genre") { const gi = g => { const i = GENRES.indexOf(catNorm(g)); return i < 0 ? 99 : i; }; return [...L].sort((p, q) => gi(p.cat) - gi(q.cat) || byNo(p, q)); }
+  if (this.sortBy === "date") { const a = [...L].sort(Numbers.cmp); return this.desc ? a.reverse() : a; }
+  const a = [...L].sort(byNo); return this.desc ? a.reverse() : a;
+};
+Grid.withVacant = function (items, filtered) {   // 番号順で絞り込みなしのときだけ、空き番号の枠を出す
+  if (this.sortBy !== "no" || filtered || !stamps.length) return items; const v = Numbers.vacant(); if (!v.length) return items;
+  const all = [...items, ...v.map(n => ({ vac: n, no: n }))]; all.sort((p, q) => (p.vac || Numbers.of(p)) - (q.vac || Numbers.of(q))); return this.desc ? all.reverse() : all;
+};
 $("#gFilt").onclick = () => { Grid.open = !Grid.open; $("#gFilters").hidden = !Grid.open; $("#gFilt").setAttribute("aria-expanded", Grid.open); Grid.render(); };
 $("#gFilters").onclick = e => { const b = e.target.closest("[data-fk]"); if (!b) return; const k = b.dataset.fk, v = k === "multi" ? true : b.dataset.fv; if (Grid.f[k] === v) delete Grid.f[k]; else Grid.f[k] = v; Grid.render(); };
-$("#cards").onclick = e => { const c = e.target.closest("[data-open]"); if (!c) return; if (Grid.selMode) { const id = c.dataset.open; Grid.sel.has(id) ? Grid.sel.delete(id) : Grid.sel.add(id); c.classList.toggle("picked", Grid.sel.has(id)); renderSelBar(); return; } CardView.open(c.dataset.open); };
+$("#cards").onclick = e => { const vc = e.target.closest("[data-vac]"); if (vc && !Grid.selMode) { Numbers.pending = +vc.dataset.vac; $("#addBtn").click(); return; } const c = e.target.closest("[data-open]"); if (!c) return; if (Grid.selMode) { const id = c.dataset.open; Grid.sel.has(id) ? Grid.sel.delete(id) : Grid.sel.add(id); c.classList.toggle("picked", Grid.sel.has(id)); renderSelBar(); return; } CardView.open(c.dataset.open); };
 $("#gSel").onclick = () => setSelMode(!Grid.selMode);
 </script>
 <script>
@@ -2438,7 +2457,7 @@ async function renderStampOnly(s, bg) {
 }
 const toBlob = (cv, type, q) => new Promise((res, rej) => cv.toBlob(b => b ? res(b) : rej(new Error("blob")), type, q));
 const safeName = t => String(t || "").replace(/[\\/:*?"<>|\s]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 32) || "petalog";
-function numbering() { return new Map(byDate(true).map((s, i) => [s.id, i + 1])); }
+function numbering() { return new Map(list().map(s => [s.id, Numbers.of(s)])); }
 async function deliverFiles(files, box) {
   const canShare = !!(navigator.canShare && navigator.share && (() => { try { return navigator.canShare({ files }); } catch { return false; } })());
   box.innerHTML = `${canShare ? `<button class="btn primary" type="button" id="exShare">写真に保存・共有（${files.length}まい）</button>` : ""}<button class="btn${canShare ? "" : " primary"}" type="button" id="exDl">${files.length > 1 ? `${files.length}まいダウンロード` : "ダウンロード"}</button>
@@ -3607,6 +3626,7 @@ function formHTML(d, ro) {
     <label class="fld full"><span>${gos ? "寺社名" : "スタンプの名前"}</span><input id="f_name" class="hand" value="${esc(d.name)}" placeholder="${gos ? "例: ○○神社" : "例: 東京駅"}"${dis}></label>
     ${gos ? "" : `<label class="fld"><span>ジャンル</span><select id="f_cat" aria-label="ジャンル"${dis}>${GENRES.map(g => `<option${g === cat ? " selected" : ""}>${g}</option>`).join("")}</select></label><label class="fld"><span>種類</span><select id="f_medium" aria-label="リアルかデジタルか"${dis}><option value="real"${digi ? "" : " selected"}>リアルスタンプ</option><option value="digital"${digi ? " selected" : ""}>デジタルスタンプ</option></select></label>`}
     <label class="fld full"><span>押した日</span><input id="f_date" type="date" value="${esc(d.date || "")}"${dis}></label>
+    ${!ro && !gos && Numbers.vacant().length ? (() => { const ed = stamps.some(x => x.id === d.id), cur = ed ? Numbers.of(d) : 0, sel = ed ? cur : (+d.no || Numbers.next()); return `<label class="fld full"><span>トレカ番号</span><select id="f_no">${Numbers.options(cur).map(([n, t]) => `<option value="${n}"${n === sel ? " selected" : ""}>${t}</option>`).join("")}</select></label>`; })() : ""}
     ${gos ? "" : `<label class="toggle ovltog full"><input type="checkbox" id="f_overlap"${d.overlap ? " checked" : ""}${dis}><span><b>重ね押し</b><br><small>2つ以上のスタンプを重ねて押した特別な1まい。トレカ一覧の「重ね押し」に入ります。</small><em class="ovlhint" id="ovlHint" hidden>インクが2色以上あります。重ね押しならチェックを入れてください。</em></span></label>${ro ? "" : sheetBoxHTML(d)}`}
     <div class="fld full"><span>イベント・路線</span><select id="f_evl" aria-label="イベント・路線"${dis}>${evlOptions(d)}</select><div class="evlhint" id="evlHint"></div>
       <div class="row2" id="evNewBox" style="margin-top:6px" hidden><input id="f_evNew" class="grow ninput" maxlength="30" placeholder="例: 謎解き"><button class="btn small primary" type="button" id="evAdd">追加</button></div>
@@ -3657,7 +3677,8 @@ function openStamp(mode, s, preset, extra = {}) {
   if (mode === "add" && !ready) { toast("保存先を準備しています。少し待ってからどうぞ"); return; }
   const ro = mode === "edit" && !!s.sample;
   const type = mode === "edit" ? (s.type || "stamp") : (extra.type || (preset && preset.type) || "stamp");
-  const d = mode === "add" ? { id: uid(), type, name: "", place: "", pref: "", cat: "駅", date: todayStr(), lat: null, lng: null, memo: "", spot: "", sizeMm: null, sizeSrc: null, rally: "", line: "", scenes: [], created: Date.now(), ...(preset || {}) } : JSON.parse(JSON.stringify(s));
+  const pendNo = mode === "add" && Numbers.pending && Numbers.vacant().includes(Numbers.pending) ? Numbers.pending : 0; Numbers.pending = 0;
+  const d = mode === "add" ? { ...(pendNo ? { no: pendNo } : {}), id: uid(), type, name: "", place: "", pref: "", cat: "駅", date: todayStr(), lat: null, lng: null, memo: "", spot: "", sizeMm: null, sizeSrc: null, rally: "", line: "", scenes: [], created: Date.now(), ...(preset || {}) } : JSON.parse(JSON.stringify(s));
   if (!Array.isArray(d.scenes)) d.scenes = [];
   if (d.type !== "goshuin") d.cat = catNorm(d.cat);
   sheetCtx = { mode, d, orig: s, ro, type, newScenes: [], delScenes: [], sceneUrls: new Map(), colorMode: "auto", offset: 0, erase: [], ghost: false, whiten: true, digital: type !== "goshuin" && d.medium === "digital", dmode: "auto", dtol: 36, adj: extra.adj || { auto: d.medium !== "digital", bright: 0, contrast: 0 }, warp: { auto: true, manual: false, quad: null }, queue: extra.queue || null, fixedType: !!(preset && preset.rally), catTouched: mode === "edit" || !!(preset && preset.cat) };
@@ -3669,7 +3690,7 @@ function openStamp(mode, s, preset, extra = {}) {
       ${d.spot ? `<div class="meta" style="margin-top:4px">置き場所: ${esc(d.spot)}</div>` : ""}${d.lat != null ? `<div class="meta" style="margin-top:6px"><a href="${gmapsDir(d.lat, d.lng)}" target="_blank" rel="noopener">ここへ行く（Googleマップ）</a></div>` : ""}${ro ? `<div class="meta" style="margin-top:6px">サンプルは編集できません。</div>` : d.priv ? `<div class="meta" style="margin-top:4px">🔒 非公開のトレカ</div>` : ""}</div></div>` : "";
   const title = mode === "add" ? (preset && preset.rally ? esc(preset.name) + " を追加" : "追加") : ro ? "サンプル" : "スタンプの記録";
   openSheet(`<div class="sheet-head"><h2>${title}</h2><span class="headbtns">${mode === "edit" && !ro ? `<button class="btn small danger" type="button" id="hDel"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>削除</button>` : ""}<button class="btn small ghost" type="button" data-close>閉じる</button></span></div>
-    ${mode === "add" ? `<div id="addStep">${addStepHTML(c)}</div>` : `<div id="heroConfirm"></div>` + hero + `<div class="heroacts"><button class="btn small" type="button" id="hExport">画像で保存</button>${ro || type === "goshuin" ? "" : `<button class="btn small" type="button" id="hBoard">スタンプ帳に貼る</button><button class="btn small" type="button" id="hRecut">切り抜きを直す</button><button class="btn small" type="button" id="hPrint">印刷用をつくる</button>`}</div>`}
+    ${mode === "add" ? `<div id="addStep">${addStepHTML(c)}</div>` : `<div id="heroConfirm"></div>` + hero + `<div class="heroacts"><button class="btn small" type="button" id="hExport">画像で保存</button>${ro || type === "goshuin" ? "" : `<button class="btn small" type="button" id="hBoard">スタンプ帳に貼る</button><button class="btn small" type="button" id="hRecut">切り抜きを直す</button><button class="btn small" type="button" id="hRetake">写真を撮り直す</button><button class="btn small" type="button" id="hPrint">印刷用をつくる</button>`}</div>`}
     <div id="formArea"${mode === "add" ? " hidden" : ""}>${formHTML(d, ro)}
     ${ro ? "" : `<div class="acts">${mode === "edit" ? `<button class="btn ghost" type="button" id="delBtn">削除</button>${type === "goshuin" ? "" : `<button class="btn" type="button" id="toBoard">スタンプ帳に貼る</button>`}` : ""}<button class="btn primary" type="button" id="saveBtn">${mode === "add" ? "スタンプ帳に入れる" : "保存"}</button></div><div id="confirmArea"></div>`}</div>`);
   wireForm();
@@ -3679,7 +3700,7 @@ function openStamp(mode, s, preset, extra = {}) {
     loadEditPhotos();
     $("#hExport").onclick = () => openExport({ ids: [d.id] });
     const hb = $("#hBoard"); if (hb) hb.onclick = () => Books.addStamp(d.id);
-    const hr = $("#hRecut"); if (hr) hr.onclick = () => openRecrop(s); const hpr = $("#hPrint"); if (hpr) hpr.onclick = () => PrintCard.open(s);
+    const hr = $("#hRecut"); if (hr) hr.onclick = () => openRecrop(s); const hrt = $("#hRetake"); if (hrt) hrt.onclick = () => { const i = document.createElement("input"); i.type = "file"; i.accept = "image/*,application/pdf"; i.onchange = () => { if (i.files[0]) openRecrop(s, i.files[0]); }; i.click(); }; const hpr = $("#hPrint"); if (hpr) hpr.onclick = () => PrintCard.open(s);
     const hd = $("#hDel"); if (hd) hd.onclick = () => {
       $("#heroConfirm").innerHTML = `<div class="confirm"><span style="flex:1">この記録と写真を削除します。スタンプ帳のページからもはがれます。元には戻せません。</span><button class="btn small" type="button" id="hNo">やめる</button><button class="btn small shu" type="button" id="hYes">削除する</button></div>`;
       $("#hNo").onclick = () => $("#heroConfirm").innerHTML = "";
@@ -3872,6 +3893,7 @@ function readForm(d) {
     else if (ev.startsWith("l:")) { d.event = ""; d.line = ev.slice(2); d.rally = lineKeyFor(d.line, d) || ""; }
     else { d.event = ""; d.line = ""; d.rally = ""; }
   }
+  const fno = $("#f_no"); if (fno && +fno.value > 0) d.no = +fno.value;
   if (!gos) { const md = $("#f_medium"); if (md) { if (md.value === "digital") d.medium = "digital"; else delete d.medium; } const cm = num(v("#f_size")); d.sizeMm = cm && cm > 0 ? Math.round(cm * 100) / 10 : null; if (!d.sizeMm) d.sizeSrc = null; }
 }
 async function saveStampForm() {
@@ -3909,6 +3931,7 @@ async function updateExisting(t) {
   await commitSave(c, merged);
 }
 async function commitSave(c, d) {
+  if (c.mode === "add" && !(+d.no > 0 && Numbers.vacant().includes(+d.no))) d.no = Numbers.next();   // 新しい番号（空き番号を選んだときはその番号）
   const btn = $("#saveBtn"); if (btn) { btn.disabled = true; btn.innerHTML = `<span class="spin"></span> 保存中`; }
   try {
     if (c.sheetNew) { await Store.putPhoto("sh_" + d.id, c.sheetNew.url); d.sheet = { w: c.sheetNew.w, h: c.sheetNew.h }; d._sheet = c.sheetNew.url; if (!d.sheetView) d.sheetView = "sheet"; }
@@ -4040,7 +4063,7 @@ function jaLabels(g) {
 function addBaseMap(m, ok, bad) {
   let settled = false; const good = l => { if (!settled) { settled = true; ok && ok(l); } }, fail = () => { if (!settled) { settled = true; bad && bad(); } };
   const raster = () => {
-    if (settled) return; const t = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: OSM_ATTR }); let n = 0, e = 0;
+    if (settled || !m._mapPane || !m.getContainer().isConnected) return; const t = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: OSM_ATTR }); let n = 0, e = 0;
     t.on("tileload", () => { if (!n++) good(t); }); t.on("tileerror", () => { if (!n && ++e >= 4) { m.removeLayer(t); fail(); } }); t.addTo(m);
     setTimeout(() => { if (!n) { try { m.removeLayer(t); } catch {} fail(); } }, 7000);
   };
@@ -4413,17 +4436,21 @@ const PaperView = {
 };
 
 /* ---------- 切り抜きを直す（登録したあとで） ---------- */
-async function openRecrop(s) {
-  if (!s || s.sample) return; toast("元の写真を読み込んでいます…", 1600);
-  let url = null; try { url = await Store.getPhoto("ph_" + s.id, s.id); } catch {}
-  if (!url) { toast("元の写真が保存されていないため、このスタンプは切り抜きを直せません", 4200); return; }
-  let im; try { im = await loadImg(url); } catch { toast("元の写真を読み込めませんでした", 3600); return; }
-  const orig = mkCanvas(im.naturalWidth || im.width, im.naturalHeight || im.height); orig.getContext("2d").drawImage(im, 0, 0);
+async function openRecrop(s, file) {   // file があれば「写真を撮り直す」（番号・日付・メモはそのまま、写真と切り抜きだけ入れ替え）
+  if (!s || s.sample) return; let orig;
+  if (file) { toast("写真を読み込んでいます…", 1600); try { orig = await fileToCanvas(file); } catch { toast("写真を読み込めませんでした", 3600); return; } }
+  else {
+    toast("元の写真を読み込んでいます…", 1600);
+    let url = null; try { url = await Store.getPhoto("ph_" + s.id, s.id); } catch {}
+    if (!url) { toast("元の写真が保存されていないため、このスタンプは切り抜きを直せません。「写真を撮り直す」なら新しい写真から作り直せます", 5200); return; }
+    let im; try { im = await loadImg(url); } catch { toast("元の写真を読み込めませんでした", 3600); return; }
+    orig = mkCanvas(im.naturalWidth || im.width, im.naturalHeight || im.height); orig.getContext("2d").drawImage(im, 0, 0);
+  }
   const digital = isDigi(s);
-  sheetCtx = { mode: "recrop", recrop: true, d: JSON.parse(JSON.stringify(s)), origStamp: s, ro: false, type: s.type || "stamp", newScenes: [], delScenes: [], sceneUrls: new Map(), colorMode: "auto", offset: 0, erase: [], ghost: false, whiten: true, digital, dmode: "auto", dtol: 36, adj: { auto: !digital, bright: 0, contrast: 0 }, warp: { auto: true, manual: false, quad: null }, queue: null, fixedType: true };
+  sheetCtx = { mode: "recrop", recrop: true, d: JSON.parse(JSON.stringify(s)), origStamp: s, ro: false, type: s.type || "stamp", newScenes: [], delScenes: [], sceneUrls: new Map(), colorMode: "auto", offset: 0, erase: [], ghost: false, whiten: true, digital, dmode: "auto", dtol: 36, adj: { auto: !digital, bright: 0, contrast: 0 }, warp: { auto: true, manual: false, quad: null }, queue: null, fixedType: true, retake: !!file };
   const c = sheetCtx;
-  openSheet(`<div class="sheet-head"><h2>切り抜きを直す</h2><button class="btn small ghost" type="button" data-close>やめる</button></div>
-    <p class="cap" style="margin:0 0 10px">登録したときの写真から、もう一度切り抜きます。青い枠や「切り抜きの強さ」「消しゴム」で直して、保存してください。</p>
+  openSheet(`<div class="sheet-head"><h2>${file ? "写真を撮り直す" : "切り抜きを直す"}</h2><button class="btn small ghost" type="button" data-close>やめる</button></div>
+    <p class="cap" style="margin:0 0 10px">${file ? `新しい写真から切り抜きます。トレカ番号（${Numbers.fmt(Numbers.of(s))}）や押した日・メモはそのままです。` : "登録したときの写真から、もう一度切り抜きます。"}青い枠や「切り抜きの強さ」「消しゴム」で直して、保存してください。</p>
     <div id="addStep">${addStepHTML(c)}</div>
     <div class="acts"><button class="btn" type="button" id="rcBack">やめる</button><button class="btn primary" type="button" id="saveBtn">この切り抜きにする</button></div>`);
   wireAdd(); $("#saveBtn").onclick = saveRecrop; $("#rcBack").onclick = () => { const t = findStamp(s.id); if (t) openStamp("edit", t); else closeSheet(); };
@@ -4432,7 +4459,7 @@ async function openRecrop(s) {
   c.src = adjustCanvas(orig, c.adj);
   if (c.digital) { c.an = analyzeDigital(c.src, c.dtol); c.boxes = digitalBoxes(c.src, c.an, c.dtol); }
   else { c.an = analyze(c.src); c.boxes = findBoxes(c.src, c.an, c.an.t); }
-  const sb = s.box ? { x: s.box.x * ps, y: s.box.y * ps, w: s.box.w * ps, h: s.box.h * ps } : null;
+  const sb = !file && s.box ? { x: s.box.x * ps, y: s.box.y * ps, w: s.box.w * ps, h: s.box.h * ps } : null;
   c.box = sb && sb.w > 8 && sb.h > 8 && sb.x + sb.w <= orig.width + 2 && sb.y + sb.h <= orig.height + 2 ? sb : (c.boxes && c.boxes[0]) || (c.digital ? { x: 0, y: 0, w: orig.width, h: orig.height } : findBox(c.src, c.an, c.an.t));
   c.orig0 = orig; c.rot = 0; c.fine = 0; c.cutRot = s.cutRot || 0; newCrop(c); refresh("box", true); wireRotate();
 }
@@ -4440,12 +4467,12 @@ async function saveRecrop() {
   const c = sheetCtx; if (!c || !c.recrop || !c.cut) return; const s = c.origStamp; const ps = s.photoScale || 1;
   const btn = $("#saveBtn"); btn.disabled = true; btn.innerHTML = `<span class="spin"></span> 保存中`;
   const d = { ...s, cut: c.cut.url, cw: c.cut.w, ch: c.cut.h, shape: c.cut.shape, ink: c.cut.ink || "", inkPx: c.cut.inkPx ? { w: c.cut.inkPx.w / ps, h: c.cut.inkPx.h / ps } : s.inkPx, box: c.box ? { x: c.box.x / ps, y: c.box.y / ps, w: c.box.w / ps, h: c.box.h / ps } : s.box, colors: c.cut.colors || [], multi: !!c.cut.multi, corner: c.cut.corner, cutRot: c.cutRot || 0, trimmed: 1, recut: Date.now() };
-  if (c.rotated) { const ph = makePhoto(c.orig); if (ph) { try { await Store.putPhoto("ph_" + s.id, ph.url); d.photoScale = ph.scale; d.box = c.box; d.inkPx = c.cut.inkPx; d.hasPhoto = true; } catch {} } }
+  if (c.rotated || c.retake) { const ph = makePhoto(c.orig); if (ph) { try { await Store.putPhoto("ph_" + s.id, ph.url); d.photoScale = ph.scale; d.box = c.box; d.inkPx = c.cut.inkPx; d.hasPhoto = true; } catch {} } }
   delete d._sig; delete d._hay;
   try { await Store.saveStamp(d); } catch { btn.disabled = false; btn.textContent = "もう一度保存"; toast("保存できませんでした。通信を確かめてもう一度どうぞ", 4000); return; }
   stamps = stamps.map(x => x.id === d.id ? d : x); Books.thumbs.clear(); imgCache.delete(s.cut);
   if (wantShare(d)) { try { await Store.pubPut(pubView(d), await thumbOf(d.cut), Profile.nick); MapV.pubs = null; } catch {} }
-  refreshAll(); openStamp("edit", d); toast("切り抜きを直しました");
+  refreshAll(); openStamp("edit", d); toast(c.retake ? "写真を撮り直しました" : "切り抜きを直しました");
 }
 
 /* ---------- みんなのコレクション（ランキング → その人のトレカ・スタンプ帳） ---------- */
@@ -4502,7 +4529,7 @@ const Others = {
   renderUser() {
     const box = this.box(); const r = this.user; if (!box || !r) return; const me = r.user_id === Store.uid;
     const L = [...this.stamps].sort((p, q) => (q.date || "").localeCompare(p.date || "") || (q.created || 0) - (p.created || 0));
-    const numOf = new Map([...this.stamps].sort((p, q) => (p.date || "9999").localeCompare(q.date || "9999") || (p.created || 0) - (q.created || 0)).map((s, i) => [s.id, i + 1]));
+    const numOf = new Map([...this.stamps].sort((p, q) => (p.date || "9999").localeCompare(q.date || "9999") || (p.created || 0) - (q.created || 0)).map((s, i) => [s.id, +s.no > 0 ? +s.no : i + 1]));
     box.innerHTML = `<div class="ouser"><button class="btn small" type="button" id="oBack">‹ ランキング</button><div class="oname"><b>${esc(r.nick || "名無しのコレクター")}</b>${me ? "<em>あなた</em>" : ""}<small>${this.uLoading ? "" : L.length + " まい"}</small></div></div>
       <div class="subbar"><div class="seg" id="oTab" role="group" aria-label="表示"><button type="button" data-t="cards" aria-pressed="${this.tab === "cards"}">トレカ</button><button type="button" data-t="books" aria-pressed="${this.tab === "books"}">スタンプ帳</button></div></div>
       <div id="oBody"></div>`;
@@ -5035,7 +5062,7 @@ const PrintCard = {
   W: 1500, H: 1051, PX: 1500 / 127, el: null, s: null, P: null, cv: null, blob: null, text: "", wiki: null, washi: null, tm: 0, gen: 0,
   url() { return new URL(".", location.href).href; },
   store() { return lsGet("petalog.printStore") === "sharp" ? "sharp" : "seven"; },
-  no(s) { return new Map(byDate(true).map((x, i) => [x.id, i + 1])).get(s.id) || 0; },
+  no(s) { return Numbers.of(s); },
   // ルビ: 「首里城《しゅりじょう》」または「｜那覇空港《なはくうこう》」の書き方
   ruby(t) { const out = [], re = /(?:｜([^｜《》\n]+)|([㐀-䶿一-鿿々〆ヶ]+))《([^》\n]+)》/g; let i = 0, mm;
     while ((mm = re.exec(t))) { for (const ch of t.slice(i, mm.index)) out.push({ t: ch }); out.push({ t: mm[1] || mm[2], r: mm[3] }); i = re.lastIndex; }
@@ -5099,7 +5126,7 @@ const PrintCard = {
     // タブ（額縁と同じ色）＋ジャンル
     const tw = TC.tabW * m, th = TC.tabH * m, tx = wx + (ww - tw) / 2, ty = wy - 0.1 * m;
     const tab = () => { x.beginPath(); x.moveTo(tx, ty); x.lineTo(tx + tw, ty); x.lineTo(tx + tw * 0.91, ty + th); x.lineTo(tx + tw * 0.09, ty + th); x.closePath(); };
-    x.save(); x.shadowColor = "rgba(0,0,0,.3)"; x.shadowBlur = 0.25 * m; x.shadowOffsetY = 0.2 * m; tab(); x.fillStyle = fr; x.fill(); x.restore();
+    x.save(); this.rr(x, wx, wy, ww, wh, wr); x.clip(); x.shadowColor = "rgba(0,0,0,.3)"; x.shadowBlur = 0.25 * m; x.shadowOffsetY = 0.2 * m; tab(); x.fillStyle = fr; x.fill(); x.restore();
     x.strokeStyle = gold; x.lineWidth = 0.22 * m; x.beginPath(); x.moveTo(tx, ty + 0.1 * m); x.lineTo(tx + tw * 0.09, ty + th); x.lineTo(tx + tw * 0.91, ty + th); x.lineTo(tx + tw, ty + 0.1 * m); x.stroke();
     const gname = catNorm(s.cat), isz = 2.7 * m; x.font = `700 ${2.7 * m}px ${MIN}`; const gtw = this.spaced(x, gname, 0.2 * 2.7 * m), tot = isz + 1 * m + gtw, sx = tx + (tw - tot) / 2, cy = ty + th / 2 - 0.3 * m;
     x.save(); x.shadowColor = "rgba(0,0,0,.4)"; x.shadowBlur = 0.15 * m; x.shadowOffsetY = 0.12 * m; x.fillStyle = cream;
@@ -5240,31 +5267,19 @@ const PrintCard = {
     const m = this.PX, W = Math.round(148 * m), H = Math.round(100 * m);
     let cv = this.cv; if (!cv || cv.width !== H || cv.height !== W) { if (cv) cv.width = cv.height = 0; cv = this.cv = mkCanvas(H, W); }
     const x = cv.getContext("2d"); x.setTransform(1, 0, 0, 1, 0, 0); x.fillStyle = "#fff"; x.fillRect(0, 0, H, W); x.setTransform(0, 1, -1, 0, H, 0);
-    const cw = Math.round(63 * m), ch = Math.round(88 * m), G = Math.round(3 * m), off = Math.round(0.3 * m);
-    const fx = Math.round((W - 2 * cw - 2 * G - off) / 2), fy = Math.round((H - ch) / 2), fold = fx + cw + G, bx = fold + G + off;   // 裏は0.3mmだけ折り線から遠く（折ると裏が折り目側へ寄るのを打ち消す）
+    const cw = Math.round(63 * m), ch = Math.round(88 * m), G = Math.round(3 * m), off = Math.round(0.6 * m);
+    const fx = Math.round((W - 2 * cw - 2 * G - off) / 2), fy = Math.round((H - ch) / 2), fold = fx + cw + G, bx = fold + G + off;   // 裏は折り線から0.6mm遠く（試し刷りで裏が左＝折り目側へ寄っていたぶんを打ち消す）
     x.save(); x.translate(fx, fy); this.front(x, s, P, cw, ch, Math.round(1.5 * m)); x.restore();
     x.save(); x.translate(bx, fy); this.back(x, s, P, cw, ch); x.restore();
-    // 切り取り線: 表だけ・63×88mmちょうど・角は四角（重ね押しは金）
-    const lw = s.overlap ? 3 : 2; x.strokeStyle = s.overlap ? "#D4AF4F" : "rgba(40,40,40,.4)"; x.lineWidth = lw; x.lineJoin = "miter"; x.strokeRect(fx + lw / 2, fy + lw / 2, cw - lw, ch - lw);
-    // 四隅の目印（折り線側の横向きは付けない）
-    x.strokeStyle = "#999"; x.lineWidth = 2; const o = 1.2 * m, l = 2.4 * m; x.beginPath();
+    // 切り取り線: 63×88mmの境目のまん中に引く（線を消すように切るとちょうど63×88mm）。緑などの額縁で見えるよう白（重ね押しは金）
+    const lw = Math.max(2, Math.round(0.2 * m)); x.strokeStyle = s.overlap ? "#E2C063" : "rgba(255,255,255,.95)"; x.lineWidth = lw; x.lineJoin = "miter"; x.strokeRect(fx, fy, cw, ch);
+    // トンボ（カードの外・黒・太め）。折り線側の横向きは裏にかかるので付けない
+    x.strokeStyle = "#111"; x.lineWidth = Math.max(3, Math.round(0.25 * m)); x.lineCap = "butt"; const o = 2.2 * m, l = 3 * m; x.beginPath();
     for (const [cx, cy, sx, sy] of [[fx, fy, -1, -1], [fx + cw, fy, 1, -1], [fx, fy + ch, -1, 1], [fx + cw, fy + ch, 1, 1]]) { if (sx < 0) { x.moveTo(cx - o, cy); x.lineTo(cx - o - l, cy); } x.moveTo(cx, cy + sy * o); x.lineTo(cx, cy + sy * (o + l)); }
     x.stroke();
-    // 山折り線
-    x.strokeStyle = "rgba(0,0,0,.45)"; x.setLineDash([10, 8]); x.beginPath(); x.moveTo(fold, 0); x.lineTo(fold, fy - 1.5 * m); x.moveTo(fold, fy + ch + 1.5 * m); x.lineTo(fold, H); x.stroke(); x.setLineDash([]);
-    x.strokeStyle = "rgba(0,0,0,.16)"; x.lineWidth = 1; x.beginPath(); x.moveTo(fold, fy); x.lineTo(fold, fy + ch); x.stroke();
-    const UI = '"Zen Kaku Gothic New","Hiragino Sans",sans-serif', ty = fy - 3 * m, by = fy + ch + 3 * m;
-    x.textBaseline = "middle"; x.textAlign = "left"; x.fillStyle = "#6E6E6E"; x.font = `500 ${1.75 * m}px ${UI}`; x.fillText("山折り", fold + 1 * m, ty);
-    // 切る順番（①は折り目側＝最初に切る）
-    x.textAlign = "center"; x.fillStyle = "#555"; x.font = `700 ${2.1 * m}px ${UI}`;
-    [["①", fx + cw + G / 2, fy + ch / 2], ["②", fx + 4 * m, ty], ["③", fx - 3.4 * m, fy + ch / 2], ["④", fx + 4 * m, by]].forEach(([t, X, Y]) => x.fillText(t, X, Y));
-    // 四隅に作り方（1行ずつ）
-    x.textAlign = "left"; x.fillStyle = "#5E5E5E"; x.font = `500 ${1.75 * m}px ${UI}`;
-    const line = (t, X, Y, Wd) => x.fillText(this.shrink(x, t, Wd), X, Y);
-    line("1. 点線で山折り→内側をテープのりで貼る（水のりは×）", fx + 8 * m, ty, fold - 2 * m - (fx + 8 * m));
-    line("2. 折り目側の①を先に切り、上から押さえて貼り直す", fold + 8 * m, ty, bx + cw - (fold + 8 * m));
-    line("3. 残りの②③④を切れば完成", fx + 8 * m, by, fold - 2 * m - (fx + 8 * m));
-    line("厚紙をはさむと硬く・角丸パンチで角を丸く", fold + 2 * m, by, bx + cw - (fold + 2 * m));
+    // 山折り線（はっきり・上から下まで）
+    x.strokeStyle = "#222"; x.lineWidth = Math.max(3, Math.round(0.25 * m)); x.setLineDash([Math.round(1.6 * m), Math.round(0.9 * m)]); x.beginPath(); x.moveTo(fold, 0); x.lineTo(fold, H); x.stroke(); x.setLineDash([]);
+    const UI = '"Zen Kaku Gothic New","Hiragino Sans",sans-serif';
     // 実寸チェック用のものさし（50mm・右の余白にたて向き）
     const rx = Math.round(bx + cw + 2.6 * m), ry0 = Math.round(fy + ch / 2 - 25 * m); x.fillStyle = "#3C3C3C";
     x.fillRect(rx, ry0, 2, 50 * m);
@@ -5313,7 +5328,7 @@ const PrintCard = {
         <label class="pc-l">裏面の解説<textarea id="pcText" rows="7" placeholder="この場所やスタンプのプチ情報"></textarea><small class="pc-rb">むずかしい読みは 首里城《しゅりじょう》 のように書くとルビになります</small></label>
         <div class="pc-st" id="pcSt"></div>
         <div class="row2"><button class="btn primary" type="button" id="pcSave">画像を保存</button><button class="btn" type="button" id="pcPdf">PDFを保存</button></div>
-        <ol class="pc-how"><li><b>コンビニで印刷：</b>「画像を保存」→ セブン‐イレブンは「ネットプリント」、ローソン・ファミマは「ネットワークプリント」で、用紙を <b>はがき・カラー</b> にして印刷（実寸で出ます）</li><li><b>家のプリンターで印刷：</b>「PDFを保存」→ 無地のはがき用紙に <b>実際のサイズ（100%）</b> で印刷。「用紙に合わせる」などの拡大・縮小はオフに</li><li>右のものさしが50mmなら実寸です</li><li>コンビニのはがきは裏に郵便番号の枠があり、光に透かすとうっすら見えます（ふつうに持つぶんにはほぼ見えません）</li><li>作り方は紙の四隅にも書いてあります：山折り → テープのりで貼る → ①を先に切って押さえる → ②③④を切る</li></ol></div>`;
+        <ol class="pc-how"><li><b>コンビニで印刷：</b>「画像を保存」→ セブン‐イレブンは「ネットプリント」、ローソン・ファミマは「ネットワークプリント」で、用紙を <b>はがき・カラー</b> にして印刷（実寸で出ます）</li><li><b>家のプリンターで印刷：</b>「PDFを保存」→ 無地のはがき用紙に <b>実際のサイズ（100%）</b> で印刷。「用紙に合わせる」などの拡大・縮小はオフに</li><li>右のものさしが50mmなら実寸です</li><li>コンビニのはがきは裏に郵便番号の枠があり、光に透かすとうっすら見えます（ふつうに持つぶんにはほぼ見えません）</li><li>作り方：点線で山折り → 内側をテープのりで貼る（水のりは乾かないので×） → 折り目側の線を先に切って、上から押さえて貼り直す → 残りの3辺を切る</li><li>切るときは白い線（重ね押しは金の線）を消すように線の上を切ると、ちょうど63×88mmになります。外の黒いトンボが目印です</li></ol></div>`;
     $("#pcX").onclick = () => { d.hidden = true; this.s = null; this.gen++; this.blob = null; if (this.burl) { URL.revokeObjectURL(this.burl); this.burl = null; } if (this.cv) { this.cv.width = this.cv.height = 0; this.cv = null; } d.innerHTML = ""; };
     const ta = $("#pcText"); ta.value = this.text;
     ta.oninput = () => { this.text = ta.value; lsSet("petalog.pt." + s.id, JSON.stringify({ text: this.text })); clearTimeout(this.tm); this.tm = setTimeout(() => this.render(), 450); };
@@ -5455,6 +5470,34 @@ const CardView = {
   }
 };
 
+/* ---------- トレカ番号: 登録したときに決まって変わらない固定番号。消した番号は「空き番号」としてあとで埋められる ---------- */
+const Numbers = {
+  pending: 0, busy: false,
+  cmp: (p, q) => (p.date || "9999").localeCompare(q.date || "9999") || (p.created || 0) - (q.created || 0),
+  mine() { return stamps.filter(s => !s.sample); },
+  max() { let m = 0; for (const s of this.mine()) if (+s.no > m) m = +s.no; return m; },
+  next() { return this.max() + 1; },
+  vacant() { const u = new Set(this.mine().map(s => +s.no).filter(n => n > 0)), out = []; for (let i = 1; i <= this.max(); i++) if (!u.has(i)) out.push(i); return out; },
+  of(s) { if (s && +s.no > 0) return +s.no; const L = [...(s && s.sample ? list() : stamps)].sort(this.cmp); return L.findIndex(x => x.id === (s && s.id)) + 1 || 0; },
+  fmt(n) { return "No." + String(n || 0).padStart(4, "0"); },
+  options(cur) { const v = this.vacant(), nx = this.next(); const opts = [];
+    if (cur) opts.push([cur, `${this.fmt(cur)}（いまの番号）`]); else opts.push([nx, `${this.fmt(nx)}（次の番号）`]);
+    for (const n of v) if (n !== cur) opts.push([n, `${this.fmt(n)}（空き番号）`]); return opts; },
+  // 番号がないスタンプに番号を付ける。はじめての時は、いま表示している番号（押した日の順）をそのまま固定する
+  async ensure() {
+    if (this.busy || !ready || Store.mode === "sample") return; const M = this.mine(); if (!M.length) return; this.busy = true;
+    try {
+      const fix = [], seen = new Map();
+      for (const s of [...M].sort((p, q) => (p.created || 0) - (q.created || 0))) { const n = +s.no; if (n > 0) { if (seen.has(n)) { delete s.no; } else seen.set(n, s); } }   // 2台で同時に登録して番号が重なったら、あとの方を次の番号へ
+      const none = M.filter(s => !(+s.no > 0)); if (!none.length) return;
+      const order = seen.size ? none.sort((p, q) => (p.created || 0) - (q.created || 0)) : none.sort(this.cmp);
+      let n = this.max(); for (const s of order) { s.no = ++n; fix.push(s); }
+      await inPool(fix, 3, s => Store.saveStamp(s));
+      if (typeof Grid !== "undefined") Grid.render();
+    } catch (_) {} finally { this.busy = false; }
+  }
+};
+
 /* ================= boot ================= */
 addEventListener("resize", () => { Book.layout(); if (view === "fall") { Fall.dirty = true; Fall.stop(); Fall.start(); } if (view === "map") MapV.draw(); });
 document.addEventListener("visibilitychange", () => { if (document.hidden) Fall.stop(); else if (view === "fall") Fall.start(); });
@@ -5471,7 +5514,7 @@ document.addEventListener("contextmenu", e => { if (!e.target.closest("input,tex
   ready = true; Book.idx = 0; MapV.shown = false;
   refreshAll(); show(view);
   if (window.PetalogCloud) PetalogCloud.afterBoot();
-  setTimeout(() => Privacy.firstSync(), 2500); loadSheets(); setTimeout(trimOld, 6000);
+  setTimeout(() => Privacy.firstSync(), 2500); loadSheets(); setTimeout(trimOld, 6000); setTimeout(() => Numbers.ensure(), 1500);
   if (!lsGet("petalog.pinchHint")) { lsSet("petalog.pinchHint", "1"); setTimeout(() => toast("トレカ一覧は、2本指でつまむと並べる列の数（1〜5列）を変えられます", 4200), 4000); }
   (async () => { let n = 0; for (const s of stamps) { if (await fillStats(s)) n++; } if (n) Grid.render(); })();
 })();
