@@ -711,6 +711,18 @@ html,body{touch-action:pan-x pan-y}
 .er-ring{position:absolute;left:0;top:0;border-radius:50%;border:2px solid #C8412E;background:rgba(200,65,46,.14);box-shadow:0 0 0 1px rgba(255,255,255,.85);pointer-events:none;z-index:2}
 .er-zr{position:absolute;right:8px;top:8px;z-index:3;border:1px solid var(--line);background:var(--card);color:inherit;border-radius:99px;padding:4px 10px;font-size:11.5px;box-shadow:var(--shadow)}
 .er-tip{font-size:11px;color:var(--muted)}
+.prt .pc-body{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:4px 16px 28px;display:flex;flex-direction:column;gap:12px;width:100%;max-width:620px;margin:0 auto;box-sizing:border-box}
+.pc-prev{position:relative}
+.pc-prev canvas{display:block;width:100%;height:auto;background:#fff;border-radius:4px;box-shadow:0 4px 18px rgba(0,0,0,.4)}
+.pc-wait{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(18,20,26,.7);color:#fff;font-size:13px;border-radius:4px}
+.pc-wait[hidden]{display:none}
+.pc-l{display:flex;flex-direction:column;gap:6px;font-size:12.5px;color:rgba(255,255,255,.8)}
+.pc-l textarea{font:inherit;font-size:15px;line-height:1.6;color:#1D2230;background:#fff;border:0;border-radius:10px;padding:10px 12px;resize:vertical}
+.pc-st{font-size:12px;color:rgba(255,255,255,.7);min-height:1em}
+.pc-how{margin:4px 0 0;padding-left:20px;font-size:12.5px;line-height:1.75;color:rgba(255,255,255,.82)}
+.pc-how b{color:#fff}
+.prt{background:#14161C}
+.prt .btn:not(.primary){color:#1D2230}
 </style>
 
 <div id="app">
@@ -3569,7 +3581,7 @@ function openStamp(mode, s, preset, extra = {}) {
       ${d.spot ? `<div class="meta" style="margin-top:4px">置き場所: ${esc(d.spot)}</div>` : ""}${d.lat != null ? `<div class="meta" style="margin-top:6px"><a href="${gmapsDir(d.lat, d.lng)}" target="_blank" rel="noopener">ここへ行く（Googleマップ）</a></div>` : ""}${ro ? `<div class="meta" style="margin-top:6px">サンプルは編集できません。</div>` : d.priv ? `<div class="meta" style="margin-top:4px">🔒 非公開のトレカ</div>` : ""}</div></div>` : "";
   const title = mode === "add" ? (preset && preset.rally ? esc(preset.name) + " を追加" : "追加") : ro ? "サンプル" : "スタンプの記録";
   openSheet(`<div class="sheet-head"><h2>${title}</h2><span class="headbtns">${mode === "edit" && !ro ? `<button class="btn small danger" type="button" id="hDel"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>削除</button>` : ""}<button class="btn small ghost" type="button" data-close>閉じる</button></span></div>
-    ${mode === "add" ? `<div id="addStep">${addStepHTML(c)}</div>` : `<div id="heroConfirm"></div>` + hero + `<div class="heroacts"><button class="btn small" type="button" id="hExport">画像で保存</button>${ro || type === "goshuin" ? "" : `<button class="btn small" type="button" id="hBoard">スタンプ帳に貼る</button><button class="btn small" type="button" id="hRecut">切り抜きを直す</button>`}</div>`}
+    ${mode === "add" ? `<div id="addStep">${addStepHTML(c)}</div>` : `<div id="heroConfirm"></div>` + hero + `<div class="heroacts"><button class="btn small" type="button" id="hExport">画像で保存</button>${ro || type === "goshuin" ? "" : `<button class="btn small" type="button" id="hBoard">スタンプ帳に貼る</button><button class="btn small" type="button" id="hRecut">切り抜きを直す</button><button class="btn small" type="button" id="hPrint">印刷用をつくる</button>`}</div>`}
     <div id="formArea"${mode === "add" ? " hidden" : ""}>${formHTML(d, ro)}
     ${ro ? "" : `<div class="acts">${mode === "edit" ? `<button class="btn ghost" type="button" id="delBtn">削除</button>${type === "goshuin" ? "" : `<button class="btn" type="button" id="toBoard">スタンプ帳に貼る</button>`}` : ""}<button class="btn primary" type="button" id="saveBtn">${mode === "add" ? "スタンプ帳に入れる" : "保存"}</button></div><div id="confirmArea"></div>`}</div>`);
   wireForm();
@@ -3579,7 +3591,7 @@ function openStamp(mode, s, preset, extra = {}) {
     loadEditPhotos();
     $("#hExport").onclick = () => openExport({ ids: [d.id] });
     const hb = $("#hBoard"); if (hb) hb.onclick = () => Books.addStamp(d.id);
-    const hr = $("#hRecut"); if (hr) hr.onclick = () => openRecrop(s);
+    const hr = $("#hRecut"); if (hr) hr.onclick = () => openRecrop(s); const hpr = $("#hPrint"); if (hpr) hpr.onclick = () => PrintCard.open(s);
     const hd = $("#hDel"); if (hd) hd.onclick = () => {
       $("#heroConfirm").innerHTML = `<div class="confirm"><span style="flex:1">この記録と写真を削除します。スタンプ帳のページからもはがれます。元には戻せません。</span><button class="btn small" type="button" id="hNo">やめる</button><button class="btn small shu" type="button" id="hYes">削除する</button></div>`;
       $("#hNo").onclick = () => $("#heroConfirm").innerHTML = "";
@@ -4929,6 +4941,207 @@ function pinGroups() {
   _pg = { sig, groups: groups.reverse() };
   return _pg.groups;
 }
+
+/* ---------- 印刷用L判: 左に表（いまのトレカ）、右に裏（マンホールカード風の解説）、まん中に折り線 ---------- */
+const PrintCard = {
+  W: 1500, H: 1051, PX: 1500 / 127, el: null, s: null, P: null, cv: null, blob: null, text: "", wiki: null, washi: null, tm: 0, gen: 0,
+  url() { return new URL(".", location.href).href; },
+  no(s) { return new Map(byDate(true).map((x, i) => [x.id, i + 1])).get(s.id) || 0; },
+  async lookup(s) {
+    const api = async p => { const r = await fetch("https://ja.wikipedia.org/w/api.php?" + new URLSearchParams({ format: "json", origin: "*", ...p })); if (!r.ok) throw new Error("wiki " + r.status); return r.json(); };
+    const q = String(s.place || s.name || "").replace(/[（(].*$/, "").replace(/(の)?(記念)?(スタンプ|来場記念|見学記念).*$/, "").trim(); if (!q) return null;
+    let title = null, best = 0;
+    if (s.lat != null && s.lng != null) {
+      const j = await api({ action: "query", list: "geosearch", gscoord: `${s.lat}|${s.lng}`, gsradius: 1500, gslimit: 50 });
+      for (const g of (j.query && j.query.geosearch) || []) { const sc = likeness(q, g.title) - g.dist / 20000; if (sc > best) { best = sc; title = g.title; } }
+    }
+    if (!title || best < 0.6) {
+      const j = await api({ action: "query", list: "search", srsearch: q, srlimit: 5 });
+      for (const r of (j.query && j.query.search) || []) { const sc = likeness(q, r.title); if (sc > best) { best = sc; title = r.title; } }
+    }
+    if (!title || best < 0.5) return null;
+    const j = await api({ action: "query", prop: "extracts", exintro: 1, explaintext: 1, redirects: 1, titles: title });
+    const pg = Object.values((j.query && j.query.pages) || {})[0]; if (!pg || !pg.extract) return null;
+    let t = String(pg.extract).replace(/\s*\n+\s*/g, "").replace(/（[^（）]{0,90}）/g, "").replace(/\([^()]{0,90}\)/g, "").replace(/[ 　]{2,}/g, " ").trim();
+    let out = ""; for (const x of t.match(/[^。]+。?/g) || [t]) { if (out && (out + x).length > 240) break; out += x; }
+    return out ? { title: pg.title, text: out } : null;
+  },
+  fallback(s) {
+    const d = s.date ? s.date.replace(/^(\d+)-0?(\d+)-0?(\d+)$/, "$1年$2月$3日") : "";
+    return `${d ? d + "、" : ""}${s.place ? s.place + "で" : s.pref ? s.pref + "で" : ""}押した「${s.name || "スタンプ"}」${s.overlap ? "の重ね押し" : ""}。${s.sizeMm ? `大きさは約${fmtCm(s.sizeMm)}。` : ""}${s.memo ? s.memo : ""}`;
+  },
+  async assets(s) {
+    if (s.sheet && !s._sheet) { const u = await Store.getPhoto("sh_" + s.id).catch(() => null); if (u) s._sheet = u; }
+    const A = artOf(s), front = await loadImg(A.url), cut = A.sheet ? await loadImg(s.cut) : front, side = [];
+    if (!A.sheet && s._sheet) side.push({ url: s._sheet, cap: "台紙" });
+    for (const k of s.scenes || []) { if (side.length >= 2) break; const u = await Store.getPhoto("sc_" + s.id + "_" + k).catch(() => null); if (u) side.push({ url: u, cap: "その日の写真" }); }
+    if (side.length < 2 && s.hasPhoto) { const u = await Store.getPhoto("ph_" + s.id, s.id).catch(() => null); if (u) side.push({ url: u, cap: "押した紙" }); }
+    for (const it of side) it.im = await loadImg(it.url).catch(() => null);
+    if (!window.qrcode) await new Promise(res => { const sc = document.createElement("script"); sc.src = "vendor/qrcode.js"; sc.onload = sc.onerror = res; document.head.appendChild(sc); });
+    let qr = null; try { qr = qrcode(0, "M"); qr.addData(this.url()); qr.make(); } catch (_) { qr = null; }
+    if (!this.washi) this.washi = makeWashi();
+    return { A, front, cut, side: side.filter(t => t.im).slice(0, 2), qr, no: this.no(s) };
+  },
+  async fonts(txt) {
+    await Promise.all(['500 40px "IBM Plex Mono"', '600 40px "Klee One"', '400 40px "Zen Kaku Gothic New"', '500 40px "Zen Kaku Gothic New"', '700 40px "Zen Kaku Gothic New"', '400 40px "Dela Gothic One"']
+      .map(f => document.fonts.load(f, txt).catch(() => null)));
+  },
+  wrap(x, text, maxW) {   // 日本語は1文字ずつ折り返し、句読点や閉じかっこは行頭に来ないようにする
+    const NO = "、。，．）」』】〉》ー…・！？!?,.)]%ぁぃぅぇぉっゃゅょァィゥェォッャュョ"; const out = []; let line = "";
+    for (const ch of String(text).replace(/\s*\n\s*/g, "\n")) {
+      if (ch === "\n") { out.push(line); line = ""; continue; }
+      const w = typeof maxW === "function" ? maxW(out.length) : maxW;
+      if (line && x.measureText(line + ch).width > w && !NO.includes(ch)) { out.push(line); line = ch; } else line += ch;
+    }
+    if (line) out.push(line); return out;
+  },
+  rr(x, X, Y, W, H, R) { x.beginPath(); x.moveTo(X + R, Y); x.arcTo(X + W, Y, X + W, Y + H, R); x.arcTo(X + W, Y + H, X, Y + H, R); x.arcTo(X, Y + H, X, Y, R); x.arcTo(X, Y, X + W, Y, R); x.closePath(); },
+  fit(im, X, Y, W, H, cover) { const r = (cover ? Math.max : Math.min)(W / im.width, H / im.height), w = im.width * r, h = im.height * r; return [X + (W - w) / 2, Y + (H - h) / 2, w, h]; },
+  shrink(x, t, maxW) { if (x.measureText(t).width <= maxW) return t; while (t.length > 1 && x.measureText(t + "…").width > maxW) t = t.slice(0, -1); return t + "…"; },
+  front(x, s, P, W, H, bleed) {
+    const cq = W / 100, g = gcol(catNorm(s.cat)), digi = isDigi(s), ink = "#1D2230", mute = "#6B7079", UI = '"Zen Kaku Gothic New","Hiragino Sans",sans-serif', MONO = '"IBM Plex Mono",ui-monospace,monospace';
+    x.fillStyle = "#fff"; x.fillRect(0, 0, W, H);
+    if (this.washi) { const p = x.createPattern(this.washi, "repeat"), k = W * 2.06 / 360; if (p.setTransform) p.setTransform(new DOMMatrix([k, 0, 0, k, 0, 0])); x.save(); x.globalCompositeOperation = "multiply"; x.fillStyle = p; x.fillRect(0, 0, W, H); x.restore(); }
+    x.fillStyle = g; x.fillRect(0, -bleed, W, 3.125 * cq + bleed);
+    const y0 = 3.125 * cq, pad = 6.25 * cq;
+    x.textBaseline = "middle"; x.font = `500 ${6.25 * cq}px ${MONO}`; x.fillStyle = mute; const ty = y0 + 5 * cq + 3.9 * cq, num = "No." + String(P.no).padStart(3, "0");
+    x.textAlign = "left"; x.fillText(num, pad, ty);
+    if (digi) { const nx = pad + x.measureText(num).width + 3 * cq; x.font = `500 ${5.3 * cq}px ${MONO}`; const tw = x.measureText("DIGITAL").width + 5 * cq; x.fillStyle = "#1B2130"; this.rr(x, nx, ty - 3.4 * cq, tw, 6.8 * cq, 2.5 * cq); x.fill(); x.fillStyle = "#fff"; x.fillText("DIGITAL", nx + 2.5 * cq, ty); x.font = `500 ${6.25 * cq}px ${MONO}`; x.fillStyle = mute; }
+    x.textAlign = "right"; x.fillText(fmtDate(s.date), W - pad, ty);
+    // スタンプ（台紙ごと表示ならその写真）と実寸のものさし
+    const A = P.A, im = P.front, ax = pad, ay = y0 + 17 * cq, aw = W - 2 * pad, ah = 68 * cq;
+    const n = A.sheet || !s.sizeMm || digi ? 0 : s.sizeMm / 10 * ((s.ch || 1) / Math.max(s.cw || 1, s.ch || 1)), hasR = n > 0.3, pct = hasR ? 0.76 : 0.84;
+    const ar = clamp((A.w || im.width) / (A.h || im.height), 0.2, 5), fw = Math.min(pct * aw, ah * ar), fh = Math.min(ah, pct * aw / ar), fx = ax + (aw - fw) / 2, fy = ay + (ah - fh) / 2 - 0.04 * fh;
+    x.save(); if (A.sheet) { x.shadowColor = "rgba(0,0,0,.18)"; x.shadowBlur = 2 * cq; x.shadowOffsetY = 0.6 * cq; } else if (!digi) x.globalCompositeOperation = "multiply";
+    x.drawImage(im, ...this.fit(im, fx, fy, fw, fh)); x.restore();
+    if (hasR) {
+      const lw = Math.max(2, W / 260), rw = 0.034 * aw, r1 = fx - 0.03 * aw, st = fh / n; x.fillStyle = "rgba(70,58,38,.30)";
+      x.fillRect(r1 - lw, fy, lw, fh);
+      for (let k = 0; k * st / 2 <= fh + 0.5; k++) { const yy = fy + fh - k * st / 2 - lw, w = k % 2 ? rw * 0.55 : rw; x.fillRect(r1 - w, yy, w, lw); }
+      x.font = `500 ${0.044 * aw}px ${MONO}`; x.textAlign = "right"; x.textBaseline = "top"; x.fillText("cm", r1 + 0.006 * aw, fy + fh + 0.006 * aw);
+    }
+    // 下から: 情報 → イベント・路線 → 名前
+    const fm = 6.5 * cq, lh = fm * 1.5, gap = 1.8 * cq; let yb = H - 5.6 * cq; x.textBaseline = "middle";
+    x.font = `700 ${fm}px ${UI}`; x.fillStyle = g; x.textAlign = "left"; x.fillText(catNorm(s.cat), pad, yb - lh / 2);
+    x.font = `400 ${fm}px ${UI}`; x.fillStyle = mute; x.textAlign = "right"; x.fillText(`${s.pref || ""}${s.sizeMm ? " · " + fmtCm(s.sizeMm) : ""}`, W - pad, yb - lh / 2);
+    yb -= lh + gap;
+    const ev = evlOf(s);
+    if (ev) { const ey = yb - lh / 2; let tx = pad; x.font = `700 ${fm}px ${UI}`; x.fillStyle = "#2B4C9B"; x.textAlign = "left";
+      if (ev.k === "l") { x.save(); x.fillStyle = ev.c; x.beginPath(); x.arc(tx + 2.2 * cq, ey, 2.2 * cq, 0, 7); x.fill(); x.restore(); tx += 6.9 * cq; } else { x.fillText("#", tx, ey); tx += x.measureText("#").width; }
+      x.fillText(this.shrink(x, ev.t, W - pad - tx), tx, ey); yb -= lh + gap; }
+    const fn = 9.4 * cq, ln = fn * 1.25; x.font = `600 ${fn}px "Klee One","Hiragino Mincho ProN",serif`; x.fillStyle = ink; x.textAlign = "left";
+    let L = this.wrap(x, s.name || "名前未設定", W - 2 * pad); if (L.length > 2) L = [L[0], this.shrink(x, L.slice(1).join(""), W - 2 * pad)];
+    L.forEach((t, i) => x.fillText(t, pad, yb - (L.length - i - 0.5) * ln));
+    // バッジ
+    if (s.overlap) {
+      x.font = `700 ${5.6 * cq}px ${UI}`; const tw = x.measureText("重ね押し").width, bw = tw + 8.8 * cq, bh = 5.6 * cq * 1.45 + 1.2 * cq, bx = 7.5 * cq, by = 19 * cq;
+      const gr = x.createLinearGradient(bx, by, bx + bw, by + bh); gr.addColorStop(0, "#E9C766"); gr.addColorStop(1, "#B8892E");
+      x.save(); x.shadowColor = "rgba(0,0,0,.2)"; x.shadowBlur = 0.8 * cq; x.shadowOffsetY = 0.3 * cq; x.fillStyle = gr; this.rr(x, bx, by, bw, bh, bh / 2); x.fill(); x.restore();
+      x.fillStyle = "#fff"; x.textAlign = "center"; x.fillText("重ね押し", bx + bw / 2, by + bh / 2);
+      const m = this.PX; x.strokeStyle = "#D4AF4F"; x.lineWidth = 0.35 * m; this.rr(x, 1.1 * m, 1.1 * m, W - 2.2 * m, H - 2.2 * m, 2.6 * m); x.stroke();
+      const a = 115 * Math.PI / 180, dx = Math.sin(a), dy = -Math.cos(a), len = Math.abs(W * dx) + Math.abs(H * dy), cx = W / 2, cy = H / 2;
+      const sh = x.createLinearGradient(cx - dx * len / 2, cy - dy * len / 2, cx + dx * len / 2, cy + dy * len / 2);
+      [[0, "rgba(255,244,200,0)"], [0.34, "rgba(255,244,200,.62)"], [0.53, "rgba(190,222,255,.42)"], [0.68, "rgba(255,196,232,.36)"], [1, "rgba(255,196,232,0)"]].forEach(([o, c]) => sh.addColorStop(o, c));
+      x.save(); x.globalCompositeOperation = "soft-light"; x.fillStyle = sh; x.fillRect(0, 0, W, H); x.restore();
+    }
+    const nv = s.visits ? s.visits.length : (s.nv || 0);
+    if (nv) { x.font = `500 ${6.25 * cq}px ${MONO}`; const t = "×" + (nv + 1), bw = x.measureText(t).width + 8.8 * cq, bh = 6.25 * cq * 1.4, bx = W - 5 * cq - bw, by = 17.5 * cq; x.fillStyle = "#C8412E"; this.rr(x, bx, by, bw, bh, bh / 2); x.fill(); x.fillStyle = "#fff"; x.textAlign = "center"; x.fillText(t, bx + bw / 2, by + bh / 2); }
+  },
+  back(x, s, P, W, H) {
+    const m = this.PX, g = gcol(catNorm(s.cat)), UI = '"Zen Kaku Gothic New","Hiragino Sans",sans-serif', MONO = '"IBM Plex Mono",ui-monospace,monospace', ink = "#1D2230";
+    x.fillStyle = "#fff"; x.fillRect(0, 0, W, H);
+    const p0 = 2.4 * m, pw = W - 2 * p0, pb = 81.4 * m;
+    x.fillStyle = g; this.rr(x, p0, p0, pw, pb - p0, 2.6 * m); x.fill();
+    // 見出し: 場所の名前
+    const title = s.place || s.name || "スタンプの記録"; let fs = 4.2 * m; x.textAlign = "center"; x.textBaseline = "middle"; x.fillStyle = "#fff";
+    for (; fs > 2.6 * m; fs -= 0.1 * m) { x.font = `700 ${fs}px ${UI}`; if (x.measureText(title).width <= pw - 6 * m) break; }
+    x.fillText(this.shrink(x, title, pw - 6 * m), W / 2, p0 + 4.3 * m);
+    // 白い枠: 左にスタンプ、右に写真
+    const bx = 4.2 * m, by = 11 * m, bw = W - 8.4 * m, bh = 31.6 * m; x.fillStyle = "#fff"; this.rr(x, bx, by, bw, bh, 0.9 * m); x.fill();
+    const lx = bx + 1 * m, ly = by + 1.2 * m, lw = 27 * m, lah = bh - 6.2 * m, im = P.cut;
+    x.save(); if (!isDigi(s)) x.globalCompositeOperation = "multiply"; x.drawImage(im, ...this.fit(im, lx + 1 * m, ly, lw - 2 * m, lah)); x.restore();
+    x.font = `500 ${2.3 * m}px ${UI}`; x.fillStyle = "#3A3F4B"; x.textAlign = "center"; x.fillText(`押した日 ${fmtDate(s.date)}`, lx + lw / 2, by + bh - 2.4 * m);
+    const rx = lx + lw + 1.6 * m, rw = bx + bw - 1 * m - rx, cap = 3 * m;
+    const info = [["ジャンル", catNorm(s.cat)], s.sizeMm ? ["大きさ", "約" + fmtCm(s.sizeMm)] : null, s.pref ? ["場所", s.pref] : null, s.overlap ? ["押し方", "重ね押し"] : null].filter(Boolean);
+    const photo = (it, Y, h) => { x.save(); this.rr(x, rx, Y, rw, h, 0.5 * m); x.clip(); x.drawImage(it.im, ...this.fit(it.im, rx, Y, rw, h, true)); x.restore();
+      x.font = `500 ${2.1 * m}px ${UI}`; x.fillStyle = "#3A3F4B"; x.textAlign = "center"; x.fillText(it.cap, rx + rw / 2, Y + h + cap / 2 + 0.2 * m); };
+    const rows = (Y, list) => { x.textAlign = "left"; list.forEach(([k, v], i) => { const yy = Y + i * 4.3 * m; x.font = `500 ${2.1 * m}px ${UI}`; x.fillStyle = "#7A7F89"; x.fillText(k, rx, yy); x.font = `700 ${2.4 * m}px ${UI}`; x.fillStyle = ink; x.fillText(this.shrink(x, v, rw - 9.5 * m), rx + 9.5 * m, yy); }); };
+    const top = by + 1.2 * m, room = bh - 2.4 * m;
+    if (P.side.length >= 2) { const h = (room - 2 * cap) / 2; photo(P.side[0], top, h); photo(P.side[1], top + h + cap, h); }
+    else if (P.side.length === 1) { const h = room - cap - 9 * m; photo(P.side[0], top, h); rows(top + h + cap + 2.6 * m, info.slice(0, 2)); }
+    else rows(top + 3 * m, info);
+    // QRコード（ぺたろぐへ）
+    const qs = 12.6 * m, qx = p0 + pw - 1.6 * m - qs, qy = pb - 1.6 * m - qs;
+    if (P.qr) { x.fillStyle = "#fff"; this.rr(x, qx, qy, qs, qs, 0.6 * m); x.fill(); const n = P.qr.getModuleCount(), pad = 0.8 * m, c = (qs - 2 * pad) / n; x.fillStyle = "#111";
+      for (let r = 0; r < n; r++) for (let k = 0; k < n; k++) if (P.qr.isDark(r, k)) x.fillRect(qx + pad + k * c, qy + pad + r * c, Math.ceil(c), Math.ceil(c)); }
+    // 解説（QRのところは行を短くする）
+    const tx = 4.6 * m, tw = W - 9.2 * m, t0 = 44.4 * m, tmax = 76.4 * m, text = (this.text || "").trim() || this.fallback(s);
+    let L = [], f = 2.55 * m, lh = 0;
+    for (; f >= 1.8 * m; f -= 0.05 * m) { lh = f * 1.55; x.font = `500 ${f}px ${UI}`; const qTop = P.qr ? qy - 0.8 * m : Infinity; L = this.wrap(x, text, i => t0 + (i + 1) * lh > qTop ? qx - 1.4 * m - tx : tw); if (t0 + L.length * lh <= tmax) break; }
+    const maxL = Math.floor((tmax - t0) / lh); if (L.length > maxL) { L = L.slice(0, maxL); L[maxL - 1] = this.shrink(x, L[maxL - 1] + "＿", x.measureText(L[maxL - 1]).width).replace("＿", ""); }
+    x.fillStyle = "#fff"; x.textAlign = "left"; x.textBaseline = "middle"; L.forEach((t, i) => x.fillText(t, tx, t0 + (i + 0.5) * lh));
+    // 番号と座標（マンホールカードの表のように）
+    const dms = (v, a, b) => { const z = Math.abs(v), d = Math.floor(z), mf = (z - d) * 60, mi = Math.floor(mf); return `${d}°${String(mi).padStart(2, "0")}'${String(Math.round((mf - mi) * 60) % 60).padStart(2, "0")}"${v >= 0 ? a : b}`; };
+    const code = `No.${String(P.no).padStart(3, "0")}${s.lat != null ? "  " + dms(+s.lat, "N", "S") + " " + dms(+s.lng, "E", "W") : ""}`;
+    let cf = 2.15 * m; for (; cf > 1.5 * m; cf -= 0.05 * m) { x.font = `500 ${cf}px ${MONO}`; if (x.measureText(code).width <= qx - tx - 1 * m) break; }
+    x.fillStyle = "rgba(255,255,255,.92)"; x.textBaseline = "alphabetic"; x.fillText(this.shrink(x, code, qx - tx - 1 * m), tx, pb - 2 * m);
+    // いちばん下: ぺたろぐ と出典
+    const fy = (pb + H) / 2; x.textBaseline = "middle"; x.textAlign = "left"; x.fillStyle = ink; x.font = `400 ${2.5 * m}px "Dela Gothic One",${UI}`; x.fillText("ぺたろぐ", 3 * m, fy);
+    const lw2 = x.measureText("ぺたろぐ").width, w = this.wiki, credit = w && text.includes(w.text.slice(0, 12)) ? `解説: Wikipedia「${w.title}」CC BY-SA 4.0` : "";
+    x.fillStyle = "#7A7F89";
+    if (!credit) { x.font = `500 ${1.8 * m}px ${UI}`; x.fillText("スタンプ記録カード", 3 * m + lw2 + 1.2 * m, fy + 0.1 * m); }
+    else { const room = W - 6 * m - lw2 - 1.5 * m; let cf = 1.6 * m; for (; cf > 1.2 * m; cf -= 0.05 * m) { x.font = `500 ${cf}px ${UI}`; if (x.measureText(credit).width <= room) break; } x.textAlign = "right"; x.fillText(this.shrink(x, credit, room), W - 3 * m, fy + 0.1 * m); }
+  },
+  async render() {
+    const s = this.s, P = this.P; if (!s || !P) return; const my = ++this.gen;
+    await this.fonts(`${s.name || ""}${s.place || ""}${s.pref || ""}${this.text || this.fallback(s)}No.0123456789cm×・ぺたろぐスタンプ記録カード押した日ジャンル大きさ場所押し方重ね押し台紙その日の写真紙解説約DIGITAL${catNorm(s.cat)}${(evlOf(s) || {}).t || ""}`);
+    if (my !== this.gen) return;
+    const cv = this.cv || (this.cv = mkCanvas(this.W, this.H)), x = cv.getContext("2d"), m = this.PX;
+    x.setTransform(1, 0, 0, 1, 0, 0); x.fillStyle = "#fff"; x.fillRect(0, 0, this.W, this.H);
+    const cw = Math.round(63 * m), ch = Math.round(88 * m), fy = Math.round((this.H - ch) / 2), fx = Math.round(this.W / 2 - 0.25 * m) - cw, bx = Math.round(this.W / 2 + 0.25 * m);
+    x.save(); x.translate(fx, fy); this.front(x, s, P, cw, ch, fy); x.restore();
+    x.save(); x.translate(bx, fy); this.back(x, s, P, cw, ch); x.restore();
+    x.strokeStyle = "rgba(0,0,0,.22)"; x.lineWidth = 1; x.strokeRect(fx + 0.5, fy + 0.5, cw - 1, ch - 1); x.strokeRect(bx + 0.5, fy + 0.5, cw - 1, ch - 1);
+    x.setLineDash([10, 8]); x.strokeStyle = "rgba(0,0,0,.4)"; x.beginPath(); x.moveTo(this.W / 2, 0); x.lineTo(this.W / 2, this.H); x.stroke(); x.setLineDash([]);
+    const pv = $("#pcCv"); if (pv) { pv.width = cv.width; pv.height = cv.height; pv.getContext("2d").drawImage(cv, 0, 0); }
+    this.blob = null; cv.toBlob(b => { if (my === this.gen) this.blob = b; }, "image/jpeg", 0.95);
+  },
+  async research() {
+    const s = this.s, st = $("#pcSt"); if (st) st.textContent = "この場所のことを調べています…";
+    let r = null; try { r = await this.lookup(s); } catch (_) { r = null; }
+    if (this.s !== s) return;
+    this.wiki = r; this.text = r ? r.text + (s.memo ? "\n" + s.memo : "") : this.fallback(s);
+    lsSet("petalog.pt." + s.id, JSON.stringify({ text: this.text, wiki: r }));
+    const ta = $("#pcText"); if (ta) ta.value = this.text;
+    if (st) st.textContent = r ? `Wikipedia「${r.title}」から解説を入れました。自由に書きかえられます。` : "解説が見つからなかったので、記録から文章を作りました。自由に書きかえられます。";
+    this.render();
+  },
+  async open(s) {
+    this.s = s; this.P = null; this.blob = null; this.wiki = null; this.text = "";
+    try { const v = JSON.parse(lsGet("petalog.pt." + s.id) || "null"); if (v) { this.text = v.text || ""; this.wiki = v.wiki || null; } } catch (_) {}
+    const d = this.el || (this.el = document.createElement("div")); d.className = "pview prt"; if (!d.parentNode) document.body.appendChild(d); d.hidden = false;
+    d.innerHTML = `<div class="pv-top"><div class="pv-t">印刷用（L判）</div><button class="btn small" type="button" id="pcX">閉じる</button></div>
+      <div class="pc-body"><div class="pc-prev"><canvas id="pcCv" width="1500" height="1051"></canvas><div class="pc-wait" id="pcWait"><span class="spin"></span> つくっています…</div></div>
+        <label class="pc-l">裏面の解説<textarea id="pcText" rows="6" placeholder="この場所やスタンプのこと"></textarea></label>
+        <div class="pc-st" id="pcSt"></div>
+        <div class="row2"><button class="btn small" type="button" id="pcRe">解説を調べ直す</button><button class="btn primary" type="button" id="pcSave">画像を保存</button></div>
+        <ol class="pc-how"><li>保存した画像を「ネットプリント」アプリ（セブン‐イレブン）で <b>写真・L判</b> として登録</li><li>お店のマルチコピー機で番号を入れて印刷（L判1枚40円）</li><li>印刷面が外になるように、まん中の点線で山折り</li><li>内側を両面テープかスプレーのりで貼り合わせる</li><li>灰色の線にそって4辺を切る（角丸パンチを使うとトレカらしくなります）</li></ol></div>`;
+    $("#pcX").onclick = () => { d.hidden = true; this.s = null; };
+    const ta = $("#pcText"); ta.value = this.text;
+    ta.oninput = () => { this.text = ta.value; lsSet("petalog.pt." + s.id, JSON.stringify({ text: this.text, wiki: this.wiki })); clearTimeout(this.tm); this.tm = setTimeout(() => this.render(), 450); };
+    $("#pcRe").onclick = () => this.research();
+    $("#pcSave").onclick = () => {
+      const b = this.blob; if (!b) { toast("もう少しお待ちください"); return; }
+      const f = new File([b], `petalog-print-${String(this.P ? this.P.no : 0).padStart(3, "0")}.jpg`, { type: "image/jpeg" });
+      if (navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f] }).catch(() => {});
+      else { const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = f.name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000); }
+    };
+    try { this.P = await this.assets(s); } catch (e) { $("#pcWait").textContent = "画像を読み込めませんでした。通信を確かめてもう一度どうぞ"; return; }
+    if (this.s !== s) return;
+    await this.render(); const w = $("#pcWait"); if (w) w.hidden = true;
+    if (!this.text) this.research(); else $("#pcSt").textContent = "前に作った解説です。書きかえるとすぐ反映されます。";
+  },
+};
 
 /* ================= boot ================= */
 addEventListener("resize", () => { Book.layout(); if (view === "fall") { Fall.dirty = true; Fall.stop(); Fall.start(); } if (view === "map") MapV.draw(); });
