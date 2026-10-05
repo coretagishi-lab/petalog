@@ -801,6 +801,12 @@ html.tcv-on,html.tcv-on body{overflow:hidden}
 .tcv-hint{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);text-align:center;color:rgba(255,255,255,.75);font:500 13px var(--f-ui);opacity:0;transition:opacity .4s;pointer-events:none}
 .tcv-hint.on{opacity:1}
 @media (prefers-reduced-motion:reduce){.tcv{transition:none}}
+/* デジスタ（デジタルスタンプ） */
+.tc-badges{position:absolute;left:calc(var(--u) * 1.8);top:calc(var(--u) * 1.6);z-index:3;display:flex;gap:calc(var(--u) * 1.2)}
+.tc-badges .tc-badge{position:static}
+.tc-badge.dgs{background:linear-gradient(180deg,#A9DDF7,#4F93D8 48%,#2E5EA6);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 calc(var(--u) * .4) calc(var(--u) * .8) rgba(20,50,100,.35);text-shadow:0 1px 1px rgba(20,40,90,.45)}
+.digchip{border-color:#6FA8DC;color:#1F4E8C;background:linear-gradient(135deg,#EEF7FF,#D4E8FA);font-weight:700}
+.digchip[aria-pressed="true"]{background:linear-gradient(135deg,#7FB7EA,#2E5EA6);border-color:#2E5EA6;color:#fff}
 </style>
 
 <div id="app">
@@ -1337,7 +1343,7 @@ function cardHTML(s, no, o = {}) {   // スタンプトレカ（印刷の表と�
   return `<button type="button" class="${cls}" data-open="${esc(s.id)}" style="--g:${gcol(g)}"><span class="pick" aria-hidden="true">✓</span>
     <span class="tc-hd"><span class="tc-k"><i></i>スタンプトレカ</span><span class="tc-no">No.${String(no || 0).padStart(4, "0")}</span></span>
     <span class="tc-win"><span class="tc-tab"><span class="tc-tabf"></span><svg viewBox="0 0 214 52" preserveAspectRatio="none" aria-hidden="true"><path d="M0 1 L19.5 51 L194.5 51 L214 1" fill="none" stroke="#C9A24A" stroke-width="2.4"/></svg><span class="tc-tabt"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${gicon(g)}"/></svg>${esc(g)}</span></span>
-      ${s.overlap ? '<span class="tc-badge">重ね押し</span>' : ""}
+      ${s.overlap || isDigi(s) ? `<span class="tc-badges">${s.overlap ? '<span class="tc-badge">重ね押し</span>' : ""}${isDigi(s) ? '<span class="tc-badge dgs">デジスタ</span>' : ""}</span>` : ""}
       <span class="tc-art${L.A.sheet ? " sh" : ""}" style="left:${u(L.x)};top:${u(L.y)};width:${u(L.w)};height:${u(L.h)}"><img src="${L.A.url}" alt="" loading="lazy" draggable="false" data-ck="${esc(s.id)}"></span>
       ${L.dimY != null ? `<span class="tc-dim" style="left:${u(L.x)};top:${u(L.dimY)};width:${u(L.w)}"><i></i><i></i><b>${L.dimTxt}</b></span>` : ""}
       <span class="tc-nm" style="font-size:${u(L.fs)}">${esc(s.name || "名前未設定")}</span><span class="tc-rule"></span>
@@ -1386,12 +1392,12 @@ const Grid = {
   },
   render() {
     const L = list(); const numOf = new Map(byDate(true).map((s, i) => [s.id, i + 1]));
-    const gs = GENRES.filter(g => L.some(s => catNorm(s.cat) === g)); const nOv = L.filter(s => s.overlap).length;
-    if (this.g === "__ovl" ? !nOv : this.g !== "all" && !gs.includes(this.g)) this.g = "all";
-    $("#gChips").innerHTML = [["all", "すべて " + L.length], ...(nOv ? [["__ovl", "重ね押し " + nOv]] : []), ...gs.map(g => [g, g + " " + L.filter(s => catNorm(s.cat) === g).length])].map(([k, t]) => `<button type="button" data-g="${esc(k)}" aria-pressed="${this.g === k}"${k === "__ovl" ? ' class="ovlchip"' : ""}>${esc(t)}</button>`).join("");
+    const gs = GENRES.filter(g => L.some(s => catNorm(s.cat) === g)); const nOv = L.filter(s => s.overlap).length, nDg = L.filter(s => isDigi(s)).length;
+    if (this.g === "__ovl" ? !nOv : this.g === "__dig" ? !nDg : this.g !== "all" && !gs.includes(this.g)) this.g = "all";
+    $("#gChips").innerHTML = [["all", "すべて " + L.length], ...(nOv ? [["__ovl", "重ね押し " + nOv]] : []), ...(nDg ? [["__dig", "デジスタ " + nDg]] : []), ...gs.map(g => [g, g + " " + L.filter(s => catNorm(s.cat) === g).length])].map(([k, t]) => `<button type="button" data-g="${esc(k)}" aria-pressed="${this.g === k}"${k === "__ovl" ? ' class="ovlchip"' : k === "__dig" ? ' class="digchip"' : ""}>${esc(t)}</button>`).join("");
     if (this.open) this.renderFilters();
     const toks = this.q.trim().toLowerCase().split(/[\s　]+/).filter(Boolean);
-    const items = byDate(!this.desc).filter(s => (this.g === "all" || (this.g === "__ovl" ? s.overlap : catNorm(s.cat) === this.g)) && this.match(s) && (!toks.length || toks.every(t => hayOf(s).includes(t))));
+    const items = byDate(!this.desc).filter(s => (this.g === "all" || (this.g === "__ovl" ? s.overlap : this.g === "__dig" ? isDigi(s) : catNorm(s.cat) === this.g)) && this.match(s) && (!toks.length || toks.every(t => hayOf(s).includes(t))));
     this.items = items; const nf = Object.keys(this.f).length;
     $("#gFilt").textContent = nf ? `絞り込み ${nf}` : "絞り込み"; $("#gFilt").classList.toggle("primary", nf > 0);
     $("#gCount").innerHTML = (nf || toks.length || this.g !== "all") ? `<span>${items.length} まい見つかりました</span><button type="button" id="gClear">条件をクリア</button>` : "";
@@ -5098,11 +5104,13 @@ const PrintCard = {
     x.save(); x.shadowColor = "rgba(0,0,0,.45)"; x.shadowBlur = 0.3 * m; x.shadowOffsetY = 0.2 * m; x.fillStyle = cream;
     x.save(); x.translate(sx, cy - isz / 2); x.scale(isz / 24, isz / 24); x.fill(new Path2D(gicon(gname))); x.restore();
     x.textAlign = "left"; x.textBaseline = "middle"; this.spaced(x, gname, 0.2 * 2.7 * m, sx + isz + 1 * m, cy); x.restore();
-    // 重ね押し
-    if (s.overlap) { x.font = `700 ${2.2 * m}px ${UI}`; const bw = this.spaced(x, "重ね押し", 0.08 * 2.2 * m) + 4.4 * m, bh = 4.2 * m, bx = wx + 1.8 * m, by = wy + 1.6 * m;
-      const gr = x.createLinearGradient(0, by, 0, by + bh); gr.addColorStop(0, "#F0D27A"); gr.addColorStop(0.48, "#C9A24A"); gr.addColorStop(1, "#A07A2C");
-      x.save(); x.shadowColor = "rgba(80,55,10,.35)"; x.shadowBlur = 0.8 * m; x.shadowOffsetY = 0.4 * m; x.fillStyle = gr; this.rr(x, bx, by, bw, bh, bh / 2); x.fill(); x.restore();
-      x.fillStyle = "#fff"; x.textBaseline = "middle"; this.spaced(x, "重ね押し", 0.08 * 2.2 * m, bx + 2.2 * m, by + bh / 2); }
+    // 重ね押し・デジスタのバッジ
+    let bx = wx + 1.8 * m; const by = wy + 1.6 * m, bh = 4.2 * m;
+    for (const [on, label, c0, c1, c2, sh] of [[s.overlap, "重ね押し", "#F0D27A", "#C9A24A", "#A07A2C", "rgba(80,55,10,.35)"], [isDigi(s), "デジスタ", "#A9DDF7", "#4F93D8", "#2E5EA6", "rgba(20,50,100,.35)"]]) {
+      if (!on) continue; x.font = `700 ${2.2 * m}px ${UI}`; const bw = this.spaced(x, label, 0.08 * 2.2 * m) + 4.4 * m;
+      const gr = x.createLinearGradient(0, by, 0, by + bh); gr.addColorStop(0, c0); gr.addColorStop(0.48, c1); gr.addColorStop(1, c2);
+      x.save(); x.shadowColor = sh; x.shadowBlur = 0.8 * m; x.shadowOffsetY = 0.4 * m; x.fillStyle = gr; this.rr(x, bx, by, bw, bh, bh / 2); x.fill(); x.restore();
+      x.fillStyle = "#fff"; x.textBaseline = "middle"; x.textAlign = "left"; this.spaced(x, label, 0.08 * 2.2 * m, bx + 2.2 * m, by + bh / 2); bx += bw + 1.2 * m; }
     // スタンプ（実寸で入るなら実寸）と寸法線
     const im = P.front, ix = wx + L.x * m, iy = wy + L.y * m, iw = L.w * m, ih = L.h * m;
     x.save(); if (L.A.sheet) { x.shadowColor = "rgba(0,0,0,.18)"; x.shadowBlur = 1.6 * m; x.shadowOffsetY = 0.6 * m; } else if (!isDigi(s)) x.globalCompositeOperation = "multiply";
@@ -5212,7 +5220,7 @@ const PrintCard = {
   },
   async render() {
     const s = this.s, P = this.P; if (!s || !P) return; const my = ++this.gen;
-    await this.fonts(`${s.name || ""}${s.place || ""}${s.pref || ""}${this.plain(this.text || this.fallback(s))}横幅高さ場所No.0123456789cm×・ぺたろぐスタンプ記録カード押した日ジャンル大きさ場所押し方重ね押し台紙その日の写真紙解説約DIGITALスタンプトレカ実寸大°'"NSEW①②③④きれいなトレカにするには印刷面を外にして点線で山折りし、内側を両面テープかのりで貼るまず折り目側の切り落とす（写真用紙は反発ではがれやすいため）ティッシュを当てて上からぐっと押さえ、しっかり貼り直す残りのを切れば完成ワンポイント・間に厚紙をはさむと本物のトレカのように硬くなります角丸パンチがあれば四隅を丸くするとよりトレカらしくスリーブに入れると指紋がつきません50mm山折り水のりは乾かないので×上から押さえて貼り直す厚紙をはさむと硬く・角丸パンチで角を丸く${catNorm(s.cat)}${(evlOf(s) || {}).t || ""}`);
+    await this.fonts(`${s.name || ""}${s.place || ""}${s.pref || ""}${this.plain(this.text || this.fallback(s))}横幅高さ場所No.0123456789cm×・ぺたろぐスタンプ記録カード押した日ジャンル大きさ場所押し方重ね押しデジスタ台紙その日の写真紙解説約DIGITALスタンプトレカ実寸大°'"NSEW①②③④きれいなトレカにするには印刷面を外にして点線で山折りし、内側を両面テープかのりで貼るまず折り目側の切り落とす（写真用紙は反発ではがれやすいため）ティッシュを当てて上からぐっと押さえ、しっかり貼り直す残りのを切れば完成ワンポイント・間に厚紙をはさむと本物のトレカのように硬くなります角丸パンチがあれば四隅を丸くするとよりトレカらしくスリーブに入れると指紋がつきません50mm山折り水のりは乾かないので×上から押さえて貼り直す厚紙をはさむと硬く・角丸パンチで角を丸く${catNorm(s.cat)}${(evlOf(s) || {}).t || ""}`);
     if (my !== this.gen) return;
     // はがき（100×148mm・300dpi・実寸）。中では横向き148×100mmで描いて、書き出しはたて向き（はがきの向き）に回す
     const m = this.PX, W = Math.round(148 * m), H = Math.round(100 * m);
@@ -5351,7 +5359,7 @@ try { document.documentElement.style.setProperty("--paper2", `url(${TCPaper().to
 async function renderCard(s, no) {
   const A = artOf(s), W = Math.round(63 * MM), H = Math.round(88 * MM), cv = mkCanvas(W, H), x = cv.getContext("2d");
   const P = { A, front: await loadImg(A.url), no: no || 0 };
-  await PrintCard.fonts(`${s.name || ""}${s.pref || ""}${fmtDate(s.date)}No.0123456789スタンプトレカ実寸大重ね押しぺたろぐcm${catNorm(s.cat)}°'"NSEW`);
+  await PrintCard.fonts(`${s.name || ""}${s.pref || ""}${fmtDate(s.date)}No.0123456789スタンプトレカ実寸大重ね押しデジスタぺたろぐcm${catNorm(s.cat)}°'"NSEW`);
   PrintCard.front(x, s, P, W, H, 0); return cv;
 }
 
