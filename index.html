@@ -706,6 +706,11 @@ html,body{touch-action:pan-x pan-y}
 .mc-grp img{max-width:56px;max-height:56px;mix-blend-mode:multiply}
 .mc-grp span{width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center}
 .mc-grp small{color:var(--muted);font-size:9.5px}
+.res-wrap{position:relative;overflow:hidden}
+.res-wrap.erz{touch-action:none}
+.er-ring{position:absolute;left:0;top:0;border-radius:50%;border:2px solid #C8412E;background:rgba(200,65,46,.14);box-shadow:0 0 0 1px rgba(255,255,255,.85);pointer-events:none;z-index:2}
+.er-zr{position:absolute;right:8px;top:8px;z-index:3;border:1px solid var(--line);background:var(--card);color:inherit;border-radius:99px;padding:4px 10px;font-size:11.5px;box-shadow:var(--shadow)}
+.er-tip{font-size:11px;color:var(--muted)}
 </style>
 
 <div id="app">
@@ -3519,16 +3524,16 @@ function addStepHTML(c) {
     <p class="cap" id="cropCap"></p>
     <div class="adjrow"><label>明るさ<input type="range" id="adjB" min="-60" max="60" value="0"></label><label>コントラスト<input type="range" id="adjC" min="-40" max="80" value="0"></label><label class="mini"><input type="checkbox" id="adjAuto" checked>自動補正</label></div>
     <div class="result">
-      <div class="res-wrap${g ? " gos" : dg ? " digi" : " washi"}"><canvas id="resCv"></canvas></div>${g ? "" : `<div class="rotres"><span>角度</span><input type="range" id="rotFine" min="-45" max="45" step="0.5" value="0" aria-label="切り抜いたスタンプの角度"><output id="rotVal">0°</output><button class="btn small" type="button" id="rotZero">0°</button></div>`}
+      <div class="res-wrap${g ? " gos" : dg ? " digi" : " washi"}"><canvas id="resCv"></canvas><div class="er-ring" id="erRing" hidden></div><button class="er-zr" type="button" id="erZoomReset" hidden>全体を表示</button></div>${g ? "" : `<div class="rotres"><span>角度</span><input type="range" id="rotFine" min="-45" max="45" step="0.5" value="0" aria-label="切り抜いたスタンプの角度"><output id="rotVal">0°</output><button class="btn small" type="button" id="rotZero">0°</button></div>`}
       <div class="ctl-col">
         ${g ? `<label class="mini"><input type="checkbox" id="whiten" checked>紙を白く・影を消す</label>` : dg ? `<div class="seg" role="group" aria-label="背景"><button type="button" data-dm="auto" aria-pressed="${c.dmode === "auto"}">背景を抜く</button><button type="button" data-dm="circle" aria-pressed="${c.dmode === "circle"}">丸く切る</button><button type="button" data-dm="none" aria-pressed="${c.dmode === "none"}">四角のまま</button></div>
         <label id="dTolL"${c.dmode === "auto" ? "" : " hidden"}>背景の抜き具合<input type="range" id="dTol" min="8" max="120" value="${c.dtol}"></label>
         <div class="row2"><button class="btn small" type="button" id="eraseBtn" aria-pressed="false">消しゴム</button><button class="btn small" type="button" id="eraseUndo" disabled>1つ戻す</button></div>
-        <label id="eraseSizeL" hidden>消しゴムの太さ<input type="range" id="eraseSize" min="3" max="30" value="10"></label>` : `<label>切り抜きの強さ<input type="range" id="thr" min="-50" max="60" value="0"></label>
+        <label id="eraseSizeL" hidden>消しゴムの太さ<input type="range" id="eraseSize" min="3" max="30" value="10"><small class="er-tip">2本指で広げると拡大できます</small></label>` : `<label>切り抜きの強さ<input type="range" id="thr" min="-50" max="60" value="0"></label>
         <div class="seg" role="group" aria-label="色"><button type="button" data-cm="auto" aria-pressed="true">自動</button><button type="button" data-cm="mono" aria-pressed="false">1色</button><button type="button" data-cm="color" aria-pressed="false">元の色</button></div>
         <label class="mini"><input type="checkbox" id="ghost">裏写り・うすい影を消す</label>
         <div class="row2"><button class="btn small" type="button" id="eraseBtn" aria-pressed="false">消しゴム</button><button class="btn small" type="button" id="eraseUndo" disabled>1つ戻す</button></div>
-        <label id="eraseSizeL" hidden>消しゴムの太さ<input type="range" id="eraseSize" min="3" max="30" value="10"></label>`}
+        <label id="eraseSizeL" hidden>消しゴムの太さ<input type="range" id="eraseSize" min="3" max="30" value="10"><small class="er-tip">2本指で広げると拡大できます</small></label>`}
         <div class="cap" id="cutCap" style="margin:0"></div>
       </div>
     </div>
@@ -3596,7 +3601,7 @@ function wireAdd() {
   const adj = () => { c.adj = { auto: $("#adjAuto").checked, bright: +$("#adjB").value, contrast: +$("#adjC").value }; clearTimeout(c.at); c.at = setTimeout(() => refresh("src"), 180); };
   ["#adjB", "#adjC"].forEach(id => { const el = $(id); if (el) el.oninput = adj; }); const aa = $("#adjAuto"); if (aa) aa.onchange = adj;
   if ($("#adjB")) { $("#adjB").value = c.adj.bright; $("#adjC").value = c.adj.contrast; $("#adjAuto").checked = c.adj.auto; }
-  const eb = $("#eraseBtn"); if (eb) eb.onclick = () => { c.erasing = !c.erasing; eb.setAttribute("aria-pressed", c.erasing); eb.classList.toggle("primary", c.erasing); $("#eraseSizeL").hidden = !c.erasing; $("#resCv").classList.toggle("erasing", c.erasing); };
+  const eb = $("#eraseBtn"); if (eb) eb.onclick = () => { c.erasing = !c.erasing; eb.setAttribute("aria-pressed", c.erasing); eb.classList.toggle("primary", c.erasing); $("#eraseSizeL").hidden = !c.erasing; $("#resCv").classList.toggle("erasing", c.erasing); $("#resCv").parentElement.classList.toggle("erz", c.erasing); if (!c.erasing && c.ezReset) c.ezReset(); };
   const eu = $("#eraseUndo"); if (eu) eu.onclick = () => { c.erase.pop(); eu.disabled = !c.erase.length; recut(); };
   wireEraser(); wireRotate();
 }
@@ -3694,18 +3699,38 @@ function recut() {
 function drawResult() {
   const c = sheetCtx, cv = $("#resCv"); if (!cv || !c.cut) return; applyCutRot(c);
   const box = cv.parentElement; const maxW = Math.min(box.clientWidth || 260, 300), maxH = c.type === "goshuin" ? 360 : 260;
-  const im = c.cut.canvas; const s = Math.min(maxW / im.width, maxH / im.height, c.type === "goshuin" ? 1 : 2); const dpr = Math.min(2, devicePixelRatio || 1);
+  const im = c.cut.canvas; const s = Math.min(maxW / im.width, maxH / im.height, c.type === "goshuin" ? 1 : 2); const dpr0 = Math.min(2, devicePixelRatio || 1), dpr = Math.max(dpr0, Math.min(dpr0 * (c.ez ? c.ez.z : 1), 1 / s));
   cv.width = im.width * s * dpr; cv.height = im.height * s * dpr; cv.style.width = im.width * s + "px"; cv.style.height = im.height * s + "px";
   const x = cv.getContext("2d"); x.clearRect(0, 0, cv.width, cv.height); x.drawImage(im, 0, 0, cv.width, cv.height);
   const oh = $("#ovlHint"), ob = $("#f_overlap"); if (oh) oh.hidden = !(c.cut && c.cut.multi) || !!(ob && ob.checked);
 }
 function wireEraser() {
-  const cv = $("#resCv"); if (!cv) return; let cur = null;
-  const pt = e => { const r = cv.getBoundingClientRect(); const c = sheetCtx; const M = Math.max(r.width, r.height); return { ...unrotPt(c, (e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height), r: (+$("#eraseSize").value) / M * (Math.max(c.cut.w, c.cut.h) / Math.max(c.cut.w, c.cut.h)) , px: e.clientX - r.left, py: e.clientY - r.top }; };
-  cv.onpointerdown = e => { const c = sheetCtx; if (!c || !c.erasing) return; cv.setPointerCapture(e.pointerId); const p = pt(e); cur = [p]; paint(p, null); };
-  cv.onpointermove = e => { if (!cur) return; const p = pt(e); const prev = cur[cur.length - 1]; cur.push(p); paint(p, prev); };
-  cv.onpointerup = cv.onpointercancel = () => { if (!cur) return; const c = sheetCtx; c.erase.push(cur.map(({ x, y, r }) => ({ x, y, r }))); cur = null; $("#eraseUndo").disabled = false; recut(); };
-  function paint(p, prev) { const x = cv.getContext("2d"), dpr = cv.width / cv.getBoundingClientRect().width; x.save(); x.globalCompositeOperation = "destination-out"; x.lineCap = "round"; x.lineWidth = +$("#eraseSize").value * 2 * dpr; x.beginPath(); x.moveTo((prev || p).px * dpr, (prev || p).py * dpr); x.lineTo(p.px * dpr, p.py * dpr); x.stroke(); x.restore(); }
+  const cv = $("#resCv"); if (!cv || !sheetCtx) return; const wrap = cv.parentElement, ring = $("#erRing"), zr = $("#erZoomReset");
+  const c0 = sheetCtx, Z = c0.ez || (c0.ez = { z: 1, tx: 0, ty: 0 }); const pts = new Map(); let cur = null, pinch = null, rt = 0;
+  const size = () => +($("#eraseSize") || { value: 10 }).value;
+  const pt = e => { const r = cv.getBoundingClientRect(), c = sheetCtx, M = Math.max(r.width, r.height), k = c.cut0 || c.cut;
+    return { ...unrotPt(c, (e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height), r: size() / M * Math.max(c.cut.w, c.cut.h) / Math.max(k._ow || k.w, k._oh || k.h), px: e.clientX - r.left, py: e.clientY - r.top }; };
+  const showRing = (x, y) => { if (!ring) return; const d = size() * 2; ring.style.width = ring.style.height = d + "px"; ring.style.transform = `translate(${x - d / 2}px,${y - d / 2}px)`; ring.hidden = false; };
+  const ringAt = e => { const w = wrap.getBoundingClientRect(); showRing(e.clientX - w.left, e.clientY - w.top); };
+  const apply = () => { const w = cv.offsetWidth, h = cv.offsetHeight; Z.z = clamp(Z.z, 1, 8); if (Z.z < 1.02) { Z.z = 1; Z.tx = Z.ty = 0; } Z.tx = clamp(Z.tx, w * (1 - Z.z), 0); Z.ty = clamp(Z.ty, h * (1 - Z.z), 0);
+    cv.style.transformOrigin = "0 0"; cv.style.transform = Z.z === 1 ? "" : `translate(${Z.tx}px,${Z.ty}px) scale(${Z.z})`; if (zr) zr.hidden = Z.z === 1; };
+  const local = (x, y) => { const r = cv.getBoundingClientRect(); return { x: x - (r.left - Z.tx), y: y - (r.top - Z.ty) }; };
+  const mid = () => { const [a, b] = [...pts.values()]; return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, d: Math.hypot(a.x - b.x, a.y - b.y) || 1 }; };
+  c0.ezReset = () => { Z.z = 1; apply(); drawResult(); };
+  if (zr) zr.onclick = () => c0.ezReset();
+  const es = $("#eraseSize"); if (es) es.oninput = () => { showRing(wrap.clientWidth / 2, wrap.clientHeight / 2); clearTimeout(rt); rt = setTimeout(() => { if (!cur && ring) ring.hidden = true; }, 1200); };
+  wrap.onpointerdown = e => { const c = sheetCtx; if (!c || !c.erasing || e.target === zr) return; e.preventDefault(); try { wrap.setPointerCapture(e.pointerId); } catch (_) {} pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pts.size >= 2) { if (cur) { cur = null; drawResult(); } if (ring) ring.hidden = true; const m = mid(); pinch = { d: m.d, l: local(m.x, m.y), z: Z.z, tx: Z.tx, ty: Z.ty }; return; }
+    if (pinch) return; const p = pt(e); cur = [p]; paint(p, null); ringAt(e); };
+  wrap.onpointermove = e => { if (pts.has(e.pointerId)) pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pinch) { if (pts.size < 2) return; const m = mid(), l = local(m.x, m.y), nz = clamp(pinch.z * m.d / pinch.d, 1, 8), cx = (pinch.l.x - pinch.tx) / pinch.z, cy = (pinch.l.y - pinch.ty) / pinch.z;
+      Z.z = nz; Z.tx = l.x - cx * nz; Z.ty = l.y - cy * nz; apply(); return; }
+    if (!cur) return; const p = pt(e), prev = cur[cur.length - 1]; cur.push(p); paint(p, prev); ringAt(e); };
+  wrap.onpointerup = wrap.onpointercancel = e => { pts.delete(e.pointerId);
+    if (pinch) { if (!pts.size) { pinch = null; drawResult(); } return; }
+    if (ring) ring.hidden = true; if (!cur) return; const c = sheetCtx; c.erase.push(cur.map(({ x, y, r }) => ({ x, y, r }))); cur = null; $("#eraseUndo").disabled = false; recut(); };
+  function paint(p, prev) { const x = cv.getContext("2d"), dpr = cv.width / cv.getBoundingClientRect().width; x.save(); x.globalCompositeOperation = "destination-out"; x.lineCap = "round"; x.lineWidth = size() * 2 * dpr; x.beginPath(); x.moveTo((prev || p).px * dpr, (prev || p).py * dpr); x.lineTo(p.px * dpr, p.py * dpr); x.stroke(); x.restore(); }
+  apply();
 }
 function wireEdit() {
   const c = sheetCtx;
