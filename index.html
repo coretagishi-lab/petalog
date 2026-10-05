@@ -4045,7 +4045,7 @@ function addBaseMap(m, ok, bad) {
     setTimeout(() => { if (!n) { try { m.removeLayer(t); } catch {} fail(); } }, 7000);
   };
   loadMapLib().then(() => {
-    if (!m._loaded && !m.getContainer().isConnected) return;
+    if (!m._mapPane || !m.getContainer().isConnected) return;   // 地図を閉じたあとに読み込みが終わったら何もしない
     let gl; try { gl = L.maplibreGL({ style: OFM_STYLE, attribution: '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> ' + OSM_ATTR }).addTo(m); } catch { raster(); return; }
     const g = gl.getMaplibreMap && gl.getMaplibreMap(); if (!g) { raster(); return; }
     const timer = setTimeout(() => { if (!settled) { try { m.removeLayer(gl); } catch {} raster(); } }, 9000);
