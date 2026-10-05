@@ -713,7 +713,8 @@ html,body{touch-action:pan-x pan-y}
 .er-tip{font-size:11px;color:var(--muted)}
 .prt .pc-body{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:4px 16px 28px;display:flex;flex-direction:column;gap:12px;width:100%;max-width:620px;margin:0 auto;box-sizing:border-box}
 .pc-prev{position:relative}
-.pc-prev canvas{display:block;width:100%;height:auto;background:#fff;border-radius:4px;box-shadow:0 4px 18px rgba(0,0,0,.4)}
+.pc-prev{min-height:120px}
+.pc-prev img{display:block;width:100%;height:auto;aspect-ratio:1500/1051;background:#fff;border-radius:4px;box-shadow:0 4px 18px rgba(0,0,0,.4);-webkit-touch-callout:default!important;-webkit-user-select:auto;user-select:auto;pointer-events:auto;object-fit:contain}
 .pc-wait{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(18,20,26,.7);color:#fff;font-size:13px;border-radius:4px}
 .pc-wait[hidden]{display:none}
 .pc-l{display:flex;flex-direction:column;gap:6px;font-size:12.5px;color:rgba(255,255,255,.8)}
@@ -723,6 +724,10 @@ html,body{touch-action:pan-x pan-y}
 .pc-how b{color:#fff}
 .prt{background:#14161C}
 .prt .btn:not(.primary){color:#1D2230}
+
+/* トレカ: スタンプを少し下げて、上の日付と下の名前の間でバランスよく */
+.card .c-art{top:21cqw;height:66cqw}
+.card .fig{transform:none}
 </style>
 
 <div id="app">
@@ -5009,9 +5014,9 @@ const PrintCard = {
     if (digi) { const nx = pad + x.measureText(num).width + 3 * cq; x.font = `500 ${5.3 * cq}px ${MONO}`; const tw = x.measureText("DIGITAL").width + 5 * cq; x.fillStyle = "#1B2130"; this.rr(x, nx, ty - 3.4 * cq, tw, 6.8 * cq, 2.5 * cq); x.fill(); x.fillStyle = "#fff"; x.fillText("DIGITAL", nx + 2.5 * cq, ty); x.font = `500 ${6.25 * cq}px ${MONO}`; x.fillStyle = mute; }
     x.textAlign = "right"; x.fillText(fmtDate(s.date), W - pad, ty);
     // スタンプ（台紙ごと表示ならその写真）と実寸のものさし
-    const A = P.A, im = P.front, ax = pad, ay = y0 + 17 * cq, aw = W - 2 * pad, ah = 68 * cq;
+    const A = P.A, im = P.front, ax = pad, ay = y0 + 21 * cq, aw = W - 2 * pad, ah = 66 * cq;
     const n = A.sheet || !s.sizeMm || digi ? 0 : s.sizeMm / 10 * ((s.ch || 1) / Math.max(s.cw || 1, s.ch || 1)), hasR = n > 0.3, pct = hasR ? 0.76 : 0.84;
-    const ar = clamp((A.w || im.width) / (A.h || im.height), 0.2, 5), fw = Math.min(pct * aw, ah * ar), fh = Math.min(ah, pct * aw / ar), fx = ax + (aw - fw) / 2, fy = ay + (ah - fh) / 2 - 0.04 * fh;
+    const ar = clamp((A.w || im.width) / (A.h || im.height), 0.2, 5), fw = Math.min(pct * aw, ah * ar), fh = Math.min(ah, pct * aw / ar), fx = ax + (aw - fw) / 2, fy = ay + (ah - fh) / 2;
     x.save(); if (A.sheet) { x.shadowColor = "rgba(0,0,0,.18)"; x.shadowBlur = 2 * cq; x.shadowOffsetY = 0.6 * cq; } else if (!digi) x.globalCompositeOperation = "multiply";
     x.drawImage(im, ...this.fit(im, fx, fy, fw, fh)); x.restore();
     if (hasR) {
@@ -5103,8 +5108,21 @@ const PrintCard = {
     // 切り取り線: 表だけ・63×88mmちょうど・角は四角（重ね押しは金）
     const lw = s.overlap ? 3 : 2; x.strokeStyle = s.overlap ? "#D4AF4F" : "rgba(40,40,40,.4)"; x.lineWidth = lw; x.lineJoin = "miter"; x.strokeRect(fx + lw / 2, fy + lw / 2, cw - lw, ch - lw);
     x.setLineDash([10, 8]); x.strokeStyle = "rgba(0,0,0,.4)"; x.beginPath(); x.moveTo(this.W / 2, 0); x.lineTo(this.W / 2, this.H); x.stroke(); x.setLineDash([]);
-    const pv = $("#pcCv"); if (pv) { pv.width = cv.width; pv.height = cv.height; pv.getContext("2d").drawImage(cv, 0, 0); }
-    this.blob = null; cv.toBlob(b => { if (my === this.gen) this.blob = b; }, "image/jpeg", 0.95);
+    this.blob = null; cv.toBlob(b => { if (my !== this.gen || !b) return; this.blob = b; const im = $("#pcImg"); if (im) { if (this.burl) URL.revokeObjectURL(this.burl); this.burl = URL.createObjectURL(b); im.src = this.burl; } }, "image/jpeg", 0.95);
+  },
+  file() {   // 押した瞬間に共有メニューを開けるよう、まだ画像がなければその場で作る
+    let b = this.blob;
+    if (!b && this.cv && this.cv.width) { const u = this.cv.toDataURL("image/jpeg", 0.95), bin = atob(u.split(",")[1]), a = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); b = new Blob([a], { type: "image/jpeg" }); }
+    return b ? new File([b], `petalog-print-${String(this.P ? this.P.no : 0).padStart(3, "0")}.jpg`, { type: "image/jpeg" }) : null;
+  },
+  hint() { toast("上の画像を長押しして「写真に保存」を選んでください", 5200); const im = $("#pcImg"); if (im) im.scrollIntoView({ behavior: "smooth", block: "center" }); },
+  save() {
+    const f = this.file(); if (!f) { toast("まだ作っています。少し待ってからもう一度どうぞ"); return; }
+    const ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    let can = false; try { can = !!(navigator.share && navigator.canShare && navigator.canShare({ files: [f] })); } catch (_) { can = false; }
+    if (can) { navigator.share({ files: [f] }).then(() => toast("保存しました")).catch(e => { if (!e || e.name !== "AbortError") this.hint(); }); return; }
+    if (ios) { this.hint(); return; }
+    const a = document.createElement("a"); a.href = URL.createObjectURL(f); a.download = f.name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
   },
   async research() {
     const s = this.s, st = $("#pcSt"); if (st) st.textContent = "この場所のことを調べています…";
@@ -5121,21 +5139,16 @@ const PrintCard = {
     try { const v = JSON.parse(lsGet("petalog.pt." + s.id) || "null"); if (v) { this.text = v.text || ""; this.wiki = v.wiki || null; } } catch (_) {}
     const d = this.el || (this.el = document.createElement("div")); d.className = "pview prt"; if (!d.parentNode) document.body.appendChild(d); d.hidden = false;
     d.innerHTML = `<div class="pv-top"><div class="pv-t">印刷用（L判）</div><button class="btn small" type="button" id="pcX">閉じる</button></div>
-      <div class="pc-body"><div class="pc-prev"><canvas id="pcCv" width="1500" height="1051"></canvas><div class="pc-wait" id="pcWait"><span class="spin"></span> つくっています…</div></div>
+      <div class="pc-body"><div class="pc-prev"><img id="pcImg" alt="印刷用の画像（長押しでも保存できます）"><div class="pc-wait" id="pcWait"><span class="spin"></span> つくっています…</div></div>
         <label class="pc-l">裏面の解説<textarea id="pcText" rows="6" placeholder="この場所やスタンプのこと"></textarea></label>
         <div class="pc-st" id="pcSt"></div>
         <div class="row2"><button class="btn small" type="button" id="pcRe">解説を調べ直す</button><button class="btn primary" type="button" id="pcSave">画像を保存</button></div>
-        <ol class="pc-how"><li>保存した画像を「ネットプリント」アプリ（セブン‐イレブン）で <b>写真・L判</b> として登録</li><li>お店のマルチコピー機で番号を入れて印刷（L判1枚40円）</li><li>印刷面が外になるように、まん中の点線で山折り</li><li>内側を両面テープかスプレーのりで貼り合わせる</li><li>灰色の線にそって4辺を切る（角丸パンチを使うとトレカらしくなります）</li></ol></div>`;
-    $("#pcX").onclick = () => { d.hidden = true; this.s = null; };
+        <ol class="pc-how"><li>「画像を保存」で写真に保存（うまく開かないときは、上の画像を長押し →「写真に保存」）</li><li>保存した画像を「ネットプリント」アプリ（セブン‐イレブン）で <b>写真・L判</b> として登録</li><li>お店のマルチコピー機で番号を入れて印刷（L判1枚40円）</li><li>印刷面が外になるように、まん中の点線で山折り</li><li>内側を両面テープかスプレーのりで貼り合わせる</li><li>灰色の線にそって4辺を切る（角丸パンチを使うとトレカらしくなります）</li></ol></div>`;
+    $("#pcX").onclick = () => { d.hidden = true; this.s = null; this.gen++; this.blob = null; if (this.burl) { URL.revokeObjectURL(this.burl); this.burl = null; } if (this.cv) { this.cv.width = this.cv.height = 0; this.cv = null; } d.innerHTML = ""; };
     const ta = $("#pcText"); ta.value = this.text;
     ta.oninput = () => { this.text = ta.value; lsSet("petalog.pt." + s.id, JSON.stringify({ text: this.text, wiki: this.wiki })); clearTimeout(this.tm); this.tm = setTimeout(() => this.render(), 450); };
     $("#pcRe").onclick = () => this.research();
-    $("#pcSave").onclick = () => {
-      const b = this.blob; if (!b) { toast("もう少しお待ちください"); return; }
-      const f = new File([b], `petalog-print-${String(this.P ? this.P.no : 0).padStart(3, "0")}.jpg`, { type: "image/jpeg" });
-      if (navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f] }).catch(() => {});
-      else { const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = f.name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000); }
-    };
+    $("#pcSave").onclick = () => this.save();
     try { this.P = await this.assets(s); } catch (e) { $("#pcWait").textContent = "画像を読み込めませんでした。通信を確かめてもう一度どうぞ"; return; }
     if (this.s !== s) return;
     await this.render(); const w = $("#pcWait"); if (w) w.hidden = true;

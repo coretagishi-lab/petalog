@@ -569,10 +569,12 @@
       document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") reg.update().catch(() => {}); });
     }).catch(() => {}));
     // 新しい版に切り替わったら自動で読み込み直す（記録の入力中は閉じるまで待つ）
-    let had = !!navigator.serviceWorker.controller, waiting = false;
-    const busy = () => { const w = document.getElementById("sheetWrap"); return w && !w.hidden; };
-    const go = () => { if (busy()) { if (!waiting) { waiting = true; setInterval(() => { if (!busy()) location.reload(); }, 1500); } return; } location.reload(); };
-    navigator.serviceWorker.addEventListener("controllerchange", () => { if (!had) { had = true; return; } go(); });
+    // ログインの更新（トークンの入れ替え）の途中で読み込み直すとログアウトになることがあるので、終わるのを待ってから
+    let had = !!navigator.serviceWorker.controller, waiting = false, going = false;
+    const busy = () => { const w = document.getElementById("sheetWrap"); return (w && !w.hidden) || !!document.querySelector(".pview:not([hidden])") || document.visibilityState !== "visible"; };
+    const reload = async () => { if (going) return; going = true; if (sb) { try { await within(sb.auth.getSession(), 5000); } catch {} } await new Promise(r => setTimeout(r, 800)); location.reload(); };
+    const go = () => { if (busy()) { if (!waiting) { waiting = true; setInterval(() => { if (!busy()) reload(); }, 1500); } return; } reload(); };
+    navigator.serviceWorker.addEventListener("controllerchange", () => { if (!had) { had = true; return; } setTimeout(go, 1500); });
   }
   addEventListener("online", () => { if (offline) { say("つながりました。読み込み直します"); setTimeout(() => location.reload(), 1200); } });
   if (sb) {
