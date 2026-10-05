@@ -4009,8 +4009,11 @@ const PlacePick = {
     const ext = $("#pmExt"); if (ext) ext.onclick = e => {
       const b = e.target.closest("[data-ext]"); if (!b) return; const w = (($("#pmQ") || {}).value || ($("#f_place") || {}).value || ($("#f_name") || {}).value || "").trim();
       if (b.dataset.ext === "paste") { if (!navigator.clipboard || !navigator.clipboard.readText) { toast("上の検索欄に長押しで貼りつけてください", 3200); return; } navigator.clipboard.readText().then(t => { if (sharedPlace(t)) this.importShared(t); else toast("コピーした内容に場所が見つかりませんでした。地図アプリの「共有」→「コピー」をしてから押してください", 4200); }).catch(() => toast("上の検索欄に長押しで貼りつけてください", 3200)); return; }
-      const url = b.dataset.ext === "google" ? "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(w || "スタンプ") : "https://maps.apple.com/?q=" + encodeURIComponent(w || "スタンプ");
-      toast("見つけたら「共有」→「コピー」して、ここに戻って「コピーした場所を貼る」を押してください", 5200); open(url, "_blank", "noopener");
+      const q = encodeURIComponent(w || "スタンプ"), g = b.dataset.ext === "google";
+      const web = g ? "https://www.google.com/maps/search/?api=1&query=" + q : "https://maps.apple.com/?q=" + q, app = g ? "comgooglemaps://?q=" + q : "maps://?q=" + q;
+      toast("見つけたら「共有」→「コピー」して、ここに戻って「コピーした場所を貼る」を押してください", 5200);
+      if (isIOS) { let gone = false; const h = () => { gone = true; }; addEventListener("pagehide", h, { once: true }); document.addEventListener("visibilitychange", h, { once: true }); location.href = app; setTimeout(() => { if (!gone && !document.hidden) open(web, "_blank", "noopener"); }, 1400); }
+      else open(web, "_blank", "noopener");
     };
     const me = $("#pmMe"); if (me) me.onclick = () => {
       if (!navigator.geolocation) { toast("この画面では現在地が使えません"); return; } me.disabled = true;
@@ -4046,7 +4049,9 @@ const PlacePick = {
     this.show([...exact, ...ov.filter(r => !have.has(key(r))), ...base.filter(r => !exact.includes(r))].slice(0, 18), false);
   },
   async importShared(t) {
-    const c = this.c; if (!c) return; const P = sharedPlace(t); if (!P) return; let ll = P.ll;
+    const c = this.c; if (!c) return; let P = sharedPlace(t); if (!P) return;
+    if (!P.ll && P.short) { toast("リンク先を読み込んでいます…", 2400); const more = await expandShort((t.match(/https?:\/\/\S+/g) || []).find(u => /maps\.app\.goo\.gl|goo\.gl\/maps|maps\.apple\/p\//.test(u))); if (sheetCtx !== c) return; if (more) { const Q = sharedPlace(t + "\n" + more.text); if (Q) P = { ...Q, name: P.name || more.name || Q.name, addr: P.addr || more.addr || Q.addr }; } }
+    let ll = P.ll;
     for (const a of P.addr ? [P.addr.split(/\s/)[0], P.addr] : []) { if (ll) break; const g = await MapV.gsi(a).catch(() => []); if (g.length) ll = [+g[0].lat, +g[0].lng]; }
     if (!ll && P.name) { const r = await placeSearch(P.name, null).catch(() => []); if (r.length) ll = [r[0].lat, r[0].lng]; }
     if (sheetCtx !== c) return;
@@ -4661,7 +4666,7 @@ function sharedPlace(t) {
   if (!ll && (m = all.match(/geo:(-?\d+\.\d+),(-?\d+\.\d+)/))) ll = inJP(+m[1], +m[2]);
   if (!ll && !urls.length && (m = all.match(/(\d{2}\.\d{3,})\s*[,、 ]\s*(\d{3}\.\d{3,})/))) ll = inJP(+m[1], +m[2]);
   let name = "";
-  if ((m = all.match(/\/maps\/place\/([^/@?]+)/))) name = m[1].replace(/\+/g, " ");
+  if ((m = all.match(/\/maps\/place\/([^/@?\s]+)/))) name = m[1].replace(/\+/g, " ");
   if (!name && (m = all.match(/[?&](?:name|q)=([^&\s]+)/))) { const v = m[1].replace(/\+/g, " "); if (!/^-?\d+\.\d+,/.test(v)) name = v; }
   const lines = z2h(t).split(/\n+/).map(x => x.trim()).filter(x => x && !/^https?:\/\//.test(x));
   const isAddr = x => /〒\s?\d{3}-?\d{4}/.test(x) || /^(日本、?\s*)?(東京都|北海道|京都府|大阪府|.{2,3}県)/.test(x);
@@ -4673,6 +4678,26 @@ function sharedPlace(t) {
   return { ll, name: name.slice(0, 60), addr, short };
 }
 function decodeURIComponentSafe(t) { try { return decodeURIComponent(t); } catch { return t; } }
+
+// a short map link only says "go to …"; ask a free public relay to follow it and read where it ends
+async function expandShort(u) {
+  if (!u) return null; const out = []; const meta = {};
+  const tries = [
+    async () => { const r = await fetch("https://api.allorigins.win/get?url=" + encodeURIComponent(u)); if (!r.ok) return; const j = await r.json(); out.push((j.status && j.status.url) || "", metaBits(j.contents || "", meta)); },
+    async () => { const r = await fetch("https://corsproxy.io/?url=" + encodeURIComponent(u)); if (!r.ok) return; out.push(r.url || "", metaBits(await r.text(), meta)); }
+  ];
+  for (const f of tries) { try { await Promise.race([f(), sleep(9000)]); } catch {} if (sharedPlace(out.join("\n") + "\nhttps://x/") && /\d{2}\.\d+/.test(out.join(" "))) break; }
+  const text = out.filter(Boolean).join("\n"); return text ? { text, name: meta.name || "", addr: meta.addr || "" } : null;
+}
+// the useful parts of a map page: its address (for coordinates), its title (name · address) and its preview picture (center=lat,lng)
+function metaBits(html, meta = {}) {
+  if (!html) return ""; const b = [];
+  const m1 = html.match(/<meta[^>]+(?:property|itemprop)="og:title"[^>]*content="([^"]+)"|<meta[^>]+content="([^"]+)"[^>]+(?:property|itemprop)="og:title"/); const title = m1 ? (m1[1] || m1[2]) : "";
+  if (title) { const [n, a] = title.replace(/&amp;/g, "&").split(/\s*·\s*/); meta.name = meta.name || n; if (a) { meta.addr = meta.addr || z2h(a).replace(/〒\s?\d{3}-?\d{4}\s*/, "").trim(); b.push(a); } }
+  const m2 = html.match(/staticmap\?center=(-?\d+\.\d+)(?:%2C|,)(-?\d+\.\d+)/); if (m2) b.push(`https://x/?ll=${m2[1]},${m2[2]}`);
+  const m3 = html.match(/https:\/\/www\.google\.[a-z.]+\/maps\/place\/[^"'\s<>]+/); if (m3) b.push(m3[0]);
+  return b.join("\n");
+}
 
 /* ================= boot ================= */
 addEventListener("resize", () => { Book.layout(); if (view === "fall") { Fall.dirty = true; Fall.stop(); Fall.start(); } if (view === "map") MapV.draw(); });
