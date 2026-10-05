@@ -3787,6 +3787,7 @@ function openSettings() {
   openSheet(`<div class="sheet-head"><h2>設定</h2><button class="btn small ghost" type="button" data-close>閉じる</button></div>
     ${window.PetalogCloud ? PetalogCloud.settingsHTML() : ""}
     ${Privacy.html()}
+    ${GPlaces.html()}
     <div class="sec"><h4>イベント・路線</h4><div id="setEv"></div><div class="row2" style="margin-top:8px"><input id="setEvIn" class="search grow" maxlength="30" placeholder="イベントを追加（例: 謎解き）"><button class="btn small primary" type="button" id="setEvAdd">追加</button></div><p class="cap">路線は、記録画面の「イベント・路線」→「＋ 路線を登録する」か、特集の路線ページから登録できます。</p></div>
     <div class="sec"><h4>大きさの基準物</h4><div id="setRef"></div><p class="cap">「写真で測る」の画面から追加できます。</p></div>
     <div class="sec"><h4>「ぜんぶ」の背景</h4><div class="papers" id="setFall">${["washi", "plain", "grid", "dot", "kraft", "cork", "seigaiha"].map(k => `<button type="button" data-fb="${k}" aria-pressed="${(Profile.fallBg || "washi") === k}"><i style="background-image:url(${Paper.previewURL(k)})"></i>${PAPERS[k]}</button>`).join("")}<label class="pbtn" aria-pressed="${Profile.fallBg === "photo"}"><i style="background-image:url(${Paper.previewURL("photo")})"></i>写真<input type="file" id="setFallPh" accept="image/*" style="position:absolute;width:1px;height:1px;opacity:0"></label></div></div>
@@ -3813,7 +3814,7 @@ function openSettings() {
   const ks = $("#keySave"); if (ks) ks.onclick = () => { const v = $("#keyIn").value.trim(); if (!/^sk-ant-/.test(v)) { toast("sk-ant- で始まるキーを入れてください"); return; } lsSet("petalog.apikey", v); toast("APIキーを保存しました"); openSettings(); };
   const kd = $("#keyDel"); if (kd) kd.onclick = () => { try { localStorage.removeItem("petalog.apikey"); } catch {} toast("APIキーを消しました"); openSettings(); };
   if (window.PetalogCloud) PetalogCloud.wireSettings();
-  Privacy.wire();
+  Privacy.wire(); GPlaces.wire();
 }
 $("#setBtn").onclick = openSettings;
 async function exportBackup() {
@@ -4004,7 +4005,8 @@ const PlacePick = {
       q.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); const v = q.value.trim(); if (v) this.search(v, true); } };
       q.onfocus = () => { const s = $("#placeQ"); if (s && s.scrollIntoView) s.scrollIntoView({ block: "start", behavior: "smooth" }); };
       box.onclick = e => {
-        const b = e.target.closest("[data-i]"); if (!b) return; const r = this.res[+b.dataset.i]; if (!r) return; box.hidden = true; q.blur(); this.lastQ = q.value.trim();
+        const b = e.target.closest("[data-i]"); if (!b) return; let r = this.res[+b.dataset.i]; if (!r) return; box.hidden = true; q.blur(); this.lastQ = q.value.trim();
+        if (r.gp) { GPlaces.details(r).then(x => { if (!x || sheetCtx !== c) return; if (this.map) this.map.setView([x.lat, x.lng], 18); setLoc(+x.lat.toFixed(6), +x.lng.toFixed(6), "Googleで検索", { pan: false }); this.choose({ n: x.name, cat: x.cat }, true); }).catch(() => toast("場所を読み込めませんでした。もう一度どうぞ")); return; }
         if (this.map) this.map.setView([r.lat, r.lng], r.z || 16);
         setLoc(+(+r.lat).toFixed(6), +(+r.lng).toFixed(6), "地図で検索", { pan: false });
         if (r.name) this.choose({ n: r.name, cat: r.cat }, true);
@@ -4031,6 +4033,10 @@ const PlacePick = {
   },
   async search(v, deep) {
     const my = ++this.seq, box = $("#pmRes"); if (!box) return; const nq = norm(v); const res = [];
+    if (GPlaces.key() && !GPlaces.bad) {
+      this.show([], true); const ctr = this.map ? this.map.getCenter() : null;
+      try { const g = await GPlaces.suggest(v, ctr); if (my !== this.seq) return; if (g.length || !deep) { this.show(g.slice(0, 10), false); return; } } catch { if (my !== this.seq) return; }
+    }
     for (const s of GEO.stations) { const ns = norm(s.n); const w = ns === nq ? 100 + s.r : ns.startsWith(nq) ? 40 + s.r : nq.length >= 2 && ns.includes(nq) ? s.r : -1; if (w >= 0) res.push({ t: s.n + "駅", sub: s.L.slice(0, 2).map(i => GEO.lines[i] && GEO.lines[i].n).filter(Boolean).join("・"), lat: s.lat, lng: s.lng, z: 17, w, name: s.n + "駅", cat: "駅" }); }
     for (const f of GEO.facs) if (f.n.includes(v)) res.push({ t: f.n, sub: f.k === "air" ? "空港" : "施設", lat: f.lat, lng: f.lng, z: 16, w: 60, name: f.n, cat: f.k === "air" ? "空港" : "施設" });
     (MapV.pubs || []).forEach(p => { if (!p.miss && p.lat != null && ((p.name || "") + (p.place || "")).includes(v)) res.push({ t: p.place || p.name, sub: "みんなの記録", lat: +p.lat, lng: +p.lng, z: 17, w: 70, name: p.place || p.name, cat: catNorm(p.cat) }); });
@@ -4055,7 +4061,6 @@ const PlacePick = {
   },
   async importShared(t) {
     const c = this.c; if (!c) return; let P = sharedPlace(t); if (!P) return;
-    if (!P.ll && P.short) { toast("リンク先を読み込んでいます…", 2400); const more = await expandShort((t.match(/https?:\/\/\S+/g) || []).find(u => /maps\.app\.goo\.gl|goo\.gl\/maps|maps\.apple\/p\//.test(u))); if (sheetCtx !== c) return; if (more) { const Q = sharedPlace(t + "\n" + more.text); if (Q) P = { ...Q, name: P.name || more.name || Q.name, addr: P.addr || more.addr || Q.addr }; } }
     let ll = P.ll;
     for (const a of P.addr ? [P.addr.split(/\s/)[0], P.addr] : []) { if (ll) break; const g = await MapV.gsi(a).catch(() => []); if (g.length) ll = [+g[0].lat, +g[0].lng]; }
     if (!ll && P.name) { const r = await placeSearch(P.name, null).catch(() => []); if (r.length) ll = [r[0].lat, r[0].lng]; }
@@ -4571,9 +4576,11 @@ async function placeSearch(v, ctr) {
     if (/[\u3040-\u30ff\u4e00-\u9fff]/.test(name)) name = name.split(/\s+/).filter(w => !/[\u0400-\u04FF]/.test(w)).join(" ");
     const st = p.osm_value === "station" || p.osm_value === "halt"; if (st && !/駅$/.test(name)) name += "駅";
     const sub = [p.state, p.city, p.district || p.locality, p.street].filter((x, i, a) => x && a.indexOf(x) === i).join(" ");
-    out.push({ t: name, sub: sub || "地図", lat: c[1], lng: c[0], z: 18, name, cat: PH_CAT[p.osm_value] || (/道の駅/.test(name) ? "道の駅" : st ? "駅" : "施設"), photon: true });
+    const sim = likeness(qs[0], name + " " + sub), km = ctr ? kmBetween(ctr.lat, ctr.lng, c[1], c[0]) : 0;
+    const score = sim - (km > 300 ? 0.35 : km > 80 ? 0.2 : km > 30 ? 0.08 : 0); if (sim < 0.38 || score < 0.3) continue;
+    out.push({ t: name, sub: sub || "地図", lat: c[1], lng: c[0], z: 18, name, cat: PH_CAT[p.osm_value] || (/道の駅/.test(name) ? "道の駅" : st ? "駅" : "施設"), photon: true, score });
   }
-  return out.slice(0, 12);
+  return out.sort((a, b) => b.score - a.score).slice(0, 10);
 }
 
 /* ---------- 種類（リアル / デジタル）で切り抜き方を切りかえる ---------- */
@@ -4712,6 +4719,50 @@ function metaBits(html, meta = {}) {
   return b.join("\n");
 }
 
+// how much of what was typed appears in a name (pieces of two letters; 1 = all of it)
+function likeness(q, name) {
+  const a = nz(q).replace(/店$/, ""), b = nz(name); if (!a) return 0; if (b.includes(a)) return 1; if (a.length < 2) return b.includes(a) ? 1 : 0;
+  let n = 0, t = 0; for (let i = 0; i < a.length - 1; i++) { t++; if (b.includes(a.slice(i, i + 2))) n++; } return t ? n / t : 0;
+}
+
+/* ---------- Googleの候補（任意）: 設定でキーを入れると、場所の名前の候補がGoogleマップと同じになる ---------- */
+const GPlaces = {
+  p: null, tok: null, bad: false, k: "",
+  key() { return this.k || lsGet("petalog.gkey") || ""; },
+  async load() { try { if (Store.mode === "cloud" || Store.mode === "local") { const m = await Store.getMeta("gplaces"); if (m && m.key) { this.k = m.key; lsSet("petalog.gkey", m.key); } } } catch {} },
+  async save(k) { this.k = k; this.bad = false; this.p = null; lsSet("petalog.gkey", k); try { await Store.putMeta("gplaces", { key: k }); } catch {} },
+  ready() {
+    if (!this.key()) return Promise.reject(new Error("nokey")); if (this.p) return this.p;
+    window.gm_authFailure = () => { this.bad = true; this.p = null; toast("Googleのキーが使えませんでした。設定のキーと、Google側の設定（Places API・Maps JavaScript API・使えるサイト）を確かめてください", 6500); };
+    this.p = new Promise((res, rej) => {
+      if (window.google && google.maps && google.maps.importLibrary) return res();
+      window.__petalogGm = () => res(); const sc = document.createElement("script"); sc.async = true; sc.onerror = () => rej(new Error("load"));
+      sc.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(this.key())}&v=weekly&language=ja&region=JP&loading=async&callback=__petalogGm`; document.head.appendChild(sc); setTimeout(() => rej(new Error("timeout")), 12000);
+    }).then(() => google.maps.importLibrary("places"));
+    this.p.catch(() => { this.p = null; }); return this.p;
+  },
+  async suggest(input, ctr) {
+    const lib = await this.ready(); if (!this.tok) this.tok = new lib.AutocompleteSessionToken();
+    const req = { input, sessionToken: this.tok, language: "ja", region: "jp", includedRegionCodes: ["jp"] }; if (ctr) req.locationBias = { center: { lat: ctr.lat, lng: ctr.lng }, radius: 50000 };
+    const { suggestions } = await lib.AutocompleteSuggestion.fetchAutocompleteSuggestions(req);
+    return (suggestions || []).map(x => x.placePrediction).filter(Boolean).map(pp => ({ t: pp.mainText ? pp.mainText.text : pp.text.text, sub: pp.secondaryText ? pp.secondaryText.text : "Google", gp: pp, google: true }));
+  },
+  async details(r) {
+    const place = r.gp.toPlace(); await place.fetchFields({ fields: ["displayName", "location", "types"] }); this.tok = null;
+    const ty = place.types || []; const name = place.displayName || r.t;
+    return { lat: place.location.lat(), lng: place.location.lng(), name, cat: ty.includes("airport") ? "空港" : ty.some(t => /station/.test(t)) ? "駅" : /道の駅/.test(name) ? "道の駅" : "施設" };
+  },
+  html() {
+    return `<div class="sec"><h4>場所の検索（Google・任意）</h4><p class="cap" style="margin-top:0">GoogleのAPIキーを入れると、記録画面の「場所の名前」の候補がGoogleマップと同じになります。入れないときは、無料の地図データで探します。</p>
+      <div class="row2"><input id="gkIn" class="search grow" type="password" autocomplete="off" placeholder="${this.key() ? "設定済み（入れ直すと上書き）" : "AIza..."}"><button class="btn small primary" type="button" id="gkSave">保存</button>${this.key() ? `<button class="btn small" type="button" id="gkDel">消す</button>` : ""}</div></div>`;
+  },
+  wire() {
+    const sv = $("#gkSave"); if (!sv) return;
+    sv.onclick = async () => { const v = $("#gkIn").value.trim(); if (!/^AIza[\w-]{20,}$/.test(v)) { toast("AIza で始まるキーを入れてください"); return; } await this.save(v); toast("Googleのキーを保存しました"); openSettings(); };
+    const dl = $("#gkDel"); if (dl) dl.onclick = async () => { await this.save(""); try { localStorage.removeItem("petalog.gkey"); } catch {} toast("Googleのキーを消しました"); openSettings(); };
+  }
+};
+
 /* ================= boot ================= */
 addEventListener("resize", () => { Book.layout(); if (view === "fall") { Fall.dirty = true; Fall.stop(); Fall.start(); } if (view === "map") MapV.draw(); });
 document.addEventListener("visibilitychange", () => { if (document.hidden) Fall.stop(); else if (view === "fall") Fall.start(); });
@@ -4722,7 +4773,7 @@ document.addEventListener("contextmenu", e => { if (!e.target.closest("input,tex
   buildSamples(); Books.data = { books: [] }; Books.sample = false; $("#collSeg").hidden = !window.PetalogCloud;
   setColl("grid"); refreshAll(); show("fall");
   Promise.all(SAMPLES.map(fillStats)).then(() => { if (!stamps.length) Grid.render(); });
-  await Store.init(); await Profile.load(); await Privacy.load(); applyFallBg();
+  await Store.init(); await Profile.load(); await Privacy.load(); GPlaces.load(); applyFallBg();
   try { stamps = await Store.listStamps(); stamps.forEach(s => { if (!Array.isArray(s.scenes)) s.scenes = []; if (s.type !== "goshuin") s.cat = catNorm(s.cat); }); } catch { stamps = []; toast("記録を読み込めませんでした。開き直してみてください。", 4000); }
   await Books.load();
   ready = true; Book.idx = 0; MapV.shown = false;
