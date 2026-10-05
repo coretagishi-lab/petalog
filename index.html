@@ -1675,7 +1675,7 @@ const MapV = {
     this.cols = this.colors();
     if (!this.init()) return;
     this.map.invalidateSize({ animate: false });
-    if (!this.shown) { this.shown = true; this.fit(); }
+    if (!this.shown) { this.shown = true; this.fit(); this.startHere(); }
     this.render();
   },
   startPick(lat, lng, q, cb) {
@@ -1755,6 +1755,19 @@ const MapV = {
     };
     show([]);
     this._gt = setTimeout(async () => { const g = await this.gsi(q); if (g.length && $("#mapQ").value.trim() === q) show(g); }, 450);
+  },
+  startHere() {
+    if (!navigator.geolocation || !this.map) return; const m = this.map;
+    if (!this.navHook) { this.navHook = true; this.nav = 0; const bump = () => this.nav++;
+      for (const k of ["setView", "fitBounds"]) { const f = m[k]; m[k] = function () { bump(); return f.apply(this, arguments); }; }
+      ["pointerdown", "wheel"].forEach(t => m.getContainer().addEventListener(t, bump, { capture: true, passive: true })); }
+    const n0 = this.nav;
+    navigator.geolocation.getCurrentPosition(p => {
+      if (this.nav !== n0 || this.pick || this.route) return;
+      const la = p.coords.latitude, ln = p.coords.longitude, d = 3 / 111, e = d / Math.cos(la * Math.PI / 180); this.me = { lat: la, lng: ln };
+      const go = () => { m.stop(); m.fitBounds([[la - d, ln - e], [la + d, ln + e]], { animate: false }); this.draw(); };
+      if (m._animatingZoom) m.once("zoomend", () => setTimeout(go, 0)); else go();
+    }, () => {}, { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
   },
   locate() {
     if (!navigator.geolocation) { toast("この画面では現在地が使えません"); return; }
