@@ -807,6 +807,8 @@ html.tcv-on,html.tcv-on body{overflow:hidden}
 .tc-badge.dgs{background:linear-gradient(180deg,#A9DDF7,#4F93D8 48%,#2E5EA6);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 calc(var(--u) * .4) calc(var(--u) * .8) rgba(20,50,100,.35);text-shadow:0 1px 1px rgba(20,40,90,.45)}
 .digchip{border-color:#6FA8DC;color:#1F4E8C;background:linear-gradient(135deg,#EEF7FF,#D4E8FA);font-weight:700}
 .digchip[aria-pressed="true"]{background:linear-gradient(135deg,#7FB7EA,#2E5EA6);border-color:#2E5EA6;color:#fff}
+.tc-k{font:400 calc(var(--u) * 3)/1 var(--f-disp);letter-spacing:.02em}
+.tc-logo{font:500 calc(var(--u) * 1.8)/1 var(--f-ui);letter-spacing:.12em;opacity:.85}
 </style>
 
 <div id="app">
@@ -1341,14 +1343,14 @@ function cardHTML(s, no, o = {}) {   // スタンプトレカ（印刷の表と�
   const dms = (v, p, q) => { const z = Math.abs(v), d = Math.floor(z), mf = (z - d) * 60, mi = Math.floor(mf); return `${d}°${String(mi).padStart(2, "0")}'${String(Math.round((mf - mi) * 60) % 60).padStart(2, "0")}"${v >= 0 ? p : q}`; };
   const geo = s.lat != null && s.lng != null && !isNaN(s.lat) ? `${dms(+s.lat, "N", "S")} ${dms(+s.lng, "E", "W")}` : "";
   return `<button type="button" class="${cls}" data-open="${esc(s.id)}" style="--g:${gcol(g)}"><span class="pick" aria-hidden="true">✓</span>
-    <span class="tc-hd"><span class="tc-k"><i></i>スタンプトレカ</span><span class="tc-no">No.${String(no || 0).padStart(4, "0")}</span></span>
+    <span class="tc-hd"><span class="tc-k">ぺたろぐ</span><span class="tc-no">No.${String(no || 0).padStart(4, "0")}</span></span>
     <span class="tc-win"><span class="tc-tab"><span class="tc-tabf"></span><svg viewBox="0 0 214 52" preserveAspectRatio="none" aria-hidden="true"><path d="M0 1 L19.5 51 L194.5 51 L214 1" fill="none" stroke="#C9A24A" stroke-width="2.4"/></svg><span class="tc-tabt"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${gicon(g)}"/></svg>${esc(g)}</span></span>
       ${s.overlap || isDigi(s) ? `<span class="tc-badges">${s.overlap ? '<span class="tc-badge">重ね押し</span>' : ""}${isDigi(s) ? '<span class="tc-badge dgs">デジスタ</span>' : ""}</span>` : ""}
       <span class="tc-art${L.A.sheet ? " sh" : ""}" style="left:${u(L.x)};top:${u(L.y)};width:${u(L.w)};height:${u(L.h)}"><img src="${L.A.url}" alt="" loading="lazy" draggable="false" data-ck="${esc(s.id)}"></span>
       ${L.dimY != null ? `<span class="tc-dim" style="left:${u(L.x)};top:${u(L.dimY)};width:${u(L.w)}"><i></i><i></i><b>${L.dimTxt}</b></span>` : ""}
       <span class="tc-nm" style="font-size:${u(L.fs)}">${esc(s.name || "名前未設定")}</span><span class="tc-rule"></span>
       <span class="tc-facts"><span>${esc(fmtDate(s.date))}</span>${L.real ? '<span class="tc-real">実寸大</span>' : ""}${s.pref ? `<span class="tc-pf">${esc(s.pref)}</span>` : ""}</span></span>
-    <span class="tc-ft"><span>${geo}</span><span class="tc-logo">ぺたろぐ</span></span></button>`;
+    <span class="tc-ft"><span>${geo}</span><span class="tc-logo">スタンプトレカ</span></span></button>`;
 }
 const Grid = {
   on: true, g: "all", q: "", desc: true, f: {}, open: false, selMode: false, sel: new Set(), items: [], cols: clamp(Math.round(+lsGet("petalog.gridCols") || 5), 1, 5),
@@ -5083,8 +5085,7 @@ const PrintCard = {
     x.fillStyle = "rgba(255,255,255,.28)"; x.fillRect(0, 0, W, 0.2 * m); x.fillStyle = "rgba(0,0,0,.28)"; x.fillRect(0, H - 0.3 * m, W, 0.3 * m);
     // 上の帯: ■ スタンプトレカ / No.0000
     x.textBaseline = "middle"; x.fillStyle = cream; x.save(); x.shadowColor = "rgba(0,0,0,.4)"; x.shadowBlur = 0.3 * m; x.shadowOffsetY = 0.2 * m;
-    const sq = 1.4 * m; x.fillRect(3.4 * m, (TC.hd / 2) * m - sq / 2, sq, sq); x.fillRect(3.4 * m + sq * 0.6, (TC.hd / 2) * m - sq * 0.3, sq * 0.6 + 0.8 * m, sq * 0.6);
-    x.font = `700 ${2.4 * m}px ${UI}`; x.textAlign = "left"; x.fillText("スタンプトレカ", 3.4 * m + sq + 1.6 * m, (TC.hd / 2) * m);
+    x.font = `400 ${3 * m}px "Dela Gothic One",${UI}`; x.textAlign = "left"; x.fillText("ぺたろぐ", 3.4 * m, (TC.hd / 2) * m + 0.15 * m);
     x.font = `500 ${3 * m}px ${MONO}`; x.textAlign = "right"; x.fillText("No." + String(P.no || 0).padStart(4, "0"), W - 3.4 * m, (TC.hd / 2) * m); x.restore();
     // 窓（白い紙）: くぼんで見える影と金の線
     const wx = TC.wx * m, wy = TC.hd * m, ww = TC.ww * m, wh = TC.wh * m, wr = 1.4 * m;
@@ -5135,7 +5136,7 @@ const PrintCard = {
     const dms = (v, p, q) => { const z = Math.abs(v), d = Math.floor(z), mf = (z - d) * 60, mi = Math.floor(mf); return `${d}°${String(mi).padStart(2, "0")}'${String(Math.round((mf - mi) * 60) % 60).padStart(2, "0")}"${v >= 0 ? p : q}`; };
     const fyb = H - (TC.ft / 2) * m; x.save(); x.shadowColor = "rgba(0,0,0,.4)"; x.shadowBlur = 0.3 * m; x.shadowOffsetY = 0.15 * m; x.fillStyle = cream; x.textBaseline = "middle";
     if (s.lat != null && s.lng != null && !isNaN(s.lat)) { x.font = `500 ${2.1 * m}px ${MONO}`; x.textAlign = "left"; x.fillText(`${dms(+s.lat, "N", "S")} ${dms(+s.lng, "E", "W")}`, 3.4 * m, fyb); }
-    x.font = `600 ${2.1 * m}px ${MIN}`; x.textAlign = "right"; x.fillText("ぺたろぐ", W - 3.4 * m, fyb); x.restore();
+    x.font = `500 ${1.8 * m}px ${UI}`; x.textAlign = "right"; x.globalAlpha = 0.85; this.spaced(x, "スタンプトレカ", 0.12 * 1.8 * m, W - 3.4 * m - this.spaced(x, "スタンプトレカ", 0.12 * 1.8 * m), fyb); x.restore();
   },
   spaced(x, t, sp, X, Y) {   // 字間つきで書く（X を省くと幅だけ返す）
     const chars = [...String(t)]; let w = 0; for (const c of chars) w += x.measureText(c).width + sp; w -= sp;
@@ -5228,7 +5229,7 @@ const PrintCard = {
       x.strokeStyle = "rgba(201,162,74,.8)"; x.lineWidth = Math.max(1.5, 0.15 * m); this.rr(x, qx + 0.1 * m, qy + 0.1 * m, qs - 0.2 * m, qs - 0.2 * m, 0.7 * m); x.stroke();
       const nn = P.qr.getModuleCount(), c = (qs - 2 * pad) / nn; x.fillStyle = "#111"; for (let r = 0; r < nn; r++) for (let k = 0; k < nn; k++) if (P.qr.isDark(r, k)) x.fillRect(qx + pad + k * c, qy + pad + r * c, Math.ceil(c), Math.ceil(c)); }
     // いちばん下（白いふち）: ぺたろぐ / スタンプトレカ
-    const fy = (py + ph + H) / 2; x.textBaseline = "middle"; x.textAlign = "left"; x.fillStyle = ink; x.font = `600 ${2.2 * m}px ${MIN}`; x.fillText("ぺたろぐ", 3 * m, fy);
+    const fy = (py + ph + H) / 2; x.textBaseline = "middle"; x.textAlign = "left"; x.fillStyle = ink; x.font = `400 ${2.5 * m}px "Dela Gothic One",${UI}`; x.fillText("ぺたろぐ", 3 * m, fy + 0.1 * m);
     x.textAlign = "right"; x.fillStyle = "#8A8F99"; x.font = `500 ${1.4 * m}px ${UI}`; x.fillText("スタンプトレカ", W - 3 * m, fy);
   },
   async render() {
