@@ -698,6 +698,14 @@ html,body{touch-action:pan-x pan-y}
 .placeq .pmres{top:100%;left:0;right:0;margin-top:4px;max-height:260px}
 .pmap .leaflet-control-attribution{font-size:8.5px;line-height:1.3;opacity:.75;background:rgba(255,255,255,.55);padding:0 4px}
 .pmap .leaflet-control-attribution a{color:#5F6676}
+.mc-n{margin-left:auto;font-size:12px;color:var(--muted);white-space:nowrap}
+.mc-grp{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.mc-grp::-webkit-scrollbar{display:none}
+.mc-grp button{flex:0 0 74px;border:1px solid var(--line);background:none;border-radius:10px;padding:5px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;color:inherit;min-width:0}
+.mc-grp i{display:flex;align-items:center;justify-content:center;width:62px;height:62px;background:#FBFAF6;border-radius:8px}
+.mc-grp img{max-width:56px;max-height:56px;mix-blend-mode:multiply}
+.mc-grp span{width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center}
+.mc-grp small{color:var(--muted);font-size:9.5px}
 </style>
 
 <div id="app">
@@ -1587,19 +1595,20 @@ const MapV = {
     };
     // stamp pins
     this.pinHits = []; const pinR = 17;
-    const drawPin = (lat, lng, url, ring, hit) => {
+    const drawPin = (lat, lng, url, ring, hit, n = 1) => {
       const [wx, wy] = W(lat, lng); const px = X(wx), py = Y(wy); if (px < -30 || py < -40 || px > Wd + 30 || py > Hd + 60) return;
       x.save(); x.shadowColor = "rgba(0,0,0,.28)"; x.shadowBlur = 6; x.shadowOffsetY = 2;
       x.beginPath(); x.moveTo(px, py); x.lineTo(px - 7, py - 12); x.lineTo(px + 7, py - 12); x.closePath(); x.fillStyle = ring; x.fill();
       x.beginPath(); x.arc(px, py - 12 - pinR, pinR + 2.5, 0, 7); x.fillStyle = ring; x.fill(); x.restore();
       x.beginPath(); x.arc(px, py - 12 - pinR, pinR, 0, 7); x.fillStyle = "#FFFFFF"; x.fill();
-      const im = imgFor(url); if (im && im.complete && im.naturalWidth) { x.save(); x.beginPath(); x.arc(px, py - 12 - pinR, pinR - 1, 0, 7); x.clip(); const s = (pinR - 2) * 2, ar = im.naturalWidth / im.naturalHeight; const iw = ar >= 1 ? s : s * ar, ih = ar >= 1 ? s / ar : s; x.globalCompositeOperation = "multiply"; x.drawImage(im, px - iw / 2, py - 12 - pinR - ih / 2, iw, ih); x.restore(); }
+      const im = imgFor(url); if (im && im.complete && im.naturalWidth) { x.save(); x.beginPath(); x.arc(px, py - 12 - pinR, pinR - 1, 0, 7); x.clip(); const s = (pinR - 2) * 2, ar = im.naturalWidth / im.naturalHeight; const iw = ar >= 1 ? s : s * ar, ih = ar >= 1 ? s / ar : s; x.globalCompositeOperation = "multiply"; if (n > 1) x.globalAlpha = .3; x.drawImage(im, px - iw / 2, py - 12 - pinR - ih / 2, iw, ih); x.restore(); }
       else if (im && !im._hooked) { im._hooked = true; im.addEventListener("load", () => this.draw(), { once: true }); }
+      if (n > 1) { const t = n > 99 ? "99+" : String(n); x.save(); x.font = `800 ${t.length > 2 ? 12 : t.length > 1 ? 15 : 17}px 'Zen Kaku Gothic New','Hiragino Sans',sans-serif`; x.textAlign = "center"; x.textBaseline = "middle"; x.lineJoin = "round"; x.lineWidth = 3.5; x.strokeStyle = "rgba(255,255,255,.92)"; x.strokeText(t, px, py - 12 - pinR + 1); x.fillStyle = ring; x.fillText(t, px, py - 12 - pinR + 1); x.restore(); }
       boxes.push([px - pinR - 3, py - 12 - pinR * 2 - 3, px + pinR + 3, py]); this.pinHits.push({ px, py: py - 12 - pinR, ...hit });
     };
     if (!this.pick) {
       if (this.mode === "all" && this.pubs) this.pubs.forEach(p => { if (p.lat != null && p.by !== Store.uid && !p.miss) drawPin(+p.lat, +p.lng, p.thumb, C.shu, { pub: p._id }); });
-      list().forEach(s => { if (s.lat != null && s.lng != null && !isNaN(s.lat)) drawPin(+s.lat, +s.lng, s.cut, C.ai, { id: s.id }); });
+      pinGroups().forEach(g => drawPin(g.lat, g.lng, g.top.cut, C.ai, g.n > 1 ? { grp: g.ids } : { id: g.top.id }, g.n));
     }
     if (this.me) { const [wx, wy] = W(this.me.lat, this.me.lng); const px = X(wx), py = Y(wy); x.beginPath(); x.arc(px, py, 14, 0, 7); x.fillStyle = "rgba(10,132,255,.18)"; x.fill(); x.beginPath(); x.arc(px, py, 7, 0, 7); x.fillStyle = "#0A84FF"; x.fill(); x.lineWidth = 2.5; x.strokeStyle = "#fff"; x.stroke(); }
     // stations
@@ -1682,7 +1691,7 @@ const MapV = {
   },
   tap(px, py) {
     this.pickName = "";
-    if (!this.pick) for (const h of [...this.pinHits].reverse()) if (Math.hypot(px - h.px, py - h.py) < 20) { if (h.pub) openPub(h.pub); else openStamp("edit", findStamp(h.id)); return; }
+    if (!this.pick) for (const h of [...this.pinHits].reverse()) if (Math.hypot(px - h.px, py - h.py) < 20) { if (h.pub) openPub(h.pub); else if (h.grp) this.showGroup(h.grp); else openStamp("edit", findStamp(h.id)); return; }
     let best = null, bd = 20; for (const h of this.stHits) { const d = Math.hypot(px - h.px, py - h.py); if (d < bd) { bd = d; best = h; } }
     if (!best) { this.closeCard(); return; }
     const o = best.s || best.f;
@@ -1704,6 +1713,15 @@ const MapV = {
     card.querySelectorAll("[data-open]").forEach(b => b.onclick = () => openStamp("edit", findStamp(b.dataset.open)));
     $("#mcAdd").onclick = () => { const name = it.kind === "st" ? o.n + "駅" : o.n; const pre = { name, place: name, cat: it.kind === "st" ? "駅" : o.k === "air" ? "空港" : /道の駅/.test(o.n) ? "道の駅" : "施設", lat: +o.lat.toFixed(6), lng: +o.lng.toFixed(6), pref: prefAt(o.lat, o.lng) || "", locSrc: it.kind === "st" ? "駅の位置" : "施設の位置" }; this.closeCard(); openStamp("add", null, pre); };
     const mr = $("#mcRally"); if (mr) mr.onclick = () => { const r = rallyChoices(o)[0]; if (!r) return; Rally.cur = r.id; Rally.hl = o.n; show("rally"); Rally.render(); };
+  },
+  showGroup(ids) {
+    const ss = ids.map(findStamp).filter(Boolean); if (!ss.length) return; const top = ss[0], card = $("#mapCard"), nm = top.place || top.name;
+    card.innerHTML = `<div class="mc-h"><b>${esc(nm)}</b><span class="mc-n">${ss.length}まい</span><button class="icon-btn" type="button" id="mcX" aria-label="閉じる" style="width:30px;height:30px;font-size:14px">✕</button></div>
+      <div class="mc-grp">${ss.map(s => `<button type="button" data-open="${s.id}"><i><img src="${esc(s.cut || "")}" alt=""></i><span>${esc(s.name)}</span><small>${esc((s.date || "").replace(/-/g, "."))}</small></button>`).join("")}</div>
+      <div class="row2"><button class="btn small primary" type="button" id="mcAdd">ここのスタンプを追加</button><a class="btn small" href="${gmapsDir(top.lat, top.lng)}" target="_blank" rel="noopener">道案内</a></div>`;
+    card.hidden = false; $("#mcX").onclick = () => this.closeCard();
+    card.querySelectorAll("[data-open]").forEach(b => b.onclick = () => openStamp("edit", findStamp(b.dataset.open)));
+    $("#mcAdd").onclick = () => { const pre = { name: nm, place: top.place || nm, cat: catNorm(top.cat), lat: +(+top.lat).toFixed(6), lng: +(+top.lng).toFixed(6), pref: top.pref || prefAt(top.lat, top.lng) || "", locSrc: "地図で検索" }; this.closeCard(); openStamp("add", null, pre); };
   },
   closeCard() { const c = $("#mapCard"); if (c) c.hidden = true; },
   gsiBlocked: false,
@@ -4854,6 +4872,25 @@ const YahooLS = {
     sv.onclick = async () => { const v = $("#yIn").value.trim(); if (v && !/^[\w.-]{20,}$/.test(v)) { toast("Client IDの形が違うようです。もう一度コピーしてください"); return; } await this.save(v); if (!v) { try { localStorage.removeItem("petalog.yahooId"); } catch {} } toast(v ? "Yahoo!の検索を使います" : "Yahoo!の検索をやめました"); };
   }
 };
+
+/* ---------- 地図: 同じ場所のスタンプをまとめる（30m以内、または同じ場所名で300m以内） ---------- */
+let _pg = { sig: "", groups: [] };
+function pinGroups() {
+  const L = list().filter(s => s.lat != null && s.lng != null && !isNaN(s.lat) && !isNaN(s.lng));
+  const sig = L.length + ":" + L.map(s => s.id + "," + s.lat + "," + s.lng + "," + (s.date || "") + "," + (s.cut || "").length + "," + (s.place || "")).join("|");
+  if (sig === _pg.sig) return _pg.groups;
+  const rk = s => (s.date || "") + "|" + String(s.created || 0).padStart(15, "0");
+  const ord = [...L].sort((a, b) => rk(b) < rk(a) ? -1 : rk(b) > rk(a) ? 1 : 0);
+  const m = (a, b) => { const dy = (a.lat - b.lat) * 110540, dx = (a.lng - b.lng) * 111320 * Math.cos(a.lat * Math.PI / 180); return Math.hypot(dx, dy); };
+  const groups = [];
+  for (const s of ord) {
+    const p = { lat: +s.lat, lng: +s.lng }, pn = norm(s.place || "");
+    const g = groups.find(g => { const d = m(g, p); return d < 30 || (pn && g.pn === pn && d < 300); });
+    if (g) { g.ids.push(s.id); g.n++; } else groups.push({ lat: p.lat, lng: p.lng, pn, top: s, ids: [s.id], n: 1 });
+  }
+  _pg = { sig, groups: groups.reverse() };
+  return _pg.groups;
+}
 
 /* ================= boot ================= */
 addEventListener("resize", () => { Book.layout(); if (view === "fall") { Fall.dirty = true; Fall.stop(); Fall.start(); } if (view === "map") MapV.draw(); });
