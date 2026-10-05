@@ -767,6 +767,7 @@ html,body{touch-action:pan-x pan-y}
 .tc-ft{position:absolute;left:0;right:0;bottom:0;height:calc(var(--u) * 6.2);display:flex;align-items:center;justify-content:space-between;padding:0 calc(var(--u) * 3.4);color:#F3E2B0;font:500 calc(var(--u) * 2.1)/1 var(--f-mono);text-shadow:0 1px 2px rgba(0,0,0,.4);white-space:nowrap}
 .tc-logo{font-family:"Shippori Mincho",var(--f-hand);font-weight:600}
 .card.tc .pick{z-index:4}
+.pc-rb{font-size:11.5px;color:rgba(255,255,255,.6)}
 </style>
 
 <div id="app">
@@ -4994,41 +4995,29 @@ const PrintCard = {
   url() { return new URL(".", location.href).href; },
   store() { return lsGet("petalog.printStore") === "sharp" ? "sharp" : "seven"; },
   no(s) { return new Map(byDate(true).map((x, i) => [x.id, i + 1])).get(s.id) || 0; },
-  async lookup(s) {
-    const api = async p => { const r = await fetch("https://ja.wikipedia.org/w/api.php?" + new URLSearchParams({ format: "json", origin: "*", ...p })); if (!r.ok) throw new Error("wiki " + r.status); return r.json(); };
-    const q = String(s.place || s.name || "").replace(/[（(].*$/, "").replace(/(の)?(記念)?(スタンプ|来場記念|見学記念).*$/, "").trim(); if (!q) return null;
-    let title = null, best = 0;
-    if (s.lat != null && s.lng != null) {
-      const j = await api({ action: "query", list: "geosearch", gscoord: `${s.lat}|${s.lng}`, gsradius: 1500, gslimit: 50 });
-      for (const g of (j.query && j.query.geosearch) || []) { const sc = likeness(q, g.title) - g.dist / 20000; if (sc > best) { best = sc; title = g.title; } }
-    }
-    if (!title || best < 0.6) {
-      const j = await api({ action: "query", list: "search", srsearch: q, srlimit: 5 });
-      for (const r of (j.query && j.query.search) || []) { const sc = likeness(q, r.title); if (sc > best) { best = sc; title = r.title; } }
-    }
-    if (!title || best < 0.5) return null;
-    const j = await api({ action: "query", prop: "extracts", exintro: 1, explaintext: 1, redirects: 1, titles: title });
-    const pg = Object.values((j.query && j.query.pages) || {})[0]; if (!pg || !pg.extract) return null;
-    let t = String(pg.extract).replace(/\s*\n+\s*/g, "").replace(/（[^（）]{0,90}）/g, "").replace(/\([^()]{0,90}\)/g, "").replace(/[ 　]{2,}/g, " ").trim();
-    let out = ""; for (const x of t.match(/[^。]+。?/g) || [t]) { if (out && (out + x).length > 240) break; out += x; }
-    return out ? { title: pg.title, text: out } : null;
-  },
+  // ルビ: 「首里城《しゅりじょう》」または「｜那覇空港《なはくうこう》」の書き方
+  ruby(t) { const out = [], re = /(?:｜([^｜《》\n]+)|([㐀-䶿一-鿿々〆ヶ]+))《([^》\n]+)》/g; let i = 0, mm;
+    while ((mm = re.exec(t))) { for (const ch of t.slice(i, mm.index)) out.push({ t: ch }); out.push({ t: mm[1] || mm[2], r: mm[3] }); i = re.lastIndex; }
+    for (const ch of t.slice(i)) out.push({ t: ch });
+    const g = []; for (const u of out) { const p = g[g.length - 1]; if (!u.r && p && !p.r && /^[0-9A-Za-z.,%°'"]+$/.test(p.t + u.t)) p.t += u.t; else g.push({ ...u }); } return g; },   // 数字や英字のつながりは改行で分けない
+  plain(t) { return this.ruby(String(t || "")).map(u => u.t + (u.r || "")).join(""); },
   fallback(s) {
     const d = s.date ? s.date.replace(/^(\d+)-0?(\d+)-0?(\d+)$/, "$1年$2月$3日") : "";
     return `${d ? d + "、" : ""}${s.place ? s.place + "で" : s.pref ? s.pref + "で" : ""}押した「${s.name || "スタンプ"}」${s.overlap ? "の重ね押し" : ""}。${s.sizeMm ? `大きさは約${fmtCm(s.sizeMm)}。` : ""}${s.memo ? s.memo : ""}`;
   },
   async assets(s) {
     if (s.sheet && !s._sheet) { const u = await Store.getPhoto("sh_" + s.id).catch(() => null); if (u) s._sheet = u; }
-    const A = artOf(s), front = await loadImg(A.url), cut = A.sheet ? await loadImg(s.cut) : front, side = [];
-    if (!A.sheet && s._sheet) side.push({ url: s._sheet, cap: "台紙" });
-    for (const k of s.scenes || []) { if (side.length >= 2) break; const u = await Store.getPhoto("sc_" + s.id + "_" + k).catch(() => null); if (u) side.push({ url: u, cap: "その日の写真" }); }
-    if (side.length < 2 && s.hasPhoto) { const u = await Store.getPhoto("ph_" + s.id, s.id).catch(() => null); if (u) side.push({ url: u, cap: "押した紙" }); }
-    for (const it of side) it.im = await loadImg(it.url).catch(() => null);
+    const A = artOf(s), front = await loadImg(A.url), cut = A.sheet ? await loadImg(s.cut) : front;
+    // 裏の写真: 追加した写真（新しい順に最大4枚）。なければスタンプの元になった写真
+    const keys = (s.scenes || []).slice(-4), added = [];
+    for (const k of keys) { const u = await Store.getPhoto("sc_" + s.id + "_" + k).catch(() => null); if (u) { const im = await loadImg(u).catch(() => null); if (im) added.push(im); } }
+    let photos = added;
+    if (!photos.length) { let u = s.hasPhoto ? await Store.getPhoto("ph_" + s.id, s.id).catch(() => null) : null; if (!u && s._sheet) u = s._sheet; const im = u ? await loadImg(u).catch(() => null) : null; photos = im ? [im] : []; }
     if (!window.qrcode) await new Promise(res => { const sc = document.createElement("script"); sc.src = "vendor/qrcode.js"; sc.onload = sc.onerror = res; document.head.appendChild(sc); });
     // QRコード: その場所のGoogleマップ（見た人がそのまま行ける）。場所が未登録ならQRなし
     let qr = null; if (s.lat != null && s.lng != null && !isNaN(s.lat)) { try { qr = qrcode(0, "M"); qr.addData(`https://www.google.com/maps/search/?api=1&query=${(+s.lat).toFixed(6)},${(+s.lng).toFixed(6)}`); qr.make(); } catch (_) { qr = null; } }
     if (!this.washi) this.washi = makeWashi();
-    return { A, front, cut, side: side.filter(t => t.im).slice(0, 2), qr, no: this.no(s) };
+    return { A, front, cut, photos, added: added.length, qr, no: this.no(s) };
   },
   async fonts(txt) {
     await Promise.all(['500 40px "IBM Plex Mono"', '600 40px "Klee One"', '600 40px "Shippori Mincho"', '700 40px "Shippori Mincho"', '400 40px "Zen Kaku Gothic New"', '500 40px "Zen Kaku Gothic New"', '700 40px "Zen Kaku Gothic New"', '400 40px "Dela Gothic One"']
@@ -5111,54 +5100,86 @@ const PrintCard = {
     const chars = [...String(t)]; let w = 0; for (const c of chars) w += x.measureText(c).width + sp; w -= sp;
     if (X == null) return w; const al = x.textAlign; x.textAlign = "left"; let cx = X; for (const c of chars) { x.fillText(c, cx, Y); cx += x.measureText(c).width + sp; } x.textAlign = al; return w;
   },
-  back(x, s, P, W, H) {
-    const m = this.PX, g = gcol(catNorm(s.cat)), UI = '"Zen Kaku Gothic New","Hiragino Sans",sans-serif', MONO = '"IBM Plex Mono",ui-monospace,monospace', ink = "#1D2230";
-    x.fillStyle = "#fff"; x.fillRect(0, 0, W, H);
-    const p0 = 2.4 * m, pw = W - 2 * p0, pb = 81.4 * m;
-    x.fillStyle = g; this.rr(x, p0, p0, pw, pb - p0, 2.6 * m); x.fill();
-    // 見出し: 場所の名前
-    const title = s.place || s.name || "スタンプの記録"; let fs = 4.2 * m; x.textAlign = "center"; x.textBaseline = "middle"; x.fillStyle = "#fff";
-    for (; fs > 2.6 * m; fs -= 0.1 * m) { x.font = `700 ${fs}px ${UI}`; if (x.measureText(title).width <= pw - 6 * m) break; }
-    x.fillText(this.shrink(x, title, pw - 6 * m), W / 2, p0 + 4.3 * m);
-    // 白い枠: 左にスタンプ、右に写真
-    const bx = 4.2 * m, by = 11 * m, bw = W - 8.4 * m, bh = 31.6 * m; x.fillStyle = "#fff"; this.rr(x, bx, by, bw, bh, 0.9 * m); x.fill();
-    const lx = bx + 1 * m, ly = by + 1.2 * m, lw = 27 * m, lah = bh - 6.2 * m, im = P.cut;
-    x.save(); if (!isDigi(s)) x.globalCompositeOperation = "multiply"; x.drawImage(im, ...this.fit(im, lx + 1 * m, ly, lw - 2 * m, lah)); x.restore();
-    x.font = `500 ${2.3 * m}px ${UI}`; x.fillStyle = "#3A3F4B"; x.textAlign = "center"; x.fillText(`押した日 ${fmtDate(s.date)}`, lx + lw / 2, by + bh - 2.4 * m);
-    const rx = lx + lw + 1.6 * m, rw = bx + bw - 1 * m - rx, cap = 3 * m;
-    const info = [["ジャンル", catNorm(s.cat)], s.sizeMm ? ["大きさ", "約" + fmtCm(s.sizeMm)] : null, s.pref ? ["場所", s.pref] : null, s.overlap ? ["押し方", "重ね押し"] : null].filter(Boolean);
-    const photo = (it, Y, h) => { x.save(); this.rr(x, rx, Y, rw, h, 0.5 * m); x.clip(); x.drawImage(it.im, ...this.fit(it.im, rx, Y, rw, h, true)); x.restore();
-      x.font = `500 ${2.1 * m}px ${UI}`; x.fillStyle = "#3A3F4B"; x.textAlign = "center"; x.fillText(it.cap, rx + rw / 2, Y + h + cap / 2 + 0.2 * m); };
-    const rows = (Y, list) => { x.textAlign = "left"; list.forEach(([k, v], i) => { const yy = Y + i * 4.3 * m; x.font = `500 ${2.1 * m}px ${UI}`; x.fillStyle = "#7A7F89"; x.fillText(k, rx, yy); x.font = `700 ${2.4 * m}px ${UI}`; x.fillStyle = ink; x.fillText(this.shrink(x, v, rw - 9.5 * m), rx + 9.5 * m, yy); }); };
-    const top = by + 1.2 * m, room = bh - 2.4 * m;
-    if (P.side.length >= 2) { const h = (room - 2 * cap) / 2; photo(P.side[0], top, h); photo(P.side[1], top + h + cap, h); }
-    else if (P.side.length === 1) { const h = room - cap - 9 * m; photo(P.side[0], top, h); rows(top + h + cap + 2.6 * m, info.slice(0, 2)); }
-    else rows(top + 3 * m, info);
-    // QRコード（ぺたろぐへ）
-    const qs = 12.6 * m, qx = p0 + pw - 1.6 * m - qs, qy = pb - 1.6 * m - qs;
-    if (P.qr) { x.fillStyle = "#fff"; this.rr(x, qx, qy, qs, qs, 0.6 * m); x.fill(); const n = P.qr.getModuleCount(), pad = 0.8 * m, c = (qs - 2 * pad) / n; x.fillStyle = "#111";
-      for (let r = 0; r < n; r++) for (let k = 0; k < n; k++) if (P.qr.isDark(r, k)) x.fillRect(qx + pad + k * c, qy + pad + r * c, Math.ceil(c), Math.ceil(c)); }
-    // 解説（QRのところは行を短くする）
-    const tx = 4.6 * m, tw = W - 9.2 * m, t0 = 44.4 * m, tmax = 76.4 * m, text = (this.text || "").trim() || this.fallback(s);
-    let L = [], f = 2.55 * m, lh = 0;
-    for (; f >= 1.8 * m; f -= 0.05 * m) { lh = f * 1.55; x.font = `500 ${f}px ${UI}`; const qTop = P.qr ? qy - 0.8 * m : Infinity; L = this.wrap(x, text, i => t0 + (i + 1) * lh > qTop ? qx - 1.4 * m - tx : tw); if (t0 + L.length * lh <= tmax) break; }
-    const maxL = Math.floor((tmax - t0) / lh); if (L.length > maxL) { L = L.slice(0, maxL); L[maxL - 1] = this.shrink(x, L[maxL - 1] + "＿", x.measureText(L[maxL - 1]).width).replace("＿", ""); }
-    x.fillStyle = "#fff"; x.textAlign = "left"; x.textBaseline = "middle"; L.forEach((t, i) => x.fillText(t, tx, t0 + (i + 0.5) * lh));
-    // 番号と座標（マンホールカードの表のように）
-    const dms = (v, a, b) => { const z = Math.abs(v), d = Math.floor(z), mf = (z - d) * 60, mi = Math.floor(mf); return `${d}°${String(mi).padStart(2, "0")}'${String(Math.round((mf - mi) * 60) % 60).padStart(2, "0")}"${v >= 0 ? a : b}`; };
-    const code = `No.${String(P.no).padStart(4, "0")}${s.lat != null ? "  " + dms(+s.lat, "N", "S") + " " + dms(+s.lng, "E", "W") : ""}`;
-    let cf = 2.15 * m; for (; cf > 1.5 * m; cf -= 0.05 * m) { x.font = `500 ${cf}px ${MONO}`; if (x.measureText(code).width <= (P.qr ? qx - 1 * m : p0 + pw - 2 * m) - tx) break; }
-    x.fillStyle = "rgba(255,255,255,.92)"; x.textBaseline = "alphabetic"; x.fillText(this.shrink(x, code, (P.qr ? qx - 1 * m : p0 + pw - 2 * m) - tx), tx, pb - 2 * m);
-    // いちばん下: ぺたろぐ と出典
-    const fy = (pb + H) / 2; x.textBaseline = "middle"; x.textAlign = "left"; x.fillStyle = ink; x.font = `400 ${2.5 * m}px "Dela Gothic One",${UI}`; x.fillText("ぺたろぐ", 3 * m, fy);
-    const lw2 = x.measureText("ぺたろぐ").width, w = this.wiki, credit = w && text.includes(w.text.slice(0, 12)) ? `解説: Wikipedia「${w.title}」CC BY-SA 4.0` : "";
-    x.fillStyle = "#7A7F89";
-    if (!credit) { x.font = `500 ${1.8 * m}px ${UI}`; x.fillText("スタンプ記録カード", 3 * m + lw2 + 1.2 * m, fy + 0.1 * m); }
-    else { const room = W - 6 * m - lw2 - 1.5 * m; let cf = 1.6 * m; for (; cf > 1.2 * m; cf -= 0.05 * m) { x.font = `500 ${cf}px ${UI}`; if (x.measureText(credit).width <= room) break; } x.textAlign = "right"; x.fillText(this.shrink(x, credit, room), W - 3 * m, fy + 0.1 * m); }
+  recess(x, X, Y, w, h, r, m) {   // 表の窓と同じ「くぼんだ白い紙」
+    this.rr(x, X, Y, w, h, r); x.fillStyle = "#F8F8F5"; x.fill();
+    const pp = x.createPattern(TCPaper(), "repeat"), ks = 40 * m / 400; if (pp.setTransform) pp.setTransform(new DOMMatrix([ks, 0, 0, ks, X, Y])); x.fillStyle = pp; this.rr(x, X, Y, w, h, r); x.fill();
+    x.save(); this.rr(x, X, Y, w, h, r); x.clip();
+    const hole = () => { x.beginPath(); x.rect(X - 40 * m, Y - 40 * m, w + 80 * m, h + 80 * m); x.moveTo(X + r, Y); x.arcTo(X, Y, X, Y + h, r); x.arcTo(X, Y + h, X + w, Y + h, r); x.arcTo(X + w, Y + h, X + w, Y, r); x.arcTo(X + w, Y, X, Y, r); x.closePath(); };
+    x.shadowColor = "rgba(0,0,0,.30)"; x.shadowBlur = 1.2 * m; x.shadowOffsetY = 0.6 * m; hole(); x.fillStyle = "#000"; x.fill("evenodd");
+    x.shadowColor = "rgba(140,106,36,.12)"; x.shadowBlur = 3 * m; x.shadowOffsetY = 0; hole(); x.fill("evenodd"); x.restore();
+    x.strokeStyle = "rgba(201,162,74,.85)"; x.lineWidth = Math.max(2, 0.22 * m); this.rr(x, X + x.lineWidth / 2, Y + x.lineWidth / 2, w - x.lineWidth, h - x.lineWidth, r); x.stroke();
+  },
+  back(x, s, P, W, H) {   // 裏: 白いふち＋色の板（表と同じ光と影）。写真は枚数でレイアウトを変える
+    const m = W / 63, g = gcol(catNorm(s.cat)), dk = mixHex(g, "#000000", 0.38), lt = mixHex(g, "#ffffff", 0.18), gold = "#C9A24A", cream = "#F3E2B0", ink = "#1E2433";
+    const MIN = '"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif', UI = '"Zen Kaku Gothic New","Hiragino Sans",sans-serif', MONO = '"IBM Plex Mono",ui-monospace,monospace';
+    x.fillStyle = "#FDFDFB"; x.fillRect(0, 0, W, H);
+    const px = 2.4 * m, py = 2.4 * m, pw = W - 4.8 * m, ph = 79 * m, pr = 2.6 * m;
+    const a = 160 * Math.PI / 180, dx = Math.sin(a), dy = -Math.cos(a), len = Math.abs(pw * dx) + Math.abs(ph * dy), cx0 = px + pw / 2, cy0 = py + ph / 2;
+    const fr = x.createLinearGradient(cx0 - dx * len / 2, cy0 - dy * len / 2, cx0 + dx * len / 2, cy0 + dy * len / 2); fr.addColorStop(0, lt); fr.addColorStop(0.32, g); fr.addColorStop(1, dk);
+    x.save(); x.shadowColor = "rgba(0,0,0,.28)"; x.shadowBlur = 1.4 * m; x.shadowOffsetY = 0.6 * m; this.rr(x, px, py, pw, ph, pr); x.fillStyle = fr; x.fill(); x.restore();
+    x.save(); this.rr(x, px, py, pw, ph, pr); x.clip(); x.fillStyle = "rgba(255,255,255,.28)"; x.fillRect(px, py, pw, 0.2 * m); x.fillStyle = "rgba(0,0,0,.28)"; x.fillRect(px, py + ph - 0.3 * m, pw, 0.3 * m); x.restore();
+    // 見出し（明朝・クリーム）と金の飾り
+    const title = s.place || s.name || "スタンプの記録"; let fs = 4.6 * m; for (; fs > 2.6 * m; fs -= 0.1 * m) { x.font = `700 ${fs}px ${MIN}`; if (this.spaced(x, title, 0.08 * fs) <= 50 * m) break; }
+    x.save(); x.shadowColor = "rgba(0,0,0,.4)"; x.shadowBlur = 0.4 * m; x.shadowOffsetY = 0.2 * m; x.fillStyle = cream; x.textBaseline = "middle";
+    const tw = this.spaced(x, title, 0.08 * fs); this.spaced(x, title, 0.08 * fs, (W - tw) / 2, 7.1 * m); x.restore();
+    const oy = 10.6 * m, ow = 12 * m; for (const sgn of [-1, 1]) { const g2 = x.createLinearGradient(W / 2 + sgn * 1.2 * m, 0, W / 2 + sgn * (1.2 * m + ow), 0); g2.addColorStop(0, gold); g2.addColorStop(1, "rgba(201,162,74,0)"); x.fillStyle = g2; x.fillRect(Math.min(W / 2 + sgn * 1.2 * m, W / 2 + sgn * (1.2 * m + ow)), oy - 0.08 * m, ow, Math.max(1.5, 0.15 * m)); }
+    x.save(); x.translate(W / 2, oy); x.rotate(Math.PI / 4); x.fillStyle = gold; const dd = 0.65 * m; x.fillRect(-dd / 2, -dd / 2, dd, dd); x.restore();
+    // 写真とスタンプの箱
+    const BX = 4.2 * m, BY = 12 * m, BW = 54.6 * m, BH = 28.2 * m; this.recess(x, BX, BY, BW, BH, 1.2 * m, m);
+    const ar = clamp((s.cw || 1) / (s.ch || 1), 0.2, 5), wmm = s.sizeMm ? (ar >= 1 ? s.sizeMm : s.sizeMm * ar) : 0, hmm = s.sizeMm ? (ar >= 1 ? s.sizeMm / ar : s.sizeMm) : 0;
+    const sizeTxt = s.sizeMm ? `横${(wmm / 10).toFixed(1)} × 高さ${(hmm / 10).toFixed(1)}cm` : "";
+    const B = (v) => v * m;
+    const stamp = (l, t, w, h) => { const im = P.cut; x.save(); if (!isDigi(s)) x.globalCompositeOperation = "multiply"; x.drawImage(im, ...this.fit(im, BX + B(l), BY + B(t), B(w), B(h))); x.restore(); };
+    const photo = (im, l, t, w, h) => { const X = BX + B(l), Y = BY + B(t), pad = 0.5 * m;
+      x.save(); x.shadowColor = "rgba(40,30,10,.28)"; x.shadowBlur = 1 * m; x.shadowOffsetY = 0.4 * m; x.fillStyle = "#fff"; x.fillRect(X, Y, B(w), B(h)); x.restore();
+      x.save(); x.beginPath(); x.rect(X + pad, Y + pad, B(w) - 2 * pad, B(h) - 2 * pad); x.clip(); const iw = B(w) - 2 * pad, ih = B(h) - 2 * pad, k = Math.max(iw / im.width, ih / im.height), dw = im.width * k, dh = im.height * k;
+      x.drawImage(im, X + pad + (iw - dw) / 2, Y + pad + (ih - dh) * (im.height > im.width ? 0.4 : 0.5), dw, dh); x.restore(); };
+    const text = (t, cxm, tm, fsz, font = MIN, w = 600, col = "#3A3F4B") => { x.font = `${w} ${fsz * m}px ${font}`; x.fillStyle = col; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(t, BX + B(cxm), BY + B(tm)); };
+    const kv = (l, t, rows) => rows.forEach(([k, v], i) => { const yy = BY + B(t + i * 3.4); x.textAlign = "left"; x.textBaseline = "middle"; x.font = `500 ${1.9 * m}px ${UI}`; x.fillStyle = "#7A7F89"; this.spaced(x, k, 0.1 * 1.9 * m, BX + B(l), yy); x.font = `700 ${2.2 * m}px ${MIN}`; x.fillStyle = ink; x.fillText(v, BX + B(l + 9.6), yy); });
+    const rows = [["ジャンル", catNorm(s.cat)], ...(s.sizeMm ? [["横　幅", fmtCm(wmm)], ["高　さ", fmtCm(hmm)]] : s.pref ? [["場　所", s.pref]] : [])];
+    const ph0 = P.photos || [], n = P.added || 0, date = `押した日 ${fmtDate(s.date)}`;
+    const order = list => { const tall = [...list].sort((p, q) => p.width / p.height - q.width / q.height); return tall; };
+    if (n <= 1) { stamp(1.4, 1.6, 29.6, 21.4); text(date, 16.2, 25.2, 2.1);
+      if (ph0[0]) { photo(ph0[0], 33, 1.6, 19.8, 12.8); kv(33.6, 17.4, rows); } else kv(33.6, 4.5, rows); }
+    else if (n === 2) { stamp(1.2, 1.8, 26.2, 19.6); text(date, 14.3, 23.2, 1.9); if (sizeTxt || true) text(`${catNorm(s.cat)}${sizeTxt ? "・" + sizeTxt : ""}`, 14.3, 25.8, 1.6, MIN, 600, "#5A5F6B");
+      photo(ph0[0], 29, 1.4, 24.2, 12.2); photo(ph0[1], 29, 14.6, 24.2, 12.2); }
+    else if (n === 3) { const o = order(ph0); photo(o[0], 1.4, 1.4, 16.8, 25.4); photo(o[2], 18.9, 1.4, 16.8, 12.8); photo(o[1], 36.4, 1.4, 16.8, 25.4);
+      text("押した日", 27.3, 16.4, 1.9); text(fmtDate(s.date), 27.3, 19.2, 2.1, MIN, 700, ink); text(catNorm(s.cat), 27.3, 21.9, 1.9, MIN, 600, g); if (sizeTxt) text(sizeTxt.replace(" × ", "×"), 27.3, 24.6, 1.5); }
+    else { const o = order(ph0); photo(o[0], 1.4, 1.4, 15, 22.2); photo(o[2], 17.1, 1.4, 20.4, 10.7); photo(o[3], 17.1, 12.9, 20.4, 10.7); photo(o[1], 38.2, 1.4, 15, 22.2);
+      x.font = `600 ${1.8 * m}px ${MIN}`; const parts = [[date, "#3A3F4B"], [catNorm(s.cat), g], ...(sizeTxt ? [[sizeTxt, "#3A3F4B"]] : [])], gap = 1.6 * m;
+      let tot = parts.reduce((t, [p]) => t + x.measureText(p).width, 0) + gap * (parts.length - 1), cx = BX + (BW - tot) / 2; x.textAlign = "left"; x.textBaseline = "middle";
+      for (const [p, c] of parts) { x.fillStyle = c; x.fillText(p, cx, BY + B(25.6)); cx += x.measureText(p).width + gap; } }
+    // 解説（ルビ付き。欄が埋まる大きさに自動でそろえる）
+    const TX = 4.6 * m, TW = 53.8 * m, T0 = 41.6 * m, TMAX = 69.6 * m, units = this.ruby(String(this.text || "").trim() || this.fallback(s));
+    let f = 2.4 * m, lines = [], lh = 0;
+    const layout = f => { const rf = f * 0.46, out = [[]]; let w = 0; const NO = "、。，．）」』】〉》ー…・！？!?,.)]%ぁぃぅぇぉっゃゅょァィゥェォッャュョ";
+      for (const u of units) { if (u.t === "\n") { out.push([]); w = 0; continue; } x.font = `500 ${f}px ${UI}`; const bw = x.measureText(u.t).width; let uw = bw; if (u.r) { x.font = `500 ${rf}px ${UI}`; uw = Math.max(bw, x.measureText(u.r).width); }
+        const line = out[out.length - 1]; if (line.length && w + uw > TW && !NO.includes(u.t)) { out.push([]); w = 0; } out[out.length - 1].push({ ...u, w: uw, bw }); w += uw; }
+      return out; };
+    for (; f >= 1.6 * m; f -= 0.05 * m) { lh = f * 1.78; lines = layout(f); if (T0 + lines.length * lh <= TMAX) break; }
+    const maxL = Math.max(1, Math.floor((TMAX - T0) / lh)); if (lines.length > maxL) { lines = lines.slice(0, maxL); const last = lines[maxL - 1]; while (last.length > 1 && last.reduce((t, u) => t + u.w, 0) > TW - f) last.pop(); last.push({ t: "…", w: f, bw: f }); }
+    const rf = f * 0.46; x.save(); x.shadowColor = "rgba(0,0,0,.3)"; x.shadowBlur = 0.25 * m; x.shadowOffsetY = 0.1 * m; x.textAlign = "center"; x.textBaseline = "middle";
+    lines.forEach((ln, i) => { const y = T0 + (i + 0.62) * lh; let cx = TX; for (const u of ln) { x.font = `500 ${f}px ${UI}`; x.fillStyle = "#fff"; x.fillText(u.t, cx + u.w / 2, y);
+      if (u.r) { x.font = `500 ${rf}px ${UI}`; x.fillStyle = "rgba(255,255,255,.9)"; x.fillText(u.r, cx + u.w / 2, y - f * 0.5 - rf * 0.62); } cx += u.w; } });
+    x.restore();
+    // 下の段: 金の線／No.と緯度経度（左）／QR（右・箱の右端とそろえる）
+    const gy = 70.4 * m, gl = x.createLinearGradient(BX, 0, BX + BW, 0); gl.addColorStop(0, "rgba(201,162,74,0)"); gl.addColorStop(0.1, gold); gl.addColorStop(0.9, gold); gl.addColorStop(1, "rgba(201,162,74,0)"); x.fillStyle = gl; x.fillRect(BX, gy, BW, Math.max(1.5, 0.15 * m));
+    const dms = (v, p, q) => { const z = Math.abs(v), d = Math.floor(z), mf = (z - d) * 60, mi = Math.floor(mf); return `${d}°${String(mi).padStart(2, "0")}'${String(Math.round((mf - mi) * 60) % 60).padStart(2, "0")}"${v >= 0 ? p : q}`; };
+    x.save(); x.shadowColor = "rgba(0,0,0,.4)"; x.shadowBlur = 0.3 * m; x.shadowOffsetY = 0.15 * m; x.fillStyle = cream; x.textAlign = "left"; x.textBaseline = "middle";
+    x.font = `500 ${3 * m}px ${MONO}`; this.spaced(x, "No." + String(P.no || 0).padStart(4, "0"), 0.08 * 3 * m, TX, 73.9 * m);
+    if (s.lat != null && s.lng != null && !isNaN(s.lat)) { x.font = `500 ${2 * m}px ${MONO}`; x.globalAlpha = 0.9; x.fillText(`${dms(+s.lat, "N", "S")} ${dms(+s.lng, "E", "W")}`, TX, 77.6 * m); }
+    x.restore();
+    if (P.qr) { const qs = 9.6 * m, qx = BX + BW - qs, qy = 80 * m - qs, pad = 0.6 * m;
+      x.save(); x.shadowColor = "rgba(0,0,0,.3)"; x.shadowBlur = 1 * m; x.shadowOffsetY = 0.4 * m; x.fillStyle = "#fff"; this.rr(x, qx, qy, qs, qs, 0.8 * m); x.fill(); x.restore();
+      x.strokeStyle = "rgba(201,162,74,.8)"; x.lineWidth = Math.max(1.5, 0.15 * m); this.rr(x, qx + 0.1 * m, qy + 0.1 * m, qs - 0.2 * m, qs - 0.2 * m, 0.7 * m); x.stroke();
+      const nn = P.qr.getModuleCount(), c = (qs - 2 * pad) / nn; x.fillStyle = "#111"; for (let r = 0; r < nn; r++) for (let k = 0; k < nn; k++) if (P.qr.isDark(r, k)) x.fillRect(qx + pad + k * c, qy + pad + r * c, Math.ceil(c), Math.ceil(c)); }
+    // いちばん下（白いふち）: ぺたろぐ / スタンプトレカ
+    const fy = (py + ph + H) / 2; x.textBaseline = "middle"; x.textAlign = "left"; x.fillStyle = ink; x.font = `600 ${2.2 * m}px ${MIN}`; x.fillText("ぺたろぐ", 3 * m, fy);
+    x.textAlign = "right"; x.fillStyle = "#8A8F99"; x.font = `500 ${1.4 * m}px ${UI}`; x.fillText("スタンプトレカ", W - 3 * m, fy);
   },
   async render() {
     const s = this.s, P = this.P; if (!s || !P) return; const my = ++this.gen;
-    await this.fonts(`${s.name || ""}${s.place || ""}${s.pref || ""}${this.text || this.fallback(s)}No.0123456789cm×・ぺたろぐスタンプ記録カード押した日ジャンル大きさ場所押し方重ね押し台紙その日の写真紙解説約DIGITALスタンプトレカ実寸大°'"NSEW①②③④きれいなトレカにするには印刷面を外にして点線で山折りし、内側を両面テープかのりで貼るまず折り目側の切り落とす（写真用紙は反発ではがれやすいため）ティッシュを当てて上からぐっと押さえ、しっかり貼り直す残りのを切れば完成ワンポイント・間に厚紙をはさむと本物のトレカのように硬くなります角丸パンチがあれば四隅を丸くするとよりトレカらしくスリーブに入れると指紋がつきません50mm山折り水のりは乾かないので×上から押さえて貼り直す厚紙をはさむと硬く・角丸パンチで角を丸く${catNorm(s.cat)}${(evlOf(s) || {}).t || ""}`);
+    await this.fonts(`${s.name || ""}${s.place || ""}${s.pref || ""}${this.plain(this.text || this.fallback(s))}横幅高さ場所No.0123456789cm×・ぺたろぐスタンプ記録カード押した日ジャンル大きさ場所押し方重ね押し台紙その日の写真紙解説約DIGITALスタンプトレカ実寸大°'"NSEW①②③④きれいなトレカにするには印刷面を外にして点線で山折りし、内側を両面テープかのりで貼るまず折り目側の切り落とす（写真用紙は反発ではがれやすいため）ティッシュを当てて上からぐっと押さえ、しっかり貼り直す残りのを切れば完成ワンポイント・間に厚紙をはさむと本物のトレカのように硬くなります角丸パンチがあれば四隅を丸くするとよりトレカらしくスリーブに入れると指紋がつきません50mm山折り水のりは乾かないので×上から押さえて貼り直す厚紙をはさむと硬く・角丸パンチで角を丸く${catNorm(s.cat)}${(evlOf(s) || {}).t || ""}`);
     if (my !== this.gen) return;
     // はがき（100×148mm・300dpi・実寸）。中では横向き148×100mmで描いて、書き出しはたて向き（はがきの向き）に回す
     const m = this.PX, W = Math.round(148 * m), H = Math.round(100 * m);
@@ -5228,35 +5249,25 @@ const PrintCard = {
     if (ios && kind !== "pdf") { this.hint(); return; }
     const a = document.createElement("a"); a.href = URL.createObjectURL(f); a.download = f.name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
   },
-  async research() {
-    const s = this.s, st = $("#pcSt"); if (st) st.textContent = "この場所のことを調べています…";
-    let r = null; try { r = await this.lookup(s); } catch (_) { r = null; }
-    if (this.s !== s) return;
-    this.wiki = r; this.text = r ? r.text + (s.memo ? "\n" + s.memo : "") : this.fallback(s);
-    lsSet("petalog.pt." + s.id, JSON.stringify({ text: this.text, wiki: r }));
-    const ta = $("#pcText"); if (ta) ta.value = this.text;
-    if (st) st.textContent = r ? `Wikipedia「${r.title}」から解説を入れました。自由に書きかえられます。` : "解説が見つからなかったので、記録から文章を作りました。自由に書きかえられます。";
-    this.render();
-  },
   async open(s) {
     this.s = s; this.P = null; this.blob = null; this.wiki = null; this.text = "";
-    try { const v = JSON.parse(lsGet("petalog.pt." + s.id) || "null"); if (v) { this.text = v.text || ""; this.wiki = v.wiki || null; } } catch (_) {}
+    try { const v = JSON.parse(lsGet("petalog.pt." + s.id) || "null"); if (v && !v.wiki) this.text = v.text || ""; } catch (_) {}   // 以前のWikipediaの解説は使わない
     const d = this.el || (this.el = document.createElement("div")); d.className = "pview prt"; if (!d.parentNode) document.body.appendChild(d); d.hidden = false;
     d.innerHTML = `<div class="pv-top"><div class="pv-t">印刷用（はがき・実寸）</div><button class="btn small" type="button" id="pcX">閉じる</button></div>
       <div class="pc-body"><div class="pc-prev"><img id="pcImg" alt="印刷用の画像（長押しでも保存できます）"><div class="pc-wait" id="pcWait"><span class="spin"></span> つくっています…</div></div>
-        <label class="pc-l">裏面の解説<textarea id="pcText" rows="6" placeholder="この場所やスタンプのこと"></textarea></label>
+        <label class="pc-l">裏面の解説<textarea id="pcText" rows="7" placeholder="この場所やスタンプのプチ情報"></textarea><small class="pc-rb">むずかしい読みは 首里城《しゅりじょう》 のように書くとルビになります</small></label>
         <div class="pc-st" id="pcSt"></div>
-        <div class="row2"><button class="btn small" type="button" id="pcRe">解説を調べ直す</button><button class="btn primary" type="button" id="pcSave">画像を保存</button><button class="btn" type="button" id="pcPdf">PDFを保存</button></div>
+        <div class="row2"><button class="btn primary" type="button" id="pcSave">画像を保存</button><button class="btn" type="button" id="pcPdf">PDFを保存</button></div>
         <ol class="pc-how"><li><b>コンビニで印刷：</b>「画像を保存」→ セブン‐イレブンは「ネットプリント」、ローソン・ファミマは「ネットワークプリント」で、用紙を <b>はがき・カラー</b> にして印刷（実寸で出ます）</li><li><b>家のプリンターで印刷：</b>「PDFを保存」→ 無地のはがき用紙に <b>実際のサイズ（100%）</b> で印刷。「用紙に合わせる」などの拡大・縮小はオフに</li><li>右のものさしが50mmなら実寸です</li><li>コンビニのはがきは裏に郵便番号の枠があり、光に透かすとうっすら見えます（ふつうに持つぶんにはほぼ見えません）</li><li>作り方は紙の四隅にも書いてあります：山折り → テープのりで貼る → ①を先に切って押さえる → ②③④を切る</li></ol></div>`;
     $("#pcX").onclick = () => { d.hidden = true; this.s = null; this.gen++; this.blob = null; if (this.burl) { URL.revokeObjectURL(this.burl); this.burl = null; } if (this.cv) { this.cv.width = this.cv.height = 0; this.cv = null; } d.innerHTML = ""; };
     const ta = $("#pcText"); ta.value = this.text;
-    ta.oninput = () => { this.text = ta.value; lsSet("petalog.pt." + s.id, JSON.stringify({ text: this.text, wiki: this.wiki })); clearTimeout(this.tm); this.tm = setTimeout(() => this.render(), 450); };
-    $("#pcRe").onclick = () => this.research();
+    ta.oninput = () => { this.text = ta.value; lsSet("petalog.pt." + s.id, JSON.stringify({ text: this.text })); clearTimeout(this.tm); this.tm = setTimeout(() => this.render(), 450); };
     $("#pcSave").onclick = () => this.save("jpg"); $("#pcPdf").onclick = () => this.save("pdf");
     try { this.P = await this.assets(s); } catch (e) { $("#pcWait").textContent = "画像を読み込めませんでした。通信を確かめてもう一度どうぞ"; return; }
     if (this.s !== s) return;
     await this.render(); const w = $("#pcWait"); if (w) w.hidden = true;
-    if (!this.text) this.research(); else $("#pcSt").textContent = "前に作った解説です。書きかえるとすぐ反映されます。";
+    if (!this.text) { this.text = this.fallback(s); ta.value = this.text; $("#pcSt").textContent = "いまは記録から文章を作っています（AIのプチ情報はこのあと対応）。自由に書きかえられます。"; this.render(); }
+    else $("#pcSt").textContent = "前に作った解説です。書きかえるとすぐ反映されます。";
   },
 };
 
