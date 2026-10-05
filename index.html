@@ -692,6 +692,10 @@ html,body{touch-action:pan-x pan-y}
 .rotres output{font-family:var(--f-mono);font-size:12px;min-width:3.4em;text-align:right;color:var(--ink)}
 .pmext{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
 .pmext span{font-size:11.5px;color:var(--muted);flex-basis:100%}
+.placeq{position:relative;scroll-margin-top:60px}
+.pqrow{display:flex;gap:6px;align-items:stretch}
+.pqrow input{flex:1;min-width:0}
+.placeq .pmres{top:100%;left:0;right:0;margin-top:4px;max-height:260px}
 </style>
 
 <div id="app">
@@ -3473,9 +3477,8 @@ function formHTML(d, ro) {
     <label class="fld full"><span>メモ</span><textarea id="f_memo" placeholder="インクの具合、混み具合など"${dis}>${esc(d.memo || "")}</textarea></label>
   </div></div>
   <div class="sec"><h4>押した場所</h4>
-    <label class="fld"><span>場所の名前</span><input id="f_place" value="${esc(d.place || "")}" placeholder="例: 日比谷駅（下の地図の候補からも選べます）" autocomplete="off"${dis}></label>
+    <div class="placeq" id="placeQ"><label class="fld"><span>${ro ? "場所の名前" : "場所の名前（入れると地図でさがします）"}</span><span class="pqrow"><input id="f_place" type="search" enterkeyhint="search" value="${esc(d.place || "")}" placeholder="例: 日比谷駅、スタバ 丸の内オアゾ" autocomplete="off"${dis}>${ro ? "" : `<button class="btn small" type="button" id="pmMe">現在地</button>`}</span></label>${ro ? "" : `<div class="pmres" id="pmRes" hidden></div>`}</div>
     <div class="pmap-wrap" id="pmapWrap"><div class="pmap" id="pmap"></div>
-      ${ro ? "" : `<div class="pmtop"><input class="pmq" id="pmQ" type="search" placeholder="地図で探す（駅・施設・住所）" autocomplete="off" enterkeyhint="search" aria-label="地図で探す"><button class="pmbtn" type="button" id="pmMe">現在地</button></div><div class="pmres" id="pmRes" hidden></div>`}
       <div class="pmhint" id="pmHint"${d.lat != null ? " hidden" : ""}>${ro ? "" : "地図をタップしてピンを立てる"}</div></div>
     ${ro ? "" : `<div class="pmext" id="pmExt"><span>見つからないときは</span><button type="button" class="btn small" data-ext="google">Googleマップで探す</button><button type="button" class="btn small" data-ext="apple">Appleマップで探す</button><button type="button" class="btn small primary" data-ext="paste">コピーした場所を貼る</button></div><div class="pcands" id="pCands"></div>`}
     <div class="locinfo" id="locInfo" style="margin-top:6px"></div>
@@ -3952,6 +3955,7 @@ const PlacePick = {
   map: null, mk: null, c: null, io: null, ac: null, cache: new Map(), base: [], extra: [], list: [], loading: false, res: [], seq: 0,
   icon() { return this._icon || (this._icon = L.divIcon({ className: "pmpin", html: `<svg viewBox="0 0 30 40" width="30" height="40"><path d="M15 39s-12-12.4-12-23a12 12 0 0 1 24 0c0 10.6-12 23-12 23z" fill="#C8412E" stroke="#fff" stroke-width="2"/><circle cx="15" cy="15.5" r="4.6" fill="#fff"/></svg>`, iconSize: [30, 40], iconAnchor: [15, 39] })); },
   unmount() {
+    if (this._out) { document.removeEventListener("pointerdown", this._out, true); this._out = null; }
     if (this.io) { this.io.disconnect(); this.io = null; } if (this.ac) { try { this.ac.abort(); } catch {} this.ac = null; }
     clearTimeout(this._ct); if (this.map) { try { this.map.remove(); } catch {} } this.map = null; this.mk = null; this.c = null; this.loading = false;
   },
@@ -3991,27 +3995,28 @@ const PlacePick = {
     if (pan) this.map.setView([lat, lng], Math.max(this.map.getZoom(), 16));
   },
   wire(c) {
-    const q = $("#pmQ"), box = $("#pmRes");
-    if (q) {
+    const q = $("#f_place"), box = $("#pmRes");
+    if (q && box) {
+      // the list closes when you tap anywhere else
+      this._out = e => { if (!box.hidden && !e.target.closest("#placeQ")) box.hidden = true; }; document.addEventListener("pointerdown", this._out, true);
       let t = 0;
-      q.oninput = () => { clearTimeout(t); const v = q.value.trim(); if (!v) { box.hidden = true; return; } t = setTimeout(() => this.search(v, false), 600); };
+      q.oninput = () => { clearTimeout(t); const v = q.value.trim(); if (!v || sharedPlace(v)) { box.hidden = true; return; } t = setTimeout(() => { if (document.activeElement === q) this.search(v, false); }, 600); };
       q.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); const v = q.value.trim(); if (v) this.search(v, true); } };
-      q.onfocus = () => { const s = $("#pmapWrap"); if (s && s.scrollIntoView) s.scrollIntoView({ block: "start", behavior: "smooth" }); };
+      q.onfocus = () => { const s = $("#placeQ"); if (s && s.scrollIntoView) s.scrollIntoView({ block: "start", behavior: "smooth" }); };
       box.onclick = e => {
-        const b = e.target.closest("[data-i]"); if (!b) return; const r = this.res[+b.dataset.i]; if (!r) return; box.hidden = true; q.blur();
+        const b = e.target.closest("[data-i]"); if (!b) return; const r = this.res[+b.dataset.i]; if (!r) return; box.hidden = true; q.blur(); this.lastQ = q.value.trim();
         if (this.map) this.map.setView([r.lat, r.lng], r.z || 16);
         setLoc(+(+r.lat).toFixed(6), +(+r.lng).toFixed(6), "地図で検索", { pan: false });
         if (r.name) this.choose({ n: r.name, cat: r.cat }, true);
       };
     }
-    if (q) q.addEventListener("paste", e => { const t = (e.clipboardData || window.clipboardData).getData("text") || ""; if (sharedPlace(t)) { e.preventDefault(); this.importShared(t); } });
     const fp0 = $("#f_place"); if (fp0) fp0.addEventListener("paste", e => { const t = (e.clipboardData || window.clipboardData).getData("text") || ""; if (sharedPlace(t)) { e.preventDefault(); this.importShared(t); } });
     const ext = $("#pmExt"); if (ext) ext.onclick = e => {
-      const b = e.target.closest("[data-ext]"); if (!b) return; const w = (($("#pmQ") || {}).value || ($("#f_place") || {}).value || ($("#f_name") || {}).value || "").trim();
+      const b = e.target.closest("[data-ext]"); if (!b) return; const w = (($("#f_place") || {}).value || ($("#f_name") || {}).value || "").trim(); this.lastQ = w;
       if (b.dataset.ext === "paste") { if (!navigator.clipboard || !navigator.clipboard.readText) { toast("上の検索欄に長押しで貼りつけてください", 3200); return; } navigator.clipboard.readText().then(t => { if (sharedPlace(t)) this.importShared(t); else toast("コピーした内容に場所が見つかりませんでした。地図アプリの「共有」→「コピー」をしてから押してください", 4200); }).catch(() => toast("上の検索欄に長押しで貼りつけてください", 3200)); return; }
       const q = encodeURIComponent(w || "スタンプ"), g = b.dataset.ext === "google";
       const web = g ? "https://www.google.com/maps/search/?api=1&query=" + q : "https://maps.apple.com/?q=" + q, app = g ? "comgooglemaps://?q=" + q : "maps://?q=" + q;
-      toast("見つけたら「共有」→「コピー」して、ここに戻って「コピーした場所を貼る」を押してください", 5200);
+      toast("お店を開いたら住所をタップしてコピー（または「共有」→「コピー」）→ ここに戻って「コピーした場所を貼る」", 6000);
       if (isIOS) { let gone = false; const h = () => { gone = true; }; addEventListener("pagehide", h, { once: true }); document.addEventListener("visibilitychange", h, { once: true }); location.href = app; setTimeout(() => { if (!gone && !document.hidden) open(web, "_blank", "noopener"); }, 1400); }
       else open(web, "_blank", "noopener");
     };
@@ -4055,10 +4060,11 @@ const PlacePick = {
     for (const a of P.addr ? [P.addr.split(/\s/)[0], P.addr] : []) { if (ll) break; const g = await MapV.gsi(a).catch(() => []); if (g.length) ll = [+g[0].lat, +g[0].lng]; }
     if (!ll && P.name) { const r = await placeSearch(P.name, null).catch(() => []); if (r.length) ll = [r[0].lat, r[0].lng]; }
     if (sheetCtx !== c) return;
-    if (!ll) { if (P.name) { const q = $("#pmQ"); if (q) { q.value = P.name; this.search(P.name, true); } } toast(P.short ? "短いリンクだけでは場所がわかりませんでした。地図アプリの「共有」で、名前や住所ごとコピーしてください" : "場所を特定できませんでした。名前で検索してみてください", 4800); return; }
+    if (!ll) { if (P.name) { const q = $("#f_place"); if (q) { q.value = P.name; this.search(P.name, true); } } toast(P.short ? "リンクから場所を読めませんでした。Googleマップでお店の住所をタップしてコピーし、もう一度「コピーした場所を貼る」を押してください（住所なら確実に入ります）" : "場所を特定できませんでした。名前で検索してみてください", 6500); return; }
     if (this.map) this.map.setView(ll, 17); setLoc(+(+ll[0]).toFixed(6), +(+ll[1]).toFixed(6), "地図アプリから", { pan: false });
-    if (P.name) this.choose({ n: P.name, cat: /駅$/.test(P.name) ? "駅" : /空港/.test(P.name) ? "空港" : /道の駅/.test(P.name) ? "道の駅" : "施設" }, true);
-    const box = $("#pmRes"); if (box) box.hidden = true; const q = $("#pmQ"); if (q) q.value = ""; toast(`「${P.name || "地図アプリの場所"}」を取り込みました`);
+    const nm = P.name || (!($("#f_place") || {}).value ? this.lastQ || "" : "");
+    if (nm) this.choose({ n: nm, cat: /駅$/.test(nm) ? "駅" : /空港/.test(nm) ? "空港" : /道の駅/.test(nm) ? "道の駅" : "施設" }, true);
+    const box = $("#pmRes"); if (box) box.hidden = true; toast(`「${nm || P.addr || "地図アプリの場所"}」の場所を入れました`);
   },
   async nominatim(v) {
     const r = await fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=jp&limit=6&accept-language=ja&q=" + encodeURIComponent(v)); if (!r.ok) return [];
@@ -4562,6 +4568,7 @@ async function placeSearch(v, ctr) {
     const p = f.properties || {}; if (p.countrycode && p.countrycode !== "JP") continue; const c = f.geometry && f.geometry.coordinates; if (!c) continue;
     const key = (p.osm_type || "") + (p.osm_id || c.join(",")); if (seen.has(key)) continue; seen.add(key);
     let name = p.name || [p.street, p.housenumber].filter(Boolean).join(" "); if (!name) continue;
+    if (/[\u3040-\u30ff\u4e00-\u9fff]/.test(name)) name = name.split(/\s+/).filter(w => !/[\u0400-\u04FF]/.test(w)).join(" ");
     const st = p.osm_value === "station" || p.osm_value === "halt"; if (st && !/駅$/.test(name)) name += "駅";
     const sub = [p.state, p.city, p.district || p.locality, p.street].filter((x, i, a) => x && a.indexOf(x) === i).join(" ");
     out.push({ t: name, sub: sub || "地図", lat: c[1], lng: c[0], z: 18, name, cat: PH_CAT[p.osm_value] || (/道の駅/.test(name) ? "道の駅" : st ? "駅" : "施設"), photon: true });
@@ -4682,11 +4689,15 @@ function decodeURIComponentSafe(t) { try { return decodeURIComponent(t); } catch
 // a short map link only says "go to …"; ask a free public relay to follow it and read where it ends
 async function expandShort(u) {
   if (!u) return null; const out = []; const meta = {};
+  const E = encodeURIComponent(u), txt = async (url, opt) => { const r = await fetch(url, opt); if (!r.ok) throw 0; return r.text(); };
   const tries = [
-    async () => { const r = await fetch("https://api.allorigins.win/get?url=" + encodeURIComponent(u)); if (!r.ok) return; const j = await r.json(); out.push((j.status && j.status.url) || "", metaBits(j.contents || "", meta)); },
-    async () => { const r = await fetch("https://corsproxy.io/?url=" + encodeURIComponent(u)); if (!r.ok) return; out.push(r.url || "", metaBits(await r.text(), meta)); }
+    async () => { const j = JSON.parse(await txt("https://api.allorigins.win/get?url=" + E)); out.push((j.status && j.status.url) || "", metaBits(j.contents || "", meta)); },
+    async () => { out.push(metaBits(await txt("https://api.codetabs.com/v1/proxy/?quest=" + E), meta)); },
+    async () => { out.push(metaBits(await txt("https://r.jina.ai/" + u, { headers: { "x-respond-with": "html" } }), meta)); },
+    async () => { out.push(metaBits(await txt("https://corsproxy.io/?url=" + E), meta)); }
   ];
-  for (const f of tries) { try { await Promise.race([f(), sleep(9000)]); } catch {} if (sharedPlace(out.join("\n") + "\nhttps://x/") && /\d{2}\.\d+/.test(out.join(" "))) break; }
+  const ok = () => !!(sharedPlace(out.join("\n") + "\nhttps://x/") || {}).ll;
+  for (const f of tries) { try { await Promise.race([f(), sleep(7000)]); } catch {} if (ok()) break; }
   const text = out.filter(Boolean).join("\n"); return text ? { text, name: meta.name || "", addr: meta.addr || "" } : null;
 }
 // the useful parts of a map page: its address (for coordinates), its title (name · address) and its preview picture (center=lat,lng)
@@ -4695,7 +4706,9 @@ function metaBits(html, meta = {}) {
   const m1 = html.match(/<meta[^>]+(?:property|itemprop)="og:title"[^>]*content="([^"]+)"|<meta[^>]+content="([^"]+)"[^>]+(?:property|itemprop)="og:title"/); const title = m1 ? (m1[1] || m1[2]) : "";
   if (title) { const [n, a] = title.replace(/&amp;/g, "&").split(/\s*·\s*/); meta.name = meta.name || n; if (a) { meta.addr = meta.addr || z2h(a).replace(/〒\s?\d{3}-?\d{4}\s*/, "").trim(); b.push(a); } }
   const m2 = html.match(/staticmap\?center=(-?\d+\.\d+)(?:%2C|,)(-?\d+\.\d+)/); if (m2) b.push(`https://x/?ll=${m2[1]},${m2[2]}`);
-  const m3 = html.match(/https:\/\/www\.google\.[a-z.]+\/maps\/place\/[^"'\s<>]+/); if (m3) b.push(m3[0]);
+  const m3 = html.match(/https:\/\/www\.google\.[a-z.]+\/maps\/place\/[^"'\s<>)]+/); if (m3) b.push(m3[0]);
+  const m4 = html.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/) || html.match(/@(\d{2}\.\d{4,}),(\d{3}\.\d{4,})/); if (m4) b.push(`https://x/?ll=${m4[1]},${m4[2]}`);
+  const m5 = html.match(/^Title:\s*(.+?)(?:\s*[-–]\s*Google\s*マップ)?\s*$/m); if (m5 && !meta.name) { const [n, a] = m5[1].split(/\s*·\s*/); meta.name = n; if (a) meta.addr = z2h(a).replace(/〒\s?\d{3}-?\d{4}\s*/, "").trim(); }
   return b.join("\n");
 }
 
