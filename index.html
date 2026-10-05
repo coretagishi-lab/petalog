@@ -5013,18 +5013,6 @@ const PrintCard = {
     x.textAlign = "left"; x.fillText(num, pad, ty);
     if (digi) { const nx = pad + x.measureText(num).width + 3 * cq; x.font = `500 ${5.3 * cq}px ${MONO}`; const tw = x.measureText("DIGITAL").width + 5 * cq; x.fillStyle = "#1B2130"; this.rr(x, nx, ty - 3.4 * cq, tw, 6.8 * cq, 2.5 * cq); x.fill(); x.fillStyle = "#fff"; x.fillText("DIGITAL", nx + 2.5 * cq, ty); x.font = `500 ${6.25 * cq}px ${MONO}`; x.fillStyle = mute; }
     x.textAlign = "right"; x.fillText(fmtDate(s.date), W - pad, ty);
-    // スタンプ（台紙ごと表示ならその写真）と実寸のものさし
-    const A = P.A, im = P.front, ax = pad, ay = y0 + 21 * cq, aw = W - 2 * pad, ah = 66 * cq;
-    const n = A.sheet || !s.sizeMm || digi ? 0 : s.sizeMm / 10 * ((s.ch || 1) / Math.max(s.cw || 1, s.ch || 1)), hasR = n > 0.3, pct = hasR ? 0.76 : 0.84;
-    const ar = clamp((A.w || im.width) / (A.h || im.height), 0.2, 5), fw = Math.min(pct * aw, ah * ar), fh = Math.min(ah, pct * aw / ar), fx = ax + (aw - fw) / 2, fy = ay + (ah - fh) / 2;
-    x.save(); if (A.sheet) { x.shadowColor = "rgba(0,0,0,.18)"; x.shadowBlur = 2 * cq; x.shadowOffsetY = 0.6 * cq; } else if (!digi) x.globalCompositeOperation = "multiply";
-    x.drawImage(im, ...this.fit(im, fx, fy, fw, fh)); x.restore();
-    if (hasR) {
-      const lw = Math.max(2, W / 260), rw = 0.034 * aw, r1 = fx - 0.03 * aw, st = fh / n; x.fillStyle = "rgba(70,58,38,.30)";
-      x.fillRect(r1 - lw, fy, lw, fh);
-      for (let k = 0; k * st / 2 <= fh + 0.5; k++) { const yy = fy + fh - k * st / 2 - lw, w = k % 2 ? rw * 0.55 : rw; x.fillRect(r1 - w, yy, w, lw); }
-      x.font = `500 ${0.044 * aw}px ${MONO}`; x.textAlign = "right"; x.textBaseline = "top"; x.fillText("cm", r1 + 0.006 * aw, fy + fh + 0.006 * aw);
-    }
     // 下から: 情報 → イベント・路線 → 名前
     const fm = 6.5 * cq, lh = fm * 1.5, gap = 1.8 * cq; let yb = H - 5.6 * cq; x.textBaseline = "middle";
     x.font = `700 ${fm}px ${UI}`; x.fillStyle = g; x.textAlign = "left"; x.fillText(catNorm(s.cat), pad, yb - lh / 2);
@@ -5037,6 +5025,20 @@ const PrintCard = {
     const fn = 9.4 * cq, ln = fn * 1.25; x.font = `600 ${fn}px "Klee One","Hiragino Mincho ProN",serif`; x.fillStyle = ink; x.textAlign = "left";
     let L = this.wrap(x, s.name || "名前未設定", W - 2 * pad); if (L.length > 2) L = [L[0], this.shrink(x, L.slice(1).join(""), W - 2 * pad)];
     L.forEach((t, i) => x.fillText(t, pad, yb - (L.length - i - 0.5) * ln));
+    // スタンプ（台紙ごと表示ならその写真）と実寸のものさし: 上の日付と下の名前のちょうど間に置く
+    const A = P.A, im = P.front, ax = pad, aw = W - 2 * pad, nameTop = yb - L.length * ln, dateBot = ty + 3.4 * cq;
+    const n = A.sheet || !s.sizeMm || digi ? 0 : s.sizeMm / 10 * ((s.ch || 1) / Math.max(s.cw || 1, s.ch || 1)), hasR = n > 0.3, pct = hasR ? 0.76 : 0.84;
+    const ah = Math.min(66 * cq, nameTop - (hasR ? 5.5 : 3) * cq - (dateBot + 3 * cq));
+    const ar = clamp((A.w || im.width) / (A.h || im.height), 0.2, 5), fw = Math.min(pct * aw, ah * ar), fh = Math.min(ah, pct * aw / ar), fx = ax + (aw - fw) / 2;
+    const fy = Math.max(dateBot + 3 * cq, (dateBot + nameTop - fh) / 2 - (hasR ? 2.2 : 1.2) * cq);
+    x.save(); if (A.sheet) { x.shadowColor = "rgba(0,0,0,.18)"; x.shadowBlur = 2 * cq; x.shadowOffsetY = 0.6 * cq; } else if (!digi) x.globalCompositeOperation = "multiply";
+    x.drawImage(im, ...this.fit(im, fx, fy, fw, fh)); x.restore();
+    if (hasR) {
+      const lw = Math.max(2, W / 260), rw = 0.034 * aw, r1 = fx - 0.03 * aw, st = fh / n; x.fillStyle = "rgba(70,58,38,.30)";
+      x.fillRect(r1 - lw, fy, lw, fh);
+      for (let k = 0; k * st / 2 <= fh + 0.5; k++) { const yy = fy + fh - k * st / 2 - lw, w = k % 2 ? rw * 0.55 : rw; x.fillRect(r1 - w, yy, w, lw); }
+      x.font = `500 ${0.044 * aw}px ${MONO}`; x.textAlign = "right"; x.textBaseline = "top"; x.fillText("cm", r1 + 0.006 * aw, fy + fh + 0.006 * aw);
+    }
     // バッジ
     if (s.overlap) {
       x.font = `700 ${5.6 * cq}px ${UI}`; const tw = x.measureText("重ね押し").width, bw = tw + 8.8 * cq, bh = 5.6 * cq * 1.45 + 1.2 * cq, bx = 7.5 * cq, by = 19 * cq;
