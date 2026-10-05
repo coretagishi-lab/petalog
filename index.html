@@ -5156,6 +5156,13 @@ const PrintCard = {
   },
 };
 
+/* ---------- 端末の空き容量が足りずログインなどを保存できないときに知らせる ---------- */
+setTimeout(() => {
+  let ok = true; try { localStorage.setItem("petalog.ping", String(Date.now())); ok = localStorage.getItem("petalog.ping") !== null; localStorage.removeItem("petalog.ping"); } catch (_) { ok = false; }
+  if (!ok) toast("この端末にデータを保存できません（iPhoneの空き容量不足か、プライベートブラウズの可能性があります）。このままだと開くたびにログアウトになります", 9000);
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); } catch (_) {}
+}, 6500);
+
 /* ================= boot ================= */
 addEventListener("resize", () => { Book.layout(); if (view === "fall") { Fall.dirty = true; Fall.stop(); Fall.start(); } if (view === "map") MapV.draw(); });
 document.addEventListener("visibilitychange", () => { if (document.hidden) Fall.stop(); else if (view === "fall") Fall.start(); });
