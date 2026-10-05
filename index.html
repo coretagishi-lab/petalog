@@ -742,9 +742,9 @@ html,body{touch-action:pan-x pan-y}
 .tc-k{display:flex;align-items:center;font:700 calc(var(--u) * 2.4)/1 var(--f-ui);white-space:nowrap}
 .tc-k i{display:inline-block;width:calc(var(--u) * 1.4);height:calc(var(--u) * 1.4);background:currentColor;margin-right:calc(var(--u) * 1.6);box-shadow:calc(var(--u) * .8) calc(var(--u) * .25) 0 calc(var(--u) * -.25) currentColor}
 .tc-no{font:500 calc(var(--u) * 3)/1 var(--f-mono);letter-spacing:.1em;white-space:nowrap}
-.tc-win{position:absolute;left:calc(var(--u) * 2.2);right:calc(var(--u) * 2.2);top:calc(var(--u) * 7);bottom:calc(var(--u) * 6.2);border-radius:calc(var(--u) * 1.4);background:#F8F8F5 var(--paper2);background-size:calc(var(--u) * 40);
-  box-shadow:inset 0 calc(var(--u) * .7) calc(var(--u) * 1.4) rgba(0,0,0,.34),inset 0 0 0 max(1px,calc(var(--u) * .22)) rgba(201,162,74,.85),inset 0 0 calc(var(--u) * 3.6) rgba(140,106,36,.14)}
-.tc-tab{position:absolute;left:50%;top:-1px;width:calc(var(--u) * 21.4);height:calc(var(--u) * 5.2);transform:translateX(-50%);z-index:2;filter:drop-shadow(0 calc(var(--u) * .5) calc(var(--u) * .5) rgba(0,0,0,.38))}
+.tc-win{position:absolute;left:calc(var(--u) * 2.2);right:calc(var(--u) * 2.2);top:calc(var(--u) * 7);bottom:calc(var(--u) * 6.2);border-radius:calc(var(--u) * 1.4);background:#FFFFFF;
+  box-shadow:inset 0 calc(var(--u) * .22) calc(var(--u) * .35) rgba(0,0,0,.26),inset 0 0 0 max(1px,calc(var(--u) * .22)) rgba(201,162,74,.85)}
+.tc-tab{position:absolute;left:50%;top:-1px;width:calc(var(--u) * 21.4);height:calc(var(--u) * 5.2);transform:translateX(-50%);z-index:2;filter:drop-shadow(0 calc(var(--u) * .2) calc(var(--u) * .25) rgba(0,0,0,.3))}
 .tc-tabf{position:absolute;inset:0;clip-path:polygon(0 0,100% 0,91% 100%,9% 100%);background:linear-gradient(160deg,var(--lt) 0%,var(--g) 32%,var(--dk) 100%) calc(var(--u) * -20.8) calc(var(--u) * -7) / calc(var(--u) * 63) calc(var(--u) * 88) no-repeat}
 .tc-tab>svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .tc-tabt{position:absolute;inset:0 0 calc(var(--u) * .6);display:flex;align-items:center;justify-content:center;gap:calc(var(--u) * 1);color:#F3E2B0;font:700 calc(var(--u) * 2.7)/1 "Shippori Mincho",var(--f-hand);letter-spacing:.2em;text-indent:.2em;text-shadow:0 1px 2px rgba(0,0,0,.45);white-space:nowrap}
@@ -758,7 +758,7 @@ html,body{touch-action:pan-x pan-y}
 .tc-dim{position:absolute;height:calc(var(--u) * 2.4);color:rgba(138,110,58,.55)}
 .tc-dim::before{content:"";position:absolute;left:0;right:0;top:50%;height:max(1px,calc(var(--u) * .15));background:currentColor;transform:translateY(-50%)}
 .tc-dim i{position:absolute;top:0;bottom:0;left:0;width:max(1px,calc(var(--u) * .15));background:currentColor}.tc-dim i+i{left:auto;right:0}
-.tc-dim b{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:0 calc(var(--u) * 1);background:#F8F8F5;font:500 calc(var(--u) * 2.1)/1 var(--f-mono);white-space:nowrap}
+.tc-dim b{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:0 calc(var(--u) * 1);background:#FFFFFF;font:500 calc(var(--u) * 2.1)/1 var(--f-mono);white-space:nowrap}
 .tc-nm{position:absolute;left:calc(var(--u) * 3);right:calc(var(--u) * 3);top:calc(var(--u) * 60.3);text-align:center;font-family:"Shippori Mincho",var(--f-hand);font-weight:700;line-height:1.2;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#1E2433}
 .tc-rule{position:absolute;left:calc(var(--u) * 3.4);right:calc(var(--u) * 3.4);top:calc(var(--u) * 67);height:max(1px,calc(var(--u) * .2));background:linear-gradient(90deg,transparent,#C9A24A 15%,#C9A24A 85%,transparent)}
 .tc-facts{position:absolute;left:0;right:0;top:calc(var(--u) * 68.6);height:calc(var(--u) * 4);display:flex;align-items:center;justify-content:center;gap:calc(var(--u) * 1.6);font:600 calc(var(--u) * 2.5)/1 "Shippori Mincho",var(--f-hand);color:#4A4F5C;white-space:nowrap}
@@ -789,7 +789,7 @@ html.tcv-on,html.tcv-on body{overflow:hidden}
 .tcv-front .card.tc.ovl::before{content:"";position:absolute;inset:0;z-index:5;pointer-events:none;opacity:calc(var(--ga,.3) * .9);mix-blend-mode:color-dodge;
   background:linear-gradient(115deg,transparent 20%,rgba(255,220,140,.45) 38%,rgba(150,220,255,.4) 50%,rgba(255,170,230,.38) 62%,transparent 80%) calc(var(--gx,50%) * 1.4 - 20%) 0/200% 100%}
 .tcv-front{transform:translateZ(1px)}
-.tcv-back{transform:rotateY(180deg) translateZ(1px);background:#FDFDFB}
+.tcv-back{transform:rotateY(180deg) translateZ(1px);background:#FFFFFF}
 .tcv-back img{display:block;width:100%;height:100%;object-fit:cover}
 .tcv-wait{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;color:#fff;font:500 13px var(--f-ui);background:linear-gradient(160deg,color-mix(in srgb,var(--g,#2B4C9B) 82%,#fff),var(--g,#2B4C9B) 32%,color-mix(in srgb,var(--g,#2B4C9B) 62%,#000))}
 .tcv-shadow{position:absolute;left:12%;right:12%;bottom:-26px;height:22px;border-radius:50%;background:radial-gradient(ellipse at center,rgba(0,0,0,.55),transparent 70%);filter:blur(6px)}
@@ -5089,20 +5089,20 @@ const PrintCard = {
     x.font = `500 ${3 * m}px ${MONO}`; x.textAlign = "right"; x.fillText("No." + String(P.no || 0).padStart(4, "0"), W - 3.4 * m, (TC.hd / 2) * m); x.restore();
     // 窓（白い紙）: くぼんで見える影と金の線
     const wx = TC.wx * m, wy = TC.hd * m, ww = TC.ww * m, wh = TC.wh * m, wr = 1.4 * m;
-    this.rr(x, wx, wy, ww, wh, wr); x.fillStyle = "#F8F8F5"; x.fill();
-    const pp = x.createPattern(TCPaper(), "repeat"), ks = 40 * m / 400; if (pp.setTransform) pp.setTransform(new DOMMatrix([ks, 0, 0, ks, wx, wy])); x.fillStyle = pp; this.rr(x, wx, wy, ww, wh, wr); x.fill();
+    this.rr(x, wx, wy, ww, wh, wr); x.fillStyle = "#FFFFFF"; x.fill();
+    
     x.save(); this.rr(x, wx, wy, ww, wh, wr); x.clip();
     const hole = () => { x.beginPath(); x.rect(wx - 40 * m, wy - 40 * m, ww + 80 * m, wh + 80 * m); x.moveTo(wx + wr, wy); x.arcTo(wx, wy, wx, wy + wh, wr); x.arcTo(wx, wy + wh, wx + ww, wy + wh, wr); x.arcTo(wx + ww, wy + wh, wx + ww, wy, wr); x.arcTo(wx + ww, wy, wx, wy, wr); x.closePath(); };
-    x.shadowColor = "rgba(0,0,0,.34)"; x.shadowBlur = 1.4 * m; x.shadowOffsetY = 0.7 * m; hole(); x.fillStyle = "#000"; x.fill("evenodd");
-    x.shadowColor = "rgba(140,106,36,.14)"; x.shadowBlur = 3.6 * m; x.shadowOffsetY = 0; hole(); x.fill("evenodd"); x.restore();
+    x.shadowColor = "rgba(0,0,0,.26)"; x.shadowBlur = 0.35 * m; x.shadowOffsetY = 0.22 * m; hole(); x.fillStyle = "#000"; x.fill("evenodd");
+     x.restore();
     x.strokeStyle = "rgba(201,162,74,.85)"; x.lineWidth = Math.max(2, 0.22 * m); this.rr(x, wx + x.lineWidth / 2, wy + x.lineWidth / 2, ww - x.lineWidth, wh - x.lineWidth, wr); x.stroke();
     // タブ（額縁と同じ色）＋ジャンル
     const tw = TC.tabW * m, th = TC.tabH * m, tx = wx + (ww - tw) / 2, ty = wy - 0.1 * m;
     const tab = () => { x.beginPath(); x.moveTo(tx, ty); x.lineTo(tx + tw, ty); x.lineTo(tx + tw * 0.91, ty + th); x.lineTo(tx + tw * 0.09, ty + th); x.closePath(); };
-    x.save(); x.shadowColor = "rgba(0,0,0,.38)"; x.shadowBlur = 0.6 * m; x.shadowOffsetY = 0.5 * m; tab(); x.fillStyle = fr; x.fill(); x.restore();
+    x.save(); x.shadowColor = "rgba(0,0,0,.3)"; x.shadowBlur = 0.25 * m; x.shadowOffsetY = 0.2 * m; tab(); x.fillStyle = fr; x.fill(); x.restore();
     x.strokeStyle = gold; x.lineWidth = 0.22 * m; x.beginPath(); x.moveTo(tx, ty + 0.1 * m); x.lineTo(tx + tw * 0.09, ty + th); x.lineTo(tx + tw * 0.91, ty + th); x.lineTo(tx + tw, ty + 0.1 * m); x.stroke();
     const gname = catNorm(s.cat), isz = 2.7 * m; x.font = `700 ${2.7 * m}px ${MIN}`; const gtw = this.spaced(x, gname, 0.2 * 2.7 * m), tot = isz + 1 * m + gtw, sx = tx + (tw - tot) / 2, cy = ty + th / 2 - 0.3 * m;
-    x.save(); x.shadowColor = "rgba(0,0,0,.45)"; x.shadowBlur = 0.3 * m; x.shadowOffsetY = 0.2 * m; x.fillStyle = cream;
+    x.save(); x.shadowColor = "rgba(0,0,0,.4)"; x.shadowBlur = 0.15 * m; x.shadowOffsetY = 0.12 * m; x.fillStyle = cream;
     x.save(); x.translate(sx, cy - isz / 2); x.scale(isz / 24, isz / 24); x.fill(new Path2D(gicon(gname))); x.restore();
     x.textAlign = "left"; x.textBaseline = "middle"; this.spaced(x, gname, 0.2 * 2.7 * m, sx + isz + 1 * m, cy); x.restore();
     // 重ね押し・デジスタのバッジ
@@ -5110,15 +5110,15 @@ const PrintCard = {
     for (const [on, label, c0, c1, c2, sh] of [[s.overlap, "重ね押し", "#F0D27A", "#C9A24A", "#A07A2C", "rgba(80,55,10,.35)"], [isDigi(s), "デジスタ", "#A9DDF7", "#4F93D8", "#2E5EA6", "rgba(20,50,100,.35)"]]) {
       if (!on) continue; x.font = `700 ${2.2 * m}px ${UI}`; const bw = this.spaced(x, label, 0.08 * 2.2 * m) + 4.4 * m;
       const gr = x.createLinearGradient(0, by, 0, by + bh); gr.addColorStop(0, c0); gr.addColorStop(0.48, c1); gr.addColorStop(1, c2);
-      x.save(); x.shadowColor = sh; x.shadowBlur = 0.8 * m; x.shadowOffsetY = 0.4 * m; x.fillStyle = gr; this.rr(x, bx, by, bw, bh, bh / 2); x.fill(); x.restore();
+      x.save(); x.shadowColor = sh; x.shadowBlur = 0.25 * m; x.shadowOffsetY = 0.15 * m; x.fillStyle = gr; this.rr(x, bx, by, bw, bh, bh / 2); x.fill(); x.restore();
       x.fillStyle = "#fff"; x.textBaseline = "middle"; x.textAlign = "left"; this.spaced(x, label, 0.08 * 2.2 * m, bx + 2.2 * m, by + bh / 2); bx += bw + 1.2 * m; }
     // スタンプ（実寸で入るなら実寸）と寸法線
     const im = P.front, ix = wx + L.x * m, iy = wy + L.y * m, iw = L.w * m, ih = L.h * m;
-    x.save(); if (L.A.sheet) { x.shadowColor = "rgba(0,0,0,.18)"; x.shadowBlur = 1.6 * m; x.shadowOffsetY = 0.6 * m; } else if (!isDigi(s)) x.globalCompositeOperation = "multiply";
+    x.save(); if (L.A.sheet) { x.shadowColor = "rgba(0,0,0,.2)"; x.shadowBlur = 0.4 * m; x.shadowOffsetY = 0.2 * m; } else if (!isDigi(s)) x.globalCompositeOperation = "multiply";
     x.drawImage(im, ...this.fit(im, ix, iy, iw, ih)); x.restore();
     if (L.dimY != null) { const dy0 = wy + L.dimY * m, dh = TC.dimh * m * 0.86, lw = Math.max(1.5, 0.15 * m); x.save(); x.globalAlpha = 0.55; x.fillStyle = "#8A6E3A";
       x.fillRect(ix, dy0 + dh / 2 - lw / 2, iw, lw); x.fillRect(ix, dy0, lw, dh); x.fillRect(ix + iw - lw, dy0, lw, dh);
-      x.font = `500 ${2.1 * m}px ${MONO}`; const tw2 = x.measureText(L.dimTxt).width + 2 * m; x.globalAlpha = 1; x.fillStyle = "#F8F8F5"; x.fillRect(ix + iw / 2 - tw2 / 2, dy0, tw2, dh);
+      x.font = `500 ${2.1 * m}px ${MONO}`; const tw2 = x.measureText(L.dimTxt).width + 2 * m; x.globalAlpha = 1; x.fillStyle = "#FFFFFF"; x.fillRect(ix + iw / 2 - tw2 / 2, dy0, tw2, dh);
       x.globalAlpha = 0.55; x.fillStyle = "#8A6E3A"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(L.dimTxt, ix + iw / 2, dy0 + dh / 2); x.restore(); }
     // 名前・金の線・日付／実寸大／都道府県（中央そろえ）
     let fs = L.fs * m; x.font = `700 ${fs}px ${MIN}`; const nm = s.name || "名前未設定"; while (this.spaced(x, nm, 0.04 * fs) > 52.6 * m && fs > 2 * m) { fs -= 0.1 * m; x.font = `700 ${fs}px ${MIN}`; }
@@ -5143,22 +5143,22 @@ const PrintCard = {
     if (X == null) return w; const al = x.textAlign; x.textAlign = "left"; let cx = X; for (const c of chars) { x.fillText(c, cx, Y); cx += x.measureText(c).width + sp; } x.textAlign = al; return w;
   },
   recess(x, X, Y, w, h, r, m) {   // 表の窓と同じ「くぼんだ白い紙」
-    this.rr(x, X, Y, w, h, r); x.fillStyle = "#F8F8F5"; x.fill();
-    const pp = x.createPattern(TCPaper(), "repeat"), ks = 40 * m / 400; if (pp.setTransform) pp.setTransform(new DOMMatrix([ks, 0, 0, ks, X, Y])); x.fillStyle = pp; this.rr(x, X, Y, w, h, r); x.fill();
+    this.rr(x, X, Y, w, h, r); x.fillStyle = "#FFFFFF"; x.fill();
+    
     x.save(); this.rr(x, X, Y, w, h, r); x.clip();
     const hole = () => { x.beginPath(); x.rect(X - 40 * m, Y - 40 * m, w + 80 * m, h + 80 * m); x.moveTo(X + r, Y); x.arcTo(X, Y, X, Y + h, r); x.arcTo(X, Y + h, X + w, Y + h, r); x.arcTo(X + w, Y + h, X + w, Y, r); x.arcTo(X + w, Y, X, Y, r); x.closePath(); };
-    x.shadowColor = "rgba(0,0,0,.30)"; x.shadowBlur = 1.2 * m; x.shadowOffsetY = 0.6 * m; hole(); x.fillStyle = "#000"; x.fill("evenodd");
-    x.shadowColor = "rgba(140,106,36,.12)"; x.shadowBlur = 3 * m; x.shadowOffsetY = 0; hole(); x.fill("evenodd"); x.restore();
+    x.shadowColor = "rgba(0,0,0,.24)"; x.shadowBlur = 0.35 * m; x.shadowOffsetY = 0.2 * m; hole(); x.fillStyle = "#000"; x.fill("evenodd");
+     x.restore();
     x.strokeStyle = "rgba(201,162,74,.85)"; x.lineWidth = Math.max(2, 0.22 * m); this.rr(x, X + x.lineWidth / 2, Y + x.lineWidth / 2, w - x.lineWidth, h - x.lineWidth, r); x.stroke();
   },
   back(x, s, P, W, H, txt) {   // 裏: 白いふち＋色の板（表と同じ光と影）。写真は枚数でレイアウトを変える
     const m = W / 63, g = gcol(catNorm(s.cat)), dk = mixHex(g, "#000000", 0.38), lt = mixHex(g, "#ffffff", 0.18), gold = "#C9A24A", cream = "#F3E2B0", ink = "#1E2433";
     const MIN = '"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif', UI = '"Zen Kaku Gothic New","Hiragino Sans",sans-serif', MONO = '"IBM Plex Mono",ui-monospace,monospace';
-    x.fillStyle = "#FDFDFB"; x.fillRect(0, 0, W, H);
+    x.fillStyle = "#FFFFFF"; x.fillRect(0, 0, W, H);
     const px = 2.4 * m, py = 2.4 * m, pw = W - 4.8 * m, ph = 79 * m, pr = 2.6 * m;
     const a = 160 * Math.PI / 180, dx = Math.sin(a), dy = -Math.cos(a), len = Math.abs(pw * dx) + Math.abs(ph * dy), cx0 = px + pw / 2, cy0 = py + ph / 2;
     const fr = x.createLinearGradient(cx0 - dx * len / 2, cy0 - dy * len / 2, cx0 + dx * len / 2, cy0 + dy * len / 2); fr.addColorStop(0, lt); fr.addColorStop(0.32, g); fr.addColorStop(1, dk);
-    x.save(); x.shadowColor = "rgba(0,0,0,.28)"; x.shadowBlur = 1.4 * m; x.shadowOffsetY = 0.6 * m; this.rr(x, px, py, pw, ph, pr); x.fillStyle = fr; x.fill(); x.restore();
+    x.save(); x.shadowColor = "rgba(0,0,0,.24)"; x.shadowBlur = 0.3 * m; x.shadowOffsetY = 0.18 * m; this.rr(x, px, py, pw, ph, pr); x.fillStyle = fr; x.fill(); x.restore();
     x.save(); this.rr(x, px, py, pw, ph, pr); x.clip(); x.fillStyle = "rgba(255,255,255,.28)"; x.fillRect(px, py, pw, 0.2 * m); x.fillStyle = "rgba(0,0,0,.28)"; x.fillRect(px, py + ph - 0.3 * m, pw, 0.3 * m); x.restore();
     // 見出し（明朝・クリーム）と金の飾り
     // 見出し（登録した名前）: 1行に入らなければ小さく、それでも長ければバランスよく2行に
@@ -5173,7 +5173,7 @@ const PrintCard = {
           const cost = Math.max(wa, wb) - (/[\s　]/.test(ch[k - 1] + ch[k]) ? 3 * m : 0); if (!best || cost < best.c) best = { c: cost, l: [a, b] }; }
         if (best) { tl = best.l; break; } }
       if (!tl) { fs = 2.1 * m; x.font = `700 ${fs}px ${MIN}`; let a = "", k = 0; while (k < ch.length && this.spaced(x, a + ch[k], sp(fs)) <= TWD) a += ch[k++]; let b = ch.slice(k).join(""); while (b && this.spaced(x, b + "…", sp(fs)) > TWD) b = b.slice(0, -1); tl = [a, b + "…"]; } }
-    x.save(); x.shadowColor = "rgba(0,0,0,.4)"; x.shadowBlur = 0.4 * m; x.shadowOffsetY = 0.2 * m; x.fillStyle = cream; x.textBaseline = "middle"; x.font = `700 ${fs}px ${MIN}`;
+    x.save(); x.shadowColor = "rgba(0,0,0,.35)"; x.shadowBlur = 0.15 * m; x.shadowOffsetY = 0.12 * m; x.fillStyle = cream; x.textBaseline = "middle"; x.font = `700 ${fs}px ${MIN}`;
     const lhT = fs * 1.18; tl.forEach((t, k) => { const tw = this.spaced(x, t, sp(fs)); this.spaced(x, t, sp(fs), (W - tw) / 2, (tl.length > 1 ? 7.2 : 6.8) * m + (k - (tl.length - 1) / 2) * lhT); }); x.restore();
     if (tl.length === 1) {
     const oy = 10.6 * m, ow = 12 * m; for (const sgn of [-1, 1]) { const g2 = x.createLinearGradient(W / 2 + sgn * 1.2 * m, 0, W / 2 + sgn * (1.2 * m + ow), 0); g2.addColorStop(0, gold); g2.addColorStop(1, "rgba(201,162,74,0)"); x.fillStyle = g2; x.fillRect(Math.min(W / 2 + sgn * 1.2 * m, W / 2 + sgn * (1.2 * m + ow)), oy - 0.08 * m, ow, Math.max(1.5, 0.15 * m)); }
@@ -5186,7 +5186,7 @@ const PrintCard = {
     const B = (v) => v * m;
     const stamp = (l, t, w, h) => { const im = P.cut; x.save(); if (!isDigi(s)) x.globalCompositeOperation = "multiply"; x.drawImage(im, ...this.fit(im, BX + B(l), BY + B(t), B(w), B(h))); x.restore(); };
     const photo = (im, l, t, w, h) => { const X = BX + B(l), Y = BY + B(t), pad = 0.5 * m;
-      x.save(); x.shadowColor = "rgba(40,30,10,.28)"; x.shadowBlur = 1 * m; x.shadowOffsetY = 0.4 * m; x.fillStyle = "#fff"; x.fillRect(X, Y, B(w), B(h)); x.restore();
+      x.save(); x.shadowColor = "rgba(40,30,10,.26)"; x.shadowBlur = 0.25 * m; x.shadowOffsetY = 0.15 * m; x.fillStyle = "#fff"; x.fillRect(X, Y, B(w), B(h)); x.restore();
       x.save(); x.beginPath(); x.rect(X + pad, Y + pad, B(w) - 2 * pad, B(h) - 2 * pad); x.clip(); const iw = B(w) - 2 * pad, ih = B(h) - 2 * pad, k = Math.max(iw / im.width, ih / im.height), dw = im.width * k, dh = im.height * k;
       x.drawImage(im, X + pad + (iw - dw) / 2, Y + pad + (ih - dh) * (im.height > im.width ? 0.4 : 0.5), dw, dh); x.restore(); };
     const text = (t, cxm, tm, fsz, font = MIN, w = 600, col = "#3A3F4B") => { x.font = `${w} ${fsz * m}px ${font}`; x.fillStyle = col; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(t, BX + B(cxm), BY + B(tm)); };
@@ -5213,7 +5213,7 @@ const PrintCard = {
       return out; };
     for (; f >= 1.6 * m; f -= 0.05 * m) { lh = f * 1.78; lines = layout(f); if (T0 + lines.length * lh <= TMAX) break; }
     const maxL = Math.max(1, Math.floor((TMAX - T0) / lh)); if (lines.length > maxL) { lines = lines.slice(0, maxL); const last = lines[maxL - 1]; while (last.length > 1 && last.reduce((t, u) => t + u.w, 0) > TW - f) last.pop(); last.push({ t: "…", w: f, bw: f }); }
-    const rf = f * 0.46; x.save(); x.shadowColor = "rgba(0,0,0,.3)"; x.shadowBlur = 0.25 * m; x.shadowOffsetY = 0.1 * m; x.textAlign = "center"; x.textBaseline = "middle";
+    const rf = f * 0.46; x.save(); x.shadowColor = "rgba(0,0,0,.28)"; x.shadowBlur = 0.12 * m; x.shadowOffsetY = 0.08 * m; x.textAlign = "center"; x.textBaseline = "middle";
     lines.forEach((ln, i) => { const y = T0 + (i + 0.62) * lh; let cx = TX; for (const u of ln) { x.font = `500 ${f}px ${UI}`; x.fillStyle = "#fff"; x.fillText(u.t, cx + u.w / 2, y);
       if (u.r) { x.font = `500 ${rf}px ${UI}`; x.fillStyle = "rgba(255,255,255,.9)"; x.fillText(u.r, cx + u.w / 2, y - f * 0.5 - rf * 0.62); } cx += u.w; } });
     x.restore();
@@ -5225,7 +5225,7 @@ const PrintCard = {
     if (s.lat != null && s.lng != null && !isNaN(s.lat)) { x.font = `500 ${2 * m}px ${MONO}`; x.globalAlpha = 0.9; x.fillText(`${dms(+s.lat, "N", "S")} ${dms(+s.lng, "E", "W")}`, TX, 77.6 * m); }
     x.restore();
     if (P.qr) { const qs = 9.6 * m, qx = BX + BW - qs, qy = 80 * m - qs, pad = 0.6 * m;
-      x.save(); x.shadowColor = "rgba(0,0,0,.3)"; x.shadowBlur = 1 * m; x.shadowOffsetY = 0.4 * m; x.fillStyle = "#fff"; this.rr(x, qx, qy, qs, qs, 0.8 * m); x.fill(); x.restore();
+      x.save(); x.shadowColor = "rgba(0,0,0,.26)"; x.shadowBlur = 0.25 * m; x.shadowOffsetY = 0.15 * m; x.fillStyle = "#fff"; this.rr(x, qx, qy, qs, qs, 0.8 * m); x.fill(); x.restore();
       x.strokeStyle = "rgba(201,162,74,.8)"; x.lineWidth = Math.max(1.5, 0.15 * m); this.rr(x, qx + 0.1 * m, qy + 0.1 * m, qs - 0.2 * m, qs - 0.2 * m, 0.7 * m); x.stroke();
       const nn = P.qr.getModuleCount(), c = (qs - 2 * pad) / nn; x.fillStyle = "#111"; for (let r = 0; r < nn; r++) for (let k = 0; k < nn; k++) if (P.qr.isDark(r, k)) x.fillRect(qx + pad + k * c, qy + pad + r * c, Math.ceil(c), Math.ceil(c)); }
     // いちばん下（白いふち）: ぺたろぐ / スタンプトレカ
