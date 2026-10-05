@@ -4983,7 +4983,8 @@ const PrintCard = {
     if (side.length < 2 && s.hasPhoto) { const u = await Store.getPhoto("ph_" + s.id, s.id).catch(() => null); if (u) side.push({ url: u, cap: "押した紙" }); }
     for (const it of side) it.im = await loadImg(it.url).catch(() => null);
     if (!window.qrcode) await new Promise(res => { const sc = document.createElement("script"); sc.src = "vendor/qrcode.js"; sc.onload = sc.onerror = res; document.head.appendChild(sc); });
-    let qr = null; try { qr = qrcode(0, "M"); qr.addData(this.url()); qr.make(); } catch (_) { qr = null; }
+    // QRコード: その場所のGoogleマップ（見た人がそのまま行ける）。場所が未登録ならQRなし
+    let qr = null; if (s.lat != null && s.lng != null && !isNaN(s.lat)) { try { qr = qrcode(0, "M"); qr.addData(`https://www.google.com/maps/search/?api=1&query=${(+s.lat).toFixed(6)},${(+s.lng).toFixed(6)}`); qr.make(); } catch (_) { qr = null; } }
     if (!this.washi) this.washi = makeWashi();
     return { A, front, cut, side: side.filter(t => t.im).slice(0, 2), qr, no: this.no(s) };
   },
@@ -5089,8 +5090,8 @@ const PrintCard = {
     // 番号と座標（マンホールカードの表のように）
     const dms = (v, a, b) => { const z = Math.abs(v), d = Math.floor(z), mf = (z - d) * 60, mi = Math.floor(mf); return `${d}°${String(mi).padStart(2, "0")}'${String(Math.round((mf - mi) * 60) % 60).padStart(2, "0")}"${v >= 0 ? a : b}`; };
     const code = `No.${String(P.no).padStart(3, "0")}${s.lat != null ? "  " + dms(+s.lat, "N", "S") + " " + dms(+s.lng, "E", "W") : ""}`;
-    let cf = 2.15 * m; for (; cf > 1.5 * m; cf -= 0.05 * m) { x.font = `500 ${cf}px ${MONO}`; if (x.measureText(code).width <= qx - tx - 1 * m) break; }
-    x.fillStyle = "rgba(255,255,255,.92)"; x.textBaseline = "alphabetic"; x.fillText(this.shrink(x, code, qx - tx - 1 * m), tx, pb - 2 * m);
+    let cf = 2.15 * m; for (; cf > 1.5 * m; cf -= 0.05 * m) { x.font = `500 ${cf}px ${MONO}`; if (x.measureText(code).width <= (P.qr ? qx - 1 * m : p0 + pw - 2 * m) - tx) break; }
+    x.fillStyle = "rgba(255,255,255,.92)"; x.textBaseline = "alphabetic"; x.fillText(this.shrink(x, code, (P.qr ? qx - 1 * m : p0 + pw - 2 * m) - tx), tx, pb - 2 * m);
     // いちばん下: ぺたろぐ と出典
     const fy = (pb + H) / 2; x.textBaseline = "middle"; x.textAlign = "left"; x.fillStyle = ink; x.font = `400 ${2.5 * m}px "Dela Gothic One",${UI}`; x.fillText("ぺたろぐ", 3 * m, fy);
     const lw2 = x.measureText("ぺたろぐ").width, w = this.wiki, credit = w && text.includes(w.text.slice(0, 12)) ? `解説: Wikipedia「${w.title}」CC BY-SA 4.0` : "";
