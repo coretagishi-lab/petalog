@@ -714,7 +714,7 @@ html,body{touch-action:pan-x pan-y}
 .prt .pc-body{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:4px 16px 28px;display:flex;flex-direction:column;gap:12px;width:100%;max-width:620px;margin:0 auto;box-sizing:border-box}
 .pc-prev{position:relative}
 .pc-prev{min-height:120px}
-.pc-prev img{display:block;width:100%;height:auto;aspect-ratio:1500/1051;background:#fff;border-radius:4px;box-shadow:0 4px 18px rgba(0,0,0,.4);-webkit-touch-callout:default!important;-webkit-user-select:auto;user-select:auto;pointer-events:auto;object-fit:contain}
+.pc-prev img{display:block;width:100%;height:auto;aspect-ratio:178/127;background:#fff;border-radius:4px;box-shadow:0 4px 18px rgba(0,0,0,.4);-webkit-touch-callout:default!important;-webkit-user-select:auto;user-select:auto;pointer-events:auto;object-fit:contain}
 .pc-wait{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(18,20,26,.7);color:#fff;font-size:13px;border-radius:4px}
 .pc-wait[hidden]{display:none}
 .pc-l{display:flex;flex-direction:column;gap:6px;font-size:12.5px;color:rgba(255,255,255,.8)}
@@ -728,6 +728,10 @@ html,body{touch-action:pan-x pan-y}
 /* トレカ: スタンプを少し下げて、上の日付と下の名前の間でバランスよく */
 .card .c-art{top:21cqw;height:66cqw}
 .card .fig{transform:none}
+.pc-store{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12.5px;color:rgba(255,255,255,.8)}
+.pc-store .seg{flex:1;min-width:240px}
+.prt .pc-body>*{flex-shrink:0}
+.prt .seg button[aria-pressed=false]{color:#1D2230}
 </style>
 
 <div id="app">
@@ -4951,6 +4955,7 @@ function pinGroups() {
 const PrintCard = {
   W: 1500, H: 1051, PX: 1500 / 127, el: null, s: null, P: null, cv: null, blob: null, text: "", wiki: null, washi: null, tm: 0, gen: 0,
   url() { return new URL(".", location.href).href; },
+  store() { return lsGet("petalog.printStore") === "sharp" ? "sharp" : "seven"; },
   no(s) { return new Map(byDate(true).map((x, i) => [x.id, i + 1])).get(s.id) || 0; },
   async lookup(s) {
     const api = async p => { const r = await fetch("https://ja.wikipedia.org/w/api.php?" + new URLSearchParams({ format: "json", origin: "*", ...p })); if (!r.ok) throw new Error("wiki " + r.status); return r.json(); };
@@ -5103,20 +5108,36 @@ const PrintCard = {
     const s = this.s, P = this.P; if (!s || !P) return; const my = ++this.gen;
     await this.fonts(`${s.name || ""}${s.place || ""}${s.pref || ""}${this.text || this.fallback(s)}No.0123456789cm×・ぺたろぐスタンプ記録カード押した日ジャンル大きさ場所押し方重ね押し台紙その日の写真紙解説約DIGITAL${catNorm(s.cat)}${(evlOf(s) || {}).t || ""}`);
     if (my !== this.gen) return;
-    const cv = this.cv || (this.cv = mkCanvas(this.W, this.H)), x = cv.getContext("2d"), m = this.PX;
-    x.setTransform(1, 0, 0, 1, 0, 0); x.fillStyle = "#fff"; x.fillRect(0, 0, this.W, this.H);
-    const cw = Math.round(63 * m), ch = Math.round(88 * m), fy = Math.round((this.H - ch) / 2), fx = Math.round(this.W / 2 - 0.25 * m) - cw, bx = Math.round(this.W / 2 + 0.25 * m);
-    x.save(); x.translate(fx, fy); this.front(x, s, P, cw, ch, fy); x.restore();
+    // 2L判（178×127mm・300dpi）。セブンはフチなしで約3%拡大されるので、そのぶん画像の外枠だけ大きくして中身を1:1で刷らせる
+    const m = this.PX, st = this.store(), k = st === "seven" ? 1.03 : 1, W = Math.round(178 * k * m), H = Math.round(127 * k * m);
+    let cv = this.cv; if (!cv || cv.width !== W || cv.height !== H) { if (cv) cv.width = cv.height = 0; cv = this.cv = mkCanvas(W, H); }
+    const x = cv.getContext("2d"); x.setTransform(1, 0, 0, 1, 0, 0); x.fillStyle = "#fff"; x.fillRect(0, 0, W, H);
+    const cw = Math.round(63 * m), ch = Math.round(88 * m), G = Math.round(3 * m), fx = Math.round((W - 2 * cw - 2 * G) / 2), fy = Math.round((H - ch) / 2), fold = fx + cw + G, bx = fold + G;
+    x.save(); x.translate(fx, fy); this.front(x, s, P, cw, ch, Math.round(1.5 * m)); x.restore();
     x.save(); x.translate(bx, fy); this.back(x, s, P, cw, ch); x.restore();
     // 切り取り線: 表だけ・63×88mmちょうど・角は四角（重ね押しは金）
     const lw = s.overlap ? 3 : 2; x.strokeStyle = s.overlap ? "#D4AF4F" : "rgba(40,40,40,.4)"; x.lineWidth = lw; x.lineJoin = "miter"; x.strokeRect(fx + lw / 2, fy + lw / 2, cw - lw, ch - lw);
-    x.setLineDash([10, 8]); x.strokeStyle = "rgba(0,0,0,.4)"; x.beginPath(); x.moveTo(this.W / 2, 0); x.lineTo(this.W / 2, this.H); x.stroke(); x.setLineDash([]);
+    // 四隅の目印（折り線側の横向きは裏にはみ出すので付けない）
+    x.strokeStyle = "#999"; x.lineWidth = 2; const o = 1.5 * m, l = 4 * m; x.beginPath();
+    for (const [cx, cy, sx, sy] of [[fx, fy, -1, -1], [fx + cw, fy, 1, -1], [fx, fy + ch, -1, 1], [fx + cw, fy + ch, 1, 1]]) { if (sx < 0) { x.moveTo(cx - o, cy); x.lineTo(cx - o - l, cy); } x.moveTo(cx, cy + sy * o); x.lineTo(cx, cy + sy * (o + l)); }
+    x.stroke();
+    // 山折り線（表と裏はこの線から3mmずつ＝線対称）
+    x.strokeStyle = "rgba(0,0,0,.45)"; x.setLineDash([10, 8]); x.beginPath(); x.moveTo(fold, 0); x.lineTo(fold, fy - 2 * m); x.moveTo(fold, fy + ch + 2 * m); x.lineTo(fold, H); x.stroke(); x.setLineDash([]);
+    x.strokeStyle = "rgba(0,0,0,.16)"; x.lineWidth = 1; x.beginPath(); x.moveTo(fold, fy); x.lineTo(fold, fy + ch); x.stroke();
+    const UI = '"Zen Kaku Gothic New","Hiragino Sans",sans-serif'; x.fillStyle = "#6E6E6E"; x.textAlign = "left"; x.textBaseline = "alphabetic";
+    x.font = `500 ${2.1 * m}px ${UI}`; x.fillText("山折り", fold + 1.2 * m, fy - 3.2 * m);
+    x.font = `500 ${2.3 * m}px ${UI}`; x.fillText(this.shrink(x, `ぺたろぐ 2L判 No.${String(P.no).padStart(3, "0")} ${s.name || ""}（${st === "seven" ? "セブン‐イレブン用" : "ローソン・ファミマ用"}）`, fold - fx - 4 * m), fx, 8 * m);
+    // 大きさ確認用のものさし（100mm）
+    const ry = Math.round(fy + ch + (H - fy - ch) * 0.58); x.fillStyle = "#3C3C3C";
+    x.fillRect(fx, ry, 100 * m, 2);
+    for (let i = 0; i <= 100; i++) { const t = i % 10 === 0 ? 3 : i % 5 === 0 ? 1.8 : 0.9; x.fillRect(Math.round(fx + i * m) - 1, ry - t * m, 2, t * m); }
+    x.fillStyle = "#6E6E6E"; x.font = `500 ${2.1 * m}px ${UI}`; x.fillText("← この線が100mmなら原寸です", fx + 102 * m, ry);
     this.blob = null; cv.toBlob(b => { if (my !== this.gen || !b) return; this.blob = b; const im = $("#pcImg"); if (im) { if (this.burl) URL.revokeObjectURL(this.burl); this.burl = URL.createObjectURL(b); im.src = this.burl; } }, "image/jpeg", 0.95);
   },
   file() {   // 押した瞬間に共有メニューを開けるよう、まだ画像がなければその場で作る
     let b = this.blob;
     if (!b && this.cv && this.cv.width) { const u = this.cv.toDataURL("image/jpeg", 0.95), bin = atob(u.split(",")[1]), a = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); b = new Blob([a], { type: "image/jpeg" }); }
-    return b ? new File([b], `petalog-print-${String(this.P ? this.P.no : 0).padStart(3, "0")}.jpg`, { type: "image/jpeg" }) : null;
+    return b ? new File([b], `petalog-No${String(this.P ? this.P.no : 0).padStart(3, "0")}-2L-${this.store() === "seven" ? "seven" : "lawson-famima"}.jpg`, { type: "image/jpeg" }) : null;
   },
   hint() { toast("上の画像を長押しして「写真に保存」を選んでください", 5200); const im = $("#pcImg"); if (im) im.scrollIntoView({ behavior: "smooth", block: "center" }); },
   save() {
@@ -5141,16 +5162,18 @@ const PrintCard = {
     this.s = s; this.P = null; this.blob = null; this.wiki = null; this.text = "";
     try { const v = JSON.parse(lsGet("petalog.pt." + s.id) || "null"); if (v) { this.text = v.text || ""; this.wiki = v.wiki || null; } } catch (_) {}
     const d = this.el || (this.el = document.createElement("div")); d.className = "pview prt"; if (!d.parentNode) document.body.appendChild(d); d.hidden = false;
-    d.innerHTML = `<div class="pv-top"><div class="pv-t">印刷用（L判）</div><button class="btn small" type="button" id="pcX">閉じる</button></div>
-      <div class="pc-body"><div class="pc-prev"><img id="pcImg" alt="印刷用の画像（長押しでも保存できます）"><div class="pc-wait" id="pcWait"><span class="spin"></span> つくっています…</div></div>
+    d.innerHTML = `<div class="pv-top"><div class="pv-t">印刷用（2L判）</div><button class="btn small" type="button" id="pcX">閉じる</button></div>
+      <div class="pc-body"><div class="pc-store"><span>印刷するお店</span><div class="seg" role="group" aria-label="印刷するお店"><button type="button" data-ps="seven" aria-pressed="${this.store() === "seven"}">セブン‐イレブン</button><button type="button" data-ps="sharp" aria-pressed="${this.store() === "sharp"}">ローソン・ファミマ</button></div></div>
+        <div class="pc-prev"><img id="pcImg" alt="印刷用の画像（長押しでも保存できます）"><div class="pc-wait" id="pcWait"><span class="spin"></span> つくっています…</div></div>
         <label class="pc-l">裏面の解説<textarea id="pcText" rows="6" placeholder="この場所やスタンプのこと"></textarea></label>
         <div class="pc-st" id="pcSt"></div>
         <div class="row2"><button class="btn small" type="button" id="pcRe">解説を調べ直す</button><button class="btn primary" type="button" id="pcSave">画像を保存</button></div>
-        <ol class="pc-how"><li>「画像を保存」で写真に保存（うまく開かないときは、上の画像を長押し →「写真に保存」）</li><li>保存した画像を「ネットプリント」アプリ（セブン‐イレブン）で <b>写真・L判</b> として登録</li><li>お店のマルチコピー機で番号を入れて印刷（L判1枚40円）</li><li>印刷面が外になるように、まん中の点線で山折り</li><li>内側を両面テープかスプレーのりで貼り合わせる</li><li>灰色の線にそって4辺を切る（角丸パンチを使うとトレカらしくなります）</li></ol></div>`;
+        <ol class="pc-how"><li>印刷するお店を選んで「画像を保存」（うまく開かないときは、上の画像を長押し →「写真に保存」）</li><li>セブン‐イレブン：「ネットプリント」で <b>写真・2L</b>（100円）<br>ローソン・ファミマ：「ネットワークプリント」で <b>写真・2L・フチなし</b>（80円）</li><li>下のものさしが100mmになっていれば原寸です（ずれていたら教えてください）</li><li>印刷面が外になるように、まん中の点線で山折りして、内側を両面テープかスプレーのりで貼り合わせる</li><li>表の線にそって4辺を切る（折り線側の余白も一緒に切り落とします）</li></ol></div>`;
     $("#pcX").onclick = () => { d.hidden = true; this.s = null; this.gen++; this.blob = null; if (this.burl) { URL.revokeObjectURL(this.burl); this.burl = null; } if (this.cv) { this.cv.width = this.cv.height = 0; this.cv = null; } d.innerHTML = ""; };
     const ta = $("#pcText"); ta.value = this.text;
     ta.oninput = () => { this.text = ta.value; lsSet("petalog.pt." + s.id, JSON.stringify({ text: this.text, wiki: this.wiki })); clearTimeout(this.tm); this.tm = setTimeout(() => this.render(), 450); };
     $("#pcRe").onclick = () => this.research();
+    d.querySelectorAll("[data-ps]").forEach(b => b.onclick = () => { lsSet("petalog.printStore", b.dataset.ps); d.querySelectorAll("[data-ps]").forEach(x => x.setAttribute("aria-pressed", x === b)); this.render(); });
     $("#pcSave").onclick = () => this.save();
     try { this.P = await this.assets(s); } catch (e) { $("#pcWait").textContent = "画像を読み込めませんでした。通信を確かめてもう一度どうぞ"; return; }
     if (this.s !== s) return;
