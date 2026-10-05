@@ -788,7 +788,8 @@ html.tcv-on,html.tcv-on body{overflow:hidden}
 .tcv-front .card.tc{width:100%;height:100%;box-shadow:none;pointer-events:none}
 .tcv-front .card.tc.ovl::before{content:"";position:absolute;inset:0;z-index:5;pointer-events:none;opacity:calc(var(--ga,.3) * .9);mix-blend-mode:color-dodge;
   background:linear-gradient(115deg,transparent 20%,rgba(255,220,140,.45) 38%,rgba(150,220,255,.4) 50%,rgba(255,170,230,.38) 62%,transparent 80%) calc(var(--gx,50%) * 1.4 - 20%) 0/200% 100%}
-.tcv-back{transform:rotateY(180deg);background:#FDFDFB}
+.tcv-front{transform:translateZ(1px)}
+.tcv-back{transform:rotateY(180deg) translateZ(1px);background:#FDFDFB}
 .tcv-back img{display:block;width:100%;height:100%;object-fit:cover}
 .tcv-wait{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;color:#fff;font:500 13px var(--f-ui);background:linear-gradient(160deg,color-mix(in srgb,var(--g,#2B4C9B) 82%,#fff),var(--g,#2B4C9B) 32%,color-mix(in srgb,var(--g,#2B4C9B) 62%,#000))}
 .tcv-shadow{position:absolute;left:12%;right:12%;bottom:-26px;height:22px;border-radius:50%;background:radial-gradient(ellipse at center,rgba(0,0,0,.55),transparent 70%);filter:blur(6px)}
@@ -5410,7 +5411,7 @@ const CardView = {
     this.backURL(s).then(u => { if (my === this.seq) bk.innerHTML = `<img src="${u}" alt="裏面">`; }).catch(() => { if (my === this.seq) bk.innerHTML = `<div class="tcv-wait">裏面を読み込めませんでした</div>`; });
     d.querySelector("#tcvCount").textContent = `${this.i + 1} / ${this.ids.length}`;
     d.querySelector("#tcvPrev").disabled = this.i <= 0; d.querySelector("#tcvNext").disabled = this.i >= this.ids.length - 1;
-    this.base = 0; this.drag = null; this.last = performance.now();
+    this.base = 0; this.drag = null; this.last = performance.now(); this.fv = null;
     if (dir) { const sl = d.querySelector("#tcvSlide"); sl.animate([{ transform: `translateX(${dir * 42}%) scale(.92)`, opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 340, easing: "cubic-bezier(.2,.8,.2,1)" }); this.ry = this.base + dir * 35; }
   },
   step(t) {
@@ -5422,6 +5423,9 @@ const CardView = {
     const k = g ? 0.32 : 0.075, damp = g ? 0.62 : 0.8;
     this.vy = (this.vy + (ty - this.ry) * k) * damp; this.vx = (this.vx + (tx - this.rx) * k) * damp; this.ry += this.vy; this.rx += this.vx;
     const card = this.el.querySelector("#tcvCard"); card.style.transform = `rotateX(${this.rx.toFixed(2)}deg) rotateY(${this.ry.toFixed(2)}deg)`;
+    // iPhoneでは表の中の部品（タブやバッジ）が裏に透けることがあるので、見えていない面は確実に隠す
+    const ang = ((this.ry % 360) + 360) % 360, fv = ang < 90 || ang > 270;
+    if (fv !== this.fv) { this.fv = fv; this.el.querySelector("#tcvFront").style.visibility = fv ? "visible" : "hidden"; this.el.querySelector("#tcvBack").style.visibility = fv ? "hidden" : "visible"; }
     const rel = ((this.ry % 360) + 540) % 360 - 180, face = Math.abs(rel) > 90 ? rel - Math.sign(rel) * 180 : rel;   // 見えている面での傾き
     card.style.setProperty("--gx", (50 + face * 2.2).toFixed(1) + "%"); card.style.setProperty("--gy", (50 - this.rx * 2.4).toFixed(1) + "%");
     card.style.setProperty("--ga", Math.min(1, 0.25 + (Math.abs(face) + Math.abs(this.rx)) / 30).toFixed(2));
