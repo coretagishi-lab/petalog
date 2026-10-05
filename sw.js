@@ -2,7 +2,7 @@
    - アプリ本体（画面のファイル・ライブラリ・フォント）を端末に保存して、電波やサーバーの調子が悪くても開けるようにする
    - 画面のファイルは「まずネット、だめなら保存分」なので、更新はすぐ届く
    - 記録のデータ（Supabase）や地図のタイルはここでは扱わない */
-const V = "petalog-2bdf1e7c10";
+const V = "petalog-fdd48bc7ad";
 const SHELL = ["./", "./index.html", "./cloud.js", "./vendor/supabase.js", "./vendor/leaflet.js", "./vendor/matter.min.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 const LIBS = /^https:\/\/(cdnjs\.cloudflare\.com|fonts\.googleapis\.com|fonts\.gstatic\.com)\//;
 
@@ -21,7 +21,8 @@ function networkFirst(req) {
   return new Promise(resolve => {
     let done = false; const finish = r => { if (!done && r) { done = true; resolve(r); } };
     const timer = setTimeout(() => fromCache(req).then(finish), 4000);
-    fetch(req).then(res => {
+    // ブラウザの一時保存（最大10分）を使わず、毎回サーバーに新しい版を確認する
+    fetch(req.url, { cache: "no-cache", credentials: "same-origin" }).then(res => {
       clearTimeout(timer);
       if (res && res.ok) { const copy = res.clone(); caches.open(V).then(c => c.put(req, copy)).catch(() => {}); }
       if (res && res.ok) finish(res); else fromCache(req).then(m => finish(m || res));

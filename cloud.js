@@ -564,7 +564,15 @@
 
   // app shell stays on the phone: opens even when the network or GitHub is unreachable
   if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
-    addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+    addEventListener("load", () => navigator.serviceWorker.register("sw.js").then(reg => {
+      // アプリに戻ってきたら新しい版がないか確認
+      document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") reg.update().catch(() => {}); });
+    }).catch(() => {}));
+    // 新しい版に切り替わったら自動で読み込み直す（記録の入力中は閉じるまで待つ）
+    let had = !!navigator.serviceWorker.controller, waiting = false;
+    const busy = () => { const w = document.getElementById("sheetWrap"); return w && !w.hidden; };
+    const go = () => { if (busy()) { if (!waiting) { waiting = true; setInterval(() => { if (!busy()) location.reload(); }, 1500); } return; } location.reload(); };
+    navigator.serviceWorker.addEventListener("controllerchange", () => { if (!had) { had = true; return; } go(); });
   }
   addEventListener("online", () => { if (offline) { say("つながりました。読み込み直します"); setTimeout(() => location.reload(), 1200); } });
   if (sb) {
