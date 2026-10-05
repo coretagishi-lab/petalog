@@ -5106,13 +5106,13 @@ const PrintCard = {
   },
   async render() {
     const s = this.s, P = this.P; if (!s || !P) return; const my = ++this.gen;
-    await this.fonts(`${s.name || ""}${s.place || ""}${s.pref || ""}${this.text || this.fallback(s)}No.0123456789cm×・ぺたろぐスタンプ記録カード押した日ジャンル大きさ場所押し方重ね押し台紙その日の写真紙解説約DIGITAL${catNorm(s.cat)}${(evlOf(s) || {}).t || ""}`);
+    await this.fonts(`${s.name || ""}${s.place || ""}${s.pref || ""}${this.text || this.fallback(s)}No.0123456789cm×・ぺたろぐスタンプ記録カード押した日ジャンル大きさ場所押し方重ね押し台紙その日の写真紙解説約DIGITAL①②③④きれいなトレカにするには印刷面を外にして点線で山折りし、内側を両面テープかのりで貼るまず折り目側の切り落とす（写真用紙は反発ではがれやすいため）ティッシュを当てて上からぐっと押さえ、しっかり貼り直す残りのを切れば完成ワンポイント・間に厚紙をはさむと本物のトレカのように硬くなります角丸パンチがあれば四隅を丸くするとよりトレカらしくスリーブに入れると指紋がつきません2L判セブン‐イレブン用ローソン・ファミマ用この線が100mmなら原寸です山折り${catNorm(s.cat)}${(evlOf(s) || {}).t || ""}`);
     if (my !== this.gen) return;
     // 2L判（178×127mm・300dpi）。セブンはフチなしで約3%拡大されるので、そのぶん画像の外枠だけ大きくして中身を1:1で刷らせる
     const m = this.PX, st = this.store(), k = st === "seven" ? 1.03 : 1, W = Math.round(178 * k * m), H = Math.round(127 * k * m);
     let cv = this.cv; if (!cv || cv.width !== W || cv.height !== H) { if (cv) cv.width = cv.height = 0; cv = this.cv = mkCanvas(W, H); }
     const x = cv.getContext("2d"); x.setTransform(1, 0, 0, 1, 0, 0); x.fillStyle = "#fff"; x.fillRect(0, 0, W, H);
-    const cw = Math.round(63 * m), ch = Math.round(88 * m), G = Math.round(3 * m), fx = Math.round((W - 2 * cw - 2 * G) / 2), fy = Math.round((H - ch) / 2), fold = fx + cw + G, bx = fold + G;
+    const cw = Math.round(63 * m), ch = Math.round(88 * m), G = Math.round(3 * m), fx = Math.round((W - 2 * cw - 2 * G) / 2), fy = Math.round((H - ch) / 2), fold = fx + cw + G, bx = fold + G + Math.round(0.3 * m);   // 裏は0.3mmだけ折り線から遠く（実際に折ると裏が折り目側へ約0.3mm寄るのを打ち消す）
     x.save(); x.translate(fx, fy); this.front(x, s, P, cw, ch, Math.round(1.5 * m)); x.restore();
     x.save(); x.translate(bx, fy); this.back(x, s, P, cw, ch); x.restore();
     // 切り取り線: 表だけ・63×88mmちょうど・角は四角（重ね押しは金）
@@ -5126,12 +5126,22 @@ const PrintCard = {
     x.strokeStyle = "rgba(0,0,0,.16)"; x.lineWidth = 1; x.beginPath(); x.moveTo(fold, fy); x.lineTo(fold, fy + ch); x.stroke();
     const UI = '"Zen Kaku Gothic New","Hiragino Sans",sans-serif'; x.fillStyle = "#6E6E6E"; x.textAlign = "left"; x.textBaseline = "alphabetic";
     x.font = `500 ${2.1 * m}px ${UI}`; x.fillText("山折り", fold + 1.2 * m, fy - 3.2 * m);
-    x.font = `500 ${2.3 * m}px ${UI}`; x.fillText(this.shrink(x, `ぺたろぐ 2L判 No.${String(P.no).padStart(3, "0")} ${s.name || ""}（${st === "seven" ? "セブン‐イレブン用" : "ローソン・ファミマ用"}）`, fold - fx - 4 * m), fx, 8 * m);
-    // 大きさ確認用のものさし（100mm）
-    const ry = Math.round(fy + ch + (H - fy - ch) * 0.58); x.fillStyle = "#3C3C3C";
-    x.fillRect(fx, ry, 100 * m, 2);
-    for (let i = 0; i <= 100; i++) { const t = i % 10 === 0 ? 3 : i % 5 === 0 ? 1.8 : 0.9; x.fillRect(Math.round(fx + i * m) - 1, ry - t * m, 2, t * m); }
-    x.fillStyle = "#6E6E6E"; x.font = `500 ${2.1 * m}px ${UI}`; x.fillText("← この線が100mmなら原寸です", fx + 102 * m, ry);
+    // 切る順番の番号（①は折り目側＝最初に切る）
+    x.textAlign = "center"; x.textBaseline = "middle"; x.fillStyle = "#555"; x.font = `700 ${2.3 * m}px ${UI}`;
+    [["①", fx + cw + G / 2, fy + ch / 2], ["②", fx + cw / 2, fy - 4.2 * m], ["③", fx - 3.6 * m, fy + ch / 2], ["④", fx + cw / 2, fy + ch + 4.2 * m]].forEach(([t, X, Y]) => x.fillText(t, X, Y));
+    // 四隅に作り方（印刷で端が切れても読めるよう、カードからの位置で決める）
+    const note = (X, Y, Wd, paras, fs = 1.95 * m) => { x.textAlign = "left"; x.textBaseline = "top"; let y = Y; for (const [t, b, c] of paras) { x.font = `${b ? 700 : 500} ${fs}px ${UI}`; x.fillStyle = c || (b ? "#3F3F3F" : "#5E5E5E"); for (const ln of this.wrap(x, t, Wd)) { x.fillText(ln, X, y); y += fs * 1.5; } } };
+    const topY = fy - 16 * m, botY = fy + ch + 7 * m, lx = fx - 17 * m, rx0 = fold + 4 * m;
+    note(lx, topY, fold - 4 * m - lx, [["きれいなトレカにするには", true], ["1. 印刷面を外にして点線で山折りし、内側を両面テープかのりで貼る"], ["2. まず折り目側の①を切り落とす（写真用紙は反発ではがれやすいため）"]]);
+    note(rx0, topY + 1.95 * m * 1.5, bx + cw - rx0, [["3. ティッシュを当てて上からぐっと押さえ、しっかり貼り直す"], ["4. 残りの②③④を切れば完成"]]);
+    note(lx, botY, fold - 4 * m - lx, [["ワンポイント", true], ["・間に厚紙をはさむと、本物のトレカのように硬くなります"], ["・角丸パンチがあれば、四隅を丸くするとよりトレカらしく"]]);
+    note(rx0, botY + 1.95 * m * 1.5, bx + cw - rx0, [["・スリーブに入れると指紋がつきません"], [`ぺたろぐ 2L判 No.${String(P.no).padStart(3, "0")}（${st === "seven" ? "セブン‐イレブン用" : "ローソン・ファミマ用"}）`, false, "#8A8A8A"]]);
+    // 大きさ確認用のものさし（100mm・右の余白にたて向き）
+    const rx = Math.round(bx + cw + 7 * m), ry0 = Math.round(fy + ch / 2 - 50 * m); x.fillStyle = "#3C3C3C";
+    x.fillRect(rx, ry0, 2, 100 * m);
+    for (let i = 0; i <= 100; i++) { const t = i % 10 === 0 ? 3 : i % 5 === 0 ? 1.8 : 0.9; x.fillRect(rx, Math.round(ry0 + i * m) - 1, t * m, 2); }
+    x.save(); x.translate(rx + 4.6 * m, ry0 + 50 * m); x.rotate(Math.PI / 2); x.textAlign = "center"; x.textBaseline = "middle"; x.fillStyle = "#6E6E6E"; x.font = `500 ${1.95 * m}px ${UI}`;
+    x.fillText("この線が100mmなら原寸です", 0, 0); x.restore();
     this.blob = null; cv.toBlob(b => { if (my !== this.gen || !b) return; this.blob = b; const im = $("#pcImg"); if (im) { if (this.burl) URL.revokeObjectURL(this.burl); this.burl = URL.createObjectURL(b); im.src = this.burl; } }, "image/jpeg", 0.95);
   },
   file() {   // 押した瞬間に共有メニューを開けるよう、まだ画像がなければその場で作る
