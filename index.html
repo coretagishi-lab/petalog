@@ -5160,11 +5160,24 @@ const PrintCard = {
     x.save(); x.shadowColor = "rgba(0,0,0,.28)"; x.shadowBlur = 1.4 * m; x.shadowOffsetY = 0.6 * m; this.rr(x, px, py, pw, ph, pr); x.fillStyle = fr; x.fill(); x.restore();
     x.save(); this.rr(x, px, py, pw, ph, pr); x.clip(); x.fillStyle = "rgba(255,255,255,.28)"; x.fillRect(px, py, pw, 0.2 * m); x.fillStyle = "rgba(0,0,0,.28)"; x.fillRect(px, py + ph - 0.3 * m, pw, 0.3 * m); x.restore();
     // 見出し（明朝・クリーム）と金の飾り
-    const title = s.place || s.name || "スタンプの記録"; let fs = 4.6 * m; for (; fs > 2.6 * m; fs -= 0.1 * m) { x.font = `700 ${fs}px ${MIN}`; if (this.spaced(x, title, 0.08 * fs) <= 50 * m) break; }
-    x.save(); x.shadowColor = "rgba(0,0,0,.4)"; x.shadowBlur = 0.4 * m; x.shadowOffsetY = 0.2 * m; x.fillStyle = cream; x.textBaseline = "middle";
-    const tw = this.spaced(x, title, 0.08 * fs); this.spaced(x, title, 0.08 * fs, (W - tw) / 2, 7.1 * m); x.restore();
+    // 見出し（登録した名前）: 1行に入らなければ小さく、それでも長ければバランスよく2行に
+    const title = String(s.name || s.place || "スタンプの記録").trim(), TWD = 50 * m, NO = "、。，．）」』】〉》ー…・！？!?,.)]%ぁぃぅぇぉっゃゅょァィゥェォッャュョ";
+    const sp = f => (title.length > 12 ? 0.03 : 0.08) * f;
+    let tl = null, fs = 4.6 * m;
+    for (; fs >= 3.2 * m; fs -= 0.1 * m) { x.font = `700 ${fs}px ${MIN}`; if (this.spaced(x, title, sp(fs)) <= TWD) { tl = [title]; break; } }
+    if (!tl) { const ch = [...title];
+      for (fs = 3.0 * m; fs >= 2.1 * m; fs -= 0.1 * m) { x.font = `700 ${fs}px ${MIN}`; let best = null;
+        for (let k = 1; k < ch.length; k++) { if (NO.includes(ch[k])) continue; const a = ch.slice(0, k).join("").trim(), b = ch.slice(k).join("").trim(); if (!a || !b) continue;
+          const wa = this.spaced(x, a, sp(fs)), wb = this.spaced(x, b, sp(fs)); if (wa > TWD || wb > TWD) continue;
+          const cost = Math.max(wa, wb) - (/[\s　]/.test(ch[k - 1] + ch[k]) ? 3 * m : 0); if (!best || cost < best.c) best = { c: cost, l: [a, b] }; }
+        if (best) { tl = best.l; break; } }
+      if (!tl) { fs = 2.1 * m; x.font = `700 ${fs}px ${MIN}`; let a = "", k = 0; while (k < ch.length && this.spaced(x, a + ch[k], sp(fs)) <= TWD) a += ch[k++]; let b = ch.slice(k).join(""); while (b && this.spaced(x, b + "…", sp(fs)) > TWD) b = b.slice(0, -1); tl = [a, b + "…"]; } }
+    x.save(); x.shadowColor = "rgba(0,0,0,.4)"; x.shadowBlur = 0.4 * m; x.shadowOffsetY = 0.2 * m; x.fillStyle = cream; x.textBaseline = "middle"; x.font = `700 ${fs}px ${MIN}`;
+    const lhT = fs * 1.18; tl.forEach((t, k) => { const tw = this.spaced(x, t, sp(fs)); this.spaced(x, t, sp(fs), (W - tw) / 2, (tl.length > 1 ? 7.2 : 6.8) * m + (k - (tl.length - 1) / 2) * lhT); }); x.restore();
+    if (tl.length === 1) {
     const oy = 10.6 * m, ow = 12 * m; for (const sgn of [-1, 1]) { const g2 = x.createLinearGradient(W / 2 + sgn * 1.2 * m, 0, W / 2 + sgn * (1.2 * m + ow), 0); g2.addColorStop(0, gold); g2.addColorStop(1, "rgba(201,162,74,0)"); x.fillStyle = g2; x.fillRect(Math.min(W / 2 + sgn * 1.2 * m, W / 2 + sgn * (1.2 * m + ow)), oy - 0.08 * m, ow, Math.max(1.5, 0.15 * m)); }
     x.save(); x.translate(W / 2, oy); x.rotate(Math.PI / 4); x.fillStyle = gold; const dd = 0.65 * m; x.fillRect(-dd / 2, -dd / 2, dd, dd); x.restore();
+    }
     // 写真とスタンプの箱
     const BX = 4.2 * m, BY = 12 * m, BW = 54.6 * m, BH = 28.2 * m; this.recess(x, BX, BY, BW, BH, 1.2 * m, m);
     const ar = clamp((s.cw || 1) / (s.ch || 1), 0.2, 5), wmm = s.sizeMm ? (ar >= 1 ? s.sizeMm : s.sizeMm * ar) : 0, hmm = s.sizeMm ? (ar >= 1 ? s.sizeMm / ar : s.sizeMm) : 0;
