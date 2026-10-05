@@ -4774,7 +4774,9 @@ const GPlaces = {
 /* ---------- Yahoo!ローカルサーチ（無料・1日5万回まで）: 駅・お店・施設を日本語でさがす ---------- */
 const YahooLS = {
   n: 0, id: "", warned: false,
-  key() { return this.id || lsGet("petalog.yahooId") || ""; },
+  // the app's own Client ID (it is sent with every search from the browser, so it is not a secret)
+  APP: "dmVyPTIwMjUwNyZpZD0xSjRnbWliZElhJmhhc2g9T1RoaU1tSXdOVE5qWWpNeE5tUTJNUQ",
+  key() { return this.id || lsGet("petalog.yahooId") || this.APP; },
   async load() { try { const m = await Store.getMeta("yahoo"); if (m && m.id) { this.id = m.id; lsSet("petalog.yahooId", m.id); } } catch {} },
   async save(id) { this.id = id; this.warned = false; lsSet("petalog.yahooId", id); try { await Store.putMeta("yahoo", { id }); } catch {} },
   warn() { if (this.warned) return; this.warned = true; toast("Yahoo!の検索につながりませんでした。電波か、設定のClient IDを確かめてください（いまは無料の地図データでさがします）", 6000); },
