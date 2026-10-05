@@ -3482,7 +3482,6 @@ function formHTML(d, ro) {
     <div class="placeq" id="placeQ"><label class="fld"><span>${ro ? "場所の名前" : "場所の名前（入れると地図でさがします）"}</span><span class="pqrow"><input id="f_place" type="search" enterkeyhint="search" value="${esc(d.place || "")}" placeholder="例: 日比谷駅、スタバ 丸の内オアゾ" autocomplete="off"${dis}>${ro ? "" : `<button class="btn small" type="button" id="pmMe">現在地</button>`}</span></label>${ro ? "" : `<div class="pmres" id="pmRes" hidden></div>`}</div>
     <div class="pmap-wrap" id="pmapWrap"><div class="pmap" id="pmap"></div>
       <div class="pmhint" id="pmHint"${d.lat != null ? " hidden" : ""}>${ro ? "" : "地図をタップしてピンを立てる"}</div></div>
-    ${ro ? "" : `<div class="pmext" id="pmExt"><span>見つからないときは</span><button type="button" class="btn small" data-ext="google">Googleマップで探す</button><button type="button" class="btn small" data-ext="apple">Appleマップで探す</button><button type="button" class="btn small primary" data-ext="paste">コピーした場所を貼る</button></div><div class="pcands" id="pCands"></div>`}
     <div class="locinfo" id="locInfo" style="margin-top:6px"></div>
     ${ro ? "" : `<div class="row2" style="margin-top:6px"><button class="btn small" type="button" id="exifBtn" hidden>写真の位置を使う</button><button class="btn small ghost" type="button" id="locClear" hidden>ピンを消す</button></div>`}
     <label class="fld" style="margin-top:10px"><span>置き場所メモ（公開するとみんなに共有）</span><input id="f_spot" maxlength="80" value="${esc(d.spot || "")}" placeholder="例: 窓口の左の台"${dis}></label>
