@@ -5045,14 +5045,14 @@ const PrintCard = {
       x.font = `700 ${5.6 * cq}px ${UI}`; const tw = x.measureText("重ね押し").width, bw = tw + 8.8 * cq, bh = 5.6 * cq * 1.45 + 1.2 * cq, bx = 7.5 * cq, by = 19 * cq;
       const gr = x.createLinearGradient(bx, by, bx + bw, by + bh); gr.addColorStop(0, "#E9C766"); gr.addColorStop(1, "#B8892E");
       x.save(); x.shadowColor = "rgba(0,0,0,.2)"; x.shadowBlur = 0.8 * cq; x.shadowOffsetY = 0.3 * cq; x.fillStyle = gr; this.rr(x, bx, by, bw, bh, bh / 2); x.fill(); x.restore();
-      x.fillStyle = "#fff"; x.textAlign = "center"; x.fillText("重ね押し", bx + bw / 2, by + bh / 2);
+      x.fillStyle = "#fff"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText("重ね押し", bx + bw / 2, by + bh / 2);
       const a = 115 * Math.PI / 180, dx = Math.sin(a), dy = -Math.cos(a), len = Math.abs(W * dx) + Math.abs(H * dy), cx = W / 2, cy = H / 2;
       const sh = x.createLinearGradient(cx - dx * len / 2, cy - dy * len / 2, cx + dx * len / 2, cy + dy * len / 2);
       [[0, "rgba(255,244,200,0)"], [0.34, "rgba(255,244,200,.62)"], [0.53, "rgba(190,222,255,.42)"], [0.68, "rgba(255,196,232,.36)"], [1, "rgba(255,196,232,0)"]].forEach(([o, c]) => sh.addColorStop(o, c));
       x.save(); x.globalCompositeOperation = "soft-light"; x.fillStyle = sh; x.fillRect(0, 0, W, H); x.restore();
     }
     const nv = s.visits ? s.visits.length : (s.nv || 0);
-    if (nv) { x.font = `500 ${6.25 * cq}px ${MONO}`; const t = "×" + (nv + 1), bw = x.measureText(t).width + 8.8 * cq, bh = 6.25 * cq * 1.4, bx = W - 5 * cq - bw, by = 17.5 * cq; x.fillStyle = "#C8412E"; this.rr(x, bx, by, bw, bh, bh / 2); x.fill(); x.fillStyle = "#fff"; x.textAlign = "center"; x.fillText(t, bx + bw / 2, by + bh / 2); }
+    if (nv) { x.font = `500 ${6.25 * cq}px ${MONO}`; const t = "×" + (nv + 1), bw = x.measureText(t).width + 8.8 * cq, bh = 6.25 * cq * 1.4, bx = W - 5 * cq - bw, by = 17.5 * cq; x.fillStyle = "#C8412E"; this.rr(x, bx, by, bw, bh, bh / 2); x.fill(); x.fillStyle = "#fff"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(t, bx + bw / 2, by + bh / 2); }
   },
   back(x, s, P, W, H) {
     const m = this.PX, g = gcol(catNorm(s.cat)), UI = '"Zen Kaku Gothic New","Hiragino Sans",sans-serif', MONO = '"IBM Plex Mono",ui-monospace,monospace', ink = "#1D2230";
