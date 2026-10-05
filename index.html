@@ -3722,7 +3722,7 @@ async function saveStampForm() {
   const c = sheetCtx; if (!c) return; const d = c.d;
   if (c.mode === "add" && !c.cut) { toast("先に写真を選んでください"); return; }
   readForm(d);
-  if (c.mode === "add") Object.assign(d, { cut: c.cut.url, cw: c.cut.w, ch: c.cut.h, shape: c.cut.shape, ink: c.cut.ink || "", inkPx: c.cut.inkPx, box: c.box || null, photoScale: c.photoScale, hasPhoto: !!c.photoUrl, colors: c.cut.colors || [], multi: !!c.cut.multi, corner: c.cut.corner, cutRot: c.cutRot || 0 });
+  if (c.mode === "add") Object.assign(d, { cut: c.cut.url, cw: c.cut.w, ch: c.cut.h, shape: c.cut.shape, ink: c.cut.ink || "", inkPx: c.cut.inkPx, box: c.box || null, photoScale: c.photoScale, hasPhoto: !!c.photoUrl, colors: c.cut.colors || [], multi: !!c.cut.multi, corner: c.cut.corner, cutRot: c.cutRot || 0, trimmed: 1 });
   if (c.ai) d.ai = { name: c.ai.name || null, confidence: +c.ai.confidence || 0, reason: c.ai.reason || null };
   if (c.mode === "add" && c.type !== "goshuin" && !c.dupDone && stamps.length) {
     c.dupDone = true; const btn = $("#saveBtn"); btn.disabled = true; btn.innerHTML = `<span class="spin"></span> 確認中`;
@@ -4283,7 +4283,7 @@ async function openRecrop(s) {
 async function saveRecrop() {
   const c = sheetCtx; if (!c || !c.recrop || !c.cut) return; const s = c.origStamp; const ps = s.photoScale || 1;
   const btn = $("#saveBtn"); btn.disabled = true; btn.innerHTML = `<span class="spin"></span> 保存中`;
-  const d = { ...s, cut: c.cut.url, cw: c.cut.w, ch: c.cut.h, shape: c.cut.shape, ink: c.cut.ink || "", inkPx: c.cut.inkPx ? { w: c.cut.inkPx.w / ps, h: c.cut.inkPx.h / ps } : s.inkPx, box: c.box ? { x: c.box.x / ps, y: c.box.y / ps, w: c.box.w / ps, h: c.box.h / ps } : s.box, colors: c.cut.colors || [], multi: !!c.cut.multi, corner: c.cut.corner, cutRot: c.cutRot || 0, recut: Date.now() };
+  const d = { ...s, cut: c.cut.url, cw: c.cut.w, ch: c.cut.h, shape: c.cut.shape, ink: c.cut.ink || "", inkPx: c.cut.inkPx ? { w: c.cut.inkPx.w / ps, h: c.cut.inkPx.h / ps } : s.inkPx, box: c.box ? { x: c.box.x / ps, y: c.box.y / ps, w: c.box.w / ps, h: c.box.h / ps } : s.box, colors: c.cut.colors || [], multi: !!c.cut.multi, corner: c.cut.corner, cutRot: c.cutRot || 0, trimmed: 1, recut: Date.now() };
   if (c.rotated) { const ph = makePhoto(c.orig); if (ph) { try { await Store.putPhoto("ph_" + s.id, ph.url); d.photoScale = ph.scale; d.box = c.box; d.inkPx = c.cut.inkPx; d.hasPhoto = true; } catch {} } }
   delete d._sig; delete d._hay;
   try { await Store.saveStamp(d); } catch { btn.disabled = false; btn.textContent = "もう一度保存"; toast("保存できませんでした。通信を確かめてもう一度どうぞ", 4000); return; }
@@ -4612,17 +4612,51 @@ const looksLikeShot = (file, orig, exif) => /png/i.test(file.type || file.name |
 // the finished cut-out can be turned freely (the photo itself stays straight)
 function applyCutRot(c) {
   if (!c || !c.cut || c.type === "goshuin") return;
-  if (!c.cut._rotOf) c.cut0 = c.cut; const deg = c.cutRot || 0;
+  if (!c.cut._rotOf && !c.cut._trimmed) { c.cut = trimCut(c.cut); c.cut0 = c.cut; } else if (!c.cut._rotOf) c.cut0 = c.cut;
+  const deg = c.cutRot || 0;
   if (!deg) { c.cut = c.cut0; return; }
   if (c.cut._rotOf === c.cut0 && c.cut._deg === deg) return;
-  const b = c.cut0, cv = rotCanvas(b.canvas, deg, true);
-  c.cut = { ...b, canvas: cv, url: cv.toDataURL("image/png"), w: cv.width, h: cv.height, _rotOf: b, _deg: deg };
+  const b = c.cut0, cv = rotCanvas(b.canvas, deg, true); const t = trimCut({ ...b, canvas: cv, url: "", w: cv.width, h: cv.height });
+  c.cut = { ...t, url: t.url || cv.toDataURL("image/png"), _rotOf: b, _deg: deg };
 }
-// eraser strokes are drawn on the turned picture; store them for the straight one
+// eraser strokes are drawn on the (trimmed, maybe turned) picture; store them for the picture the cutter works on
 function unrotPt(c, x, y) {
-  const deg = c && c.cutRot, b = c && c.cut0; if (!deg || !b || !c.cut || c.cut._rotOf !== b) return { x, y };
-  const W = c.cut.w, H = c.cut.h, a = -deg * Math.PI / 180; const px = x * W - W / 2, py = y * H - H / 2;
-  return { x: (px * Math.cos(a) - py * Math.sin(a) + b.w / 2) / b.w, y: (px * Math.sin(a) + py * Math.cos(a) + b.h / 2) / b.h };
+  const cur = c && c.cut; if (!cur) return { x, y }; const b = c.cut0 || cur;
+  let px = x * cur.w, py = y * cur.h;
+  if (c.cutRot && cur._rotOf === b) {
+    px += cur._tx || 0; py += cur._ty || 0; const RW = cur._ow || cur.w, RH = cur._oh || cur.h, a = -c.cutRot * Math.PI / 180, dx = px - RW / 2, dy = py - RH / 2;
+    px = dx * Math.cos(a) - dy * Math.sin(a) + b.w / 2; py = dx * Math.sin(a) + dy * Math.cos(a) + b.h / 2;
+  }
+  const ow = b._ow || b.w, oh = b._oh || b.h; return { x: (px + (b._tx || 0)) / ow, y: (py + (b._ty || 0)) / oh };
+}
+// the picture keeps only the stamp itself: see-through margins around it are cut off, so the longest side really is the stamp
+function trimCut(cut) {
+  const cv = cut && cut.canvas; if (!cv || !cv.width) return cut; const w = cv.width, h = cv.height;
+  let d; try { d = cv.getContext("2d").getImageData(0, 0, w, h).data; } catch { return cut; }
+  const col = new Uint32Array(w), row = new Uint32Array(h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (d[(y * w + x) * 4 + 3] > 40) { col[x]++; row[y]++; }
+  const mc = Math.max(2, Math.round(h * 0.004)), mr = Math.max(2, Math.round(w * 0.004));
+  let x0 = 0, x1 = w - 1, y0 = 0, y1 = h - 1;
+  while (x0 < w && col[x0] < mc) x0++; while (x1 > x0 && col[x1] < mc) x1--; while (y0 < h && row[y0] < mr) y0++; while (y1 > y0 && row[y1] < mr) y1--;
+  if (x0 >= x1 || y0 >= y1) return { ...cut, _trimmed: true, _tx: 0, _ty: 0, _ow: w, _oh: h };
+  x0 = Math.max(0, x0 - 1); y0 = Math.max(0, y0 - 1); x1 = Math.min(w - 1, x1 + 1); y1 = Math.min(h - 1, y1 + 1);
+  const tw = x1 - x0 + 1, th = y1 - y0 + 1;
+  if (tw >= w - 3 && th >= h - 3) return { ...cut, _trimmed: true, _tx: 0, _ty: 0, _ow: w, _oh: h };
+  const o = mkCanvas(tw, th); o.getContext("2d").drawImage(cv, x0, y0, tw, th, 0, 0, tw, th);
+  return { ...cut, canvas: o, url: o.toDataURL("image/png"), w: tw, h: th, _trimmed: true, _tx: x0, _ty: y0, _ow: w, _oh: h };
+}
+// stamps saved before this: trim them once (in the background) and keep the trimmed picture
+async function trimOld() {
+  const L = stamps.filter(s => !s.trimmed && s.type !== "goshuin" && s.cut && /^data:image\/(png|webp)/.test(s.cut)); let n = 0;
+  for (const s of L) {
+    let im; try { im = await loadImg(s.cut); } catch { continue; } if ((im.naturalWidth || im.width) < 8) continue;
+    const cv = mkCanvas(im.naturalWidth || im.width, im.naturalHeight || im.height); cv.getContext("2d").drawImage(im, 0, 0);
+    const t = trimCut({ canvas: cv, url: s.cut, w: cv.width, h: cv.height }); const changed = t.canvas !== cv;
+    const next = { ...s, trimmed: 1, ...(changed ? { cut: t.url, cw: t.w, ch: t.h } : {}) }; delete next._hay; delete next._sig;
+    try { await Store.saveStamp(next); } catch { break; }
+    Object.assign(s, next); if (changed) { delete s._hay; n++; }
+  }
+  if (n) { Books.thumbs.clear(); Grid.render(); Fall.dirty = true; if (view === "fall") { Fall.stop(); Fall.start(); } }
 }
 
 /* ---------- お店の名前と支店名で探す（OpenStreetMap / Overpass）: 「スタバ丸の内オアゾ」など ---------- */
@@ -4837,7 +4871,7 @@ document.addEventListener("contextmenu", e => { if (!e.target.closest("input,tex
   ready = true; Book.idx = 0; MapV.shown = false;
   refreshAll(); show(view);
   if (window.PetalogCloud) PetalogCloud.afterBoot();
-  setTimeout(() => Privacy.firstSync(), 2500); loadSheets();
+  setTimeout(() => Privacy.firstSync(), 2500); loadSheets(); setTimeout(trimOld, 6000);
   if (!lsGet("petalog.pinchHint")) { lsSet("petalog.pinchHint", "1"); setTimeout(() => toast("トレカ一覧は、2本指でつまむと並べる列の数（1〜5列）を変えられます", 4200), 4000); }
   (async () => { let n = 0; for (const s of stamps) { if (await fillStats(s)) n++; } if (n) Grid.render(); })();
 })();
