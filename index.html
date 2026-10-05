@@ -713,8 +713,8 @@ html,body{touch-action:pan-x pan-y}
 .er-tip{font-size:11px;color:var(--muted)}
 .prt .pc-body{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:4px 16px 28px;display:flex;flex-direction:column;gap:12px;width:100%;max-width:620px;margin:0 auto;box-sizing:border-box}
 .pc-prev{position:relative}
-.pc-prev{min-height:120px}
-.pc-prev img{display:block;width:100%;height:auto;aspect-ratio:178/127;background:#fff;border-radius:4px;box-shadow:0 4px 18px rgba(0,0,0,.4);-webkit-touch-callout:default!important;-webkit-user-select:auto;user-select:auto;pointer-events:auto;object-fit:contain}
+.pc-prev{position:relative;aspect-ratio:148/100;overflow:hidden;background:#fff;border-radius:4px;box-shadow:0 4px 18px rgba(0,0,0,.4)}
+.pc-prev img{position:absolute;left:50%;top:50%;width:67.568%;height:auto;aspect-ratio:100/148;transform:translate(-50%,-50%) rotate(-90deg);-webkit-touch-callout:default!important;-webkit-user-select:auto;user-select:auto;pointer-events:auto}
 .pc-wait{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(18,20,26,.7);color:#fff;font-size:13px;border-radius:4px}
 .pc-wait[hidden]{display:none}
 .pc-l{display:flex;flex-direction:column;gap:6px;font-size:12.5px;color:rgba(255,255,255,.8)}
@@ -5106,56 +5106,74 @@ const PrintCard = {
   },
   async render() {
     const s = this.s, P = this.P; if (!s || !P) return; const my = ++this.gen;
-    await this.fonts(`${s.name || ""}${s.place || ""}${s.pref || ""}${this.text || this.fallback(s)}No.0123456789cm×・ぺたろぐスタンプ記録カード押した日ジャンル大きさ場所押し方重ね押し台紙その日の写真紙解説約DIGITAL①②③④きれいなトレカにするには印刷面を外にして点線で山折りし、内側を両面テープかのりで貼るまず折り目側の切り落とす（写真用紙は反発ではがれやすいため）ティッシュを当てて上からぐっと押さえ、しっかり貼り直す残りのを切れば完成ワンポイント・間に厚紙をはさむと本物のトレカのように硬くなります角丸パンチがあれば四隅を丸くするとよりトレカらしくスリーブに入れると指紋がつきません2L判セブン‐イレブン用ローソン・ファミマ用この線が100mmなら原寸です山折り${catNorm(s.cat)}${(evlOf(s) || {}).t || ""}`);
+    await this.fonts(`${s.name || ""}${s.place || ""}${s.pref || ""}${this.text || this.fallback(s)}No.0123456789cm×・ぺたろぐスタンプ記録カード押した日ジャンル大きさ場所押し方重ね押し台紙その日の写真紙解説約DIGITAL①②③④きれいなトレカにするには印刷面を外にして点線で山折りし、内側を両面テープかのりで貼るまず折り目側の切り落とす（写真用紙は反発ではがれやすいため）ティッシュを当てて上からぐっと押さえ、しっかり貼り直す残りのを切れば完成ワンポイント・間に厚紙をはさむと本物のトレカのように硬くなります角丸パンチがあれば四隅を丸くするとよりトレカらしくスリーブに入れると指紋がつきません50mm山折り水のりは乾かないので×上から押さえて貼り直す厚紙をはさむと硬く・角丸パンチで角を丸く${catNorm(s.cat)}${(evlOf(s) || {}).t || ""}`);
     if (my !== this.gen) return;
-    // 2L判（178×127mm・300dpi）。セブンはフチなしで約3%拡大されるので、そのぶん画像の外枠だけ大きくして中身を1:1で刷らせる
-    const m = this.PX, st = this.store(), k = st === "seven" ? 1.03 : 1, W = Math.round(178 * k * m), H = Math.round(127 * k * m);
-    let cv = this.cv; if (!cv || cv.width !== W || cv.height !== H) { if (cv) cv.width = cv.height = 0; cv = this.cv = mkCanvas(W, H); }
-    const x = cv.getContext("2d"); x.setTransform(1, 0, 0, 1, 0, 0); x.fillStyle = "#fff"; x.fillRect(0, 0, W, H);
-    const cw = Math.round(63 * m), ch = Math.round(88 * m), G = Math.round(3 * m), fx = Math.round((W - 2 * cw - 2 * G) / 2), fy = Math.round((H - ch) / 2), fold = fx + cw + G, bx = fold + G + Math.round(0.3 * m);   // 裏は0.3mmだけ折り線から遠く（実際に折ると裏が折り目側へ約0.3mm寄るのを打ち消す）
+    // はがき（100×148mm・300dpi・実寸）。中では横向き148×100mmで描いて、書き出しはたて向き（はがきの向き）に回す
+    const m = this.PX, W = Math.round(148 * m), H = Math.round(100 * m);
+    let cv = this.cv; if (!cv || cv.width !== H || cv.height !== W) { if (cv) cv.width = cv.height = 0; cv = this.cv = mkCanvas(H, W); }
+    const x = cv.getContext("2d"); x.setTransform(1, 0, 0, 1, 0, 0); x.fillStyle = "#fff"; x.fillRect(0, 0, H, W); x.setTransform(0, 1, -1, 0, H, 0);
+    const cw = Math.round(63 * m), ch = Math.round(88 * m), G = Math.round(3 * m), off = Math.round(0.3 * m);
+    const fx = Math.round((W - 2 * cw - 2 * G - off) / 2), fy = Math.round((H - ch) / 2), fold = fx + cw + G, bx = fold + G + off;   // 裏は0.3mmだけ折り線から遠く（折ると裏が折り目側へ寄るのを打ち消す）
     x.save(); x.translate(fx, fy); this.front(x, s, P, cw, ch, Math.round(1.5 * m)); x.restore();
     x.save(); x.translate(bx, fy); this.back(x, s, P, cw, ch); x.restore();
     // 切り取り線: 表だけ・63×88mmちょうど・角は四角（重ね押しは金）
     const lw = s.overlap ? 3 : 2; x.strokeStyle = s.overlap ? "#D4AF4F" : "rgba(40,40,40,.4)"; x.lineWidth = lw; x.lineJoin = "miter"; x.strokeRect(fx + lw / 2, fy + lw / 2, cw - lw, ch - lw);
-    // 四隅の目印（折り線側の横向きは裏にはみ出すので付けない）
-    x.strokeStyle = "#999"; x.lineWidth = 2; const o = 1.5 * m, l = 4 * m; x.beginPath();
+    // 四隅の目印（折り線側の横向きは付けない）
+    x.strokeStyle = "#999"; x.lineWidth = 2; const o = 1.2 * m, l = 2.4 * m; x.beginPath();
     for (const [cx, cy, sx, sy] of [[fx, fy, -1, -1], [fx + cw, fy, 1, -1], [fx, fy + ch, -1, 1], [fx + cw, fy + ch, 1, 1]]) { if (sx < 0) { x.moveTo(cx - o, cy); x.lineTo(cx - o - l, cy); } x.moveTo(cx, cy + sy * o); x.lineTo(cx, cy + sy * (o + l)); }
     x.stroke();
-    // 山折り線（表と裏はこの線から3mmずつ＝線対称）
-    x.strokeStyle = "rgba(0,0,0,.45)"; x.setLineDash([10, 8]); x.beginPath(); x.moveTo(fold, 0); x.lineTo(fold, fy - 2 * m); x.moveTo(fold, fy + ch + 2 * m); x.lineTo(fold, H); x.stroke(); x.setLineDash([]);
+    // 山折り線
+    x.strokeStyle = "rgba(0,0,0,.45)"; x.setLineDash([10, 8]); x.beginPath(); x.moveTo(fold, 0); x.lineTo(fold, fy - 1.5 * m); x.moveTo(fold, fy + ch + 1.5 * m); x.lineTo(fold, H); x.stroke(); x.setLineDash([]);
     x.strokeStyle = "rgba(0,0,0,.16)"; x.lineWidth = 1; x.beginPath(); x.moveTo(fold, fy); x.lineTo(fold, fy + ch); x.stroke();
-    const UI = '"Zen Kaku Gothic New","Hiragino Sans",sans-serif'; x.fillStyle = "#6E6E6E"; x.textAlign = "left"; x.textBaseline = "alphabetic";
-    x.font = `500 ${2.1 * m}px ${UI}`; x.fillText("山折り", fold + 1.2 * m, fy - 3.2 * m);
-    // 切る順番の番号（①は折り目側＝最初に切る）
-    x.textAlign = "center"; x.textBaseline = "middle"; x.fillStyle = "#555"; x.font = `700 ${2.3 * m}px ${UI}`;
-    [["①", fx + cw + G / 2, fy + ch / 2], ["②", fx + cw / 2, fy - 4.2 * m], ["③", fx - 3.6 * m, fy + ch / 2], ["④", fx + cw / 2, fy + ch + 4.2 * m]].forEach(([t, X, Y]) => x.fillText(t, X, Y));
-    // 四隅に作り方（印刷で端が切れても読めるよう、カードからの位置で決める）
-    const note = (X, Y, Wd, paras, fs = 1.95 * m) => { x.textAlign = "left"; x.textBaseline = "top"; let y = Y; for (const [t, b, c] of paras) { x.font = `${b ? 700 : 500} ${fs}px ${UI}`; x.fillStyle = c || (b ? "#3F3F3F" : "#5E5E5E"); for (const ln of this.wrap(x, t, Wd)) { x.fillText(ln, X, y); y += fs * 1.5; } } };
-    const topY = fy - 16 * m, botY = fy + ch + 7 * m, lx = fx - 17 * m, rx0 = fold + 4 * m;
-    note(lx, topY, fold - 4 * m - lx, [["きれいなトレカにするには", true], ["1. 印刷面を外にして点線で山折りし、内側を両面テープかのりで貼る"], ["2. まず折り目側の①を切り落とす（写真用紙は反発ではがれやすいため）"]]);
-    note(rx0, topY + 1.95 * m * 1.5, bx + cw - rx0, [["3. ティッシュを当てて上からぐっと押さえ、しっかり貼り直す"], ["4. 残りの②③④を切れば完成"]]);
-    note(lx, botY, fold - 4 * m - lx, [["ワンポイント", true], ["・間に厚紙をはさむと、本物のトレカのように硬くなります"], ["・角丸パンチがあれば、四隅を丸くするとよりトレカらしく"]]);
-    note(rx0, botY + 1.95 * m * 1.5, bx + cw - rx0, [["・スリーブに入れると指紋がつきません"], [`ぺたろぐ 2L判 No.${String(P.no).padStart(3, "0")}（${st === "seven" ? "セブン‐イレブン用" : "ローソン・ファミマ用"}）`, false, "#8A8A8A"]]);
-    // 大きさ確認用のものさし（100mm・右の余白にたて向き）
-    const rx = Math.round(bx + cw + 7 * m), ry0 = Math.round(fy + ch / 2 - 50 * m); x.fillStyle = "#3C3C3C";
-    x.fillRect(rx, ry0, 2, 100 * m);
-    for (let i = 0; i <= 100; i++) { const t = i % 10 === 0 ? 3 : i % 5 === 0 ? 1.8 : 0.9; x.fillRect(rx, Math.round(ry0 + i * m) - 1, t * m, 2); }
-    x.save(); x.translate(rx + 4.6 * m, ry0 + 50 * m); x.rotate(Math.PI / 2); x.textAlign = "center"; x.textBaseline = "middle"; x.fillStyle = "#6E6E6E"; x.font = `500 ${1.95 * m}px ${UI}`;
-    x.fillText("この線が100mmなら原寸です", 0, 0); x.restore();
-    this.blob = null; cv.toBlob(b => { if (my !== this.gen || !b) return; this.blob = b; const im = $("#pcImg"); if (im) { if (this.burl) URL.revokeObjectURL(this.burl); this.burl = URL.createObjectURL(b); im.src = this.burl; } }, "image/jpeg", 0.95);
+    const UI = '"Zen Kaku Gothic New","Hiragino Sans",sans-serif', ty = fy - 3 * m, by = fy + ch + 3 * m;
+    x.textBaseline = "middle"; x.textAlign = "left"; x.fillStyle = "#6E6E6E"; x.font = `500 ${1.75 * m}px ${UI}`; x.fillText("山折り", fold + 1 * m, ty);
+    // 切る順番（①は折り目側＝最初に切る）
+    x.textAlign = "center"; x.fillStyle = "#555"; x.font = `700 ${2.1 * m}px ${UI}`;
+    [["①", fx + cw + G / 2, fy + ch / 2], ["②", fx + 4 * m, ty], ["③", fx - 3.4 * m, fy + ch / 2], ["④", fx + 4 * m, by]].forEach(([t, X, Y]) => x.fillText(t, X, Y));
+    // 四隅に作り方（1行ずつ）
+    x.textAlign = "left"; x.fillStyle = "#5E5E5E"; x.font = `500 ${1.75 * m}px ${UI}`;
+    const line = (t, X, Y, Wd) => x.fillText(this.shrink(x, t, Wd), X, Y);
+    line("1. 点線で山折り→内側をテープのりで貼る（水のりは×）", fx + 8 * m, ty, fold - 2 * m - (fx + 8 * m));
+    line("2. 折り目側の①を先に切り、上から押さえて貼り直す", fold + 8 * m, ty, bx + cw - (fold + 8 * m));
+    line("3. 残りの②③④を切れば完成", fx + 8 * m, by, fold - 2 * m - (fx + 8 * m));
+    line("厚紙をはさむと硬く・角丸パンチで角を丸く", fold + 2 * m, by, bx + cw - (fold + 2 * m));
+    // 実寸チェック用のものさし（50mm・右の余白にたて向き）
+    const rx = Math.round(bx + cw + 2.6 * m), ry0 = Math.round(fy + ch / 2 - 25 * m); x.fillStyle = "#3C3C3C";
+    x.fillRect(rx, ry0, 2, 50 * m);
+    for (let i = 0; i <= 50; i++) { const t = i % 10 === 0 ? 2.4 : i % 5 === 0 ? 1.5 : 0.8; x.fillRect(rx, Math.round(ry0 + i * m) - 1, t * m, 2); }
+    x.fillStyle = "#6E6E6E"; x.font = `500 ${1.5 * m}px ${UI}`; x.textAlign = "left"; x.textBaseline = "top"; x.fillText("50mm", rx, ry0 + 50 * m + 1 * m);
+    x.setTransform(1, 0, 0, 1, 0, 0);
+    this.blob = null; this.pdfBlob = null;
+    cv.toBlob(b => { if (my !== this.gen || !b) return; this.blob = b; const im = $("#pcImg"); if (im) { if (this.burl) URL.revokeObjectURL(this.burl); this.burl = URL.createObjectURL(b); im.src = this.burl; }
+      b.arrayBuffer().then(ab => { if (my === this.gen) this.pdfBlob = this.pdf(new Uint8Array(ab), cv.width, cv.height); }).catch(() => {}); }, "image/jpeg", 0.95);
   },
-  file() {   // 押した瞬間に共有メニューを開けるよう、まだ画像がなければその場で作る
+  pdf(jpg, wPx, hPx) {   // 画像1枚だけの小さなPDF。ページは はがき（100×148mm）ちょうど
+    const wpt = (100 / 25.4 * 72).toFixed(2), hpt = (148 / 25.4 * 72).toFixed(2), enc = new TextEncoder(), parts = [], offs = []; let len = 0;
+    const put = d => { const u = typeof d === "string" ? enc.encode(d) : d; parts.push(u); len += u.length; };
+    const obj = (n, f) => { offs[n] = len; put(`${n} 0 obj\n`); f(); put("\nendobj\n"); };
+    put("%PDF-1.4\n%\u00e2\u00e3\u00cf\u00d3\n");
+    obj(1, () => put("<< /Type /Catalog /Pages 2 0 R >>"));
+    obj(2, () => put("<< /Type /Pages /Kids [3 0 R] /Count 1 >>"));
+    obj(3, () => put(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${wpt} ${hpt}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>`));
+    obj(4, () => { put(`<< /Type /XObject /Subtype /Image /Width ${wPx} /Height ${hPx} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpg.length} >>\nstream\n`); put(jpg); put("\nendstream"); });
+    const cs = `q ${wpt} 0 0 ${hpt} 0 0 cm /Im0 Do Q`; obj(5, () => put(`<< /Length ${cs.length} >>\nstream\n${cs}\nendstream`));
+    const xr = len; put("xref\n0 6\n0000000000 65535 f \n" + [1, 2, 3, 4, 5].map(n => String(offs[n]).padStart(10, "0") + " 00000 n \n").join("") + `trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xr}\n%%EOF\n`);
+    return new Blob(parts, { type: "application/pdf" });
+  },
+  file(kind) {   // 押した瞬間に共有メニューを開けるよう、まだ画像がなければその場で作る
+    const base = `petalog-No${String(this.P ? this.P.no : 0).padStart(3, "0")}-hagaki`;
+    if (kind === "pdf") return this.pdfBlob ? new File([this.pdfBlob], base + ".pdf", { type: "application/pdf" }) : null;
     let b = this.blob;
     if (!b && this.cv && this.cv.width) { const u = this.cv.toDataURL("image/jpeg", 0.95), bin = atob(u.split(",")[1]), a = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); b = new Blob([a], { type: "image/jpeg" }); }
-    return b ? new File([b], `petalog-No${String(this.P ? this.P.no : 0).padStart(3, "0")}-2L-${this.store() === "seven" ? "seven" : "lawson-famima"}.jpg`, { type: "image/jpeg" }) : null;
+    return b ? new File([b], base + ".jpg", { type: "image/jpeg" }) : null;
   },
   hint() { toast("上の画像を長押しして「写真に保存」を選んでください", 5200); const im = $("#pcImg"); if (im) im.scrollIntoView({ behavior: "smooth", block: "center" }); },
-  save() {
-    const f = this.file(); if (!f) { toast("まだ作っています。少し待ってからもう一度どうぞ"); return; }
+  save(kind) {
+    const f = this.file(kind); if (!f) { toast("まだ作っています。少し待ってからもう一度どうぞ"); return; }
     const ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
     let can = false; try { can = !!(navigator.share && navigator.canShare && navigator.canShare({ files: [f] })); } catch (_) { can = false; }
-    if (can) { navigator.share({ files: [f] }).then(() => toast("保存しました")).catch(e => { if (!e || e.name !== "AbortError") this.hint(); }); return; }
-    if (ios) { this.hint(); return; }
+    if (can) { navigator.share({ files: [f] }).then(() => toast("保存しました")).catch(e => { if (!e || e.name !== "AbortError") { if (kind === "pdf") toast("PDFを開けませんでした。もう一度どうぞ"); else this.hint(); } }); return; }
+    if (ios && kind !== "pdf") { this.hint(); return; }
     const a = document.createElement("a"); a.href = URL.createObjectURL(f); a.download = f.name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
   },
   async research() {
@@ -5172,19 +5190,17 @@ const PrintCard = {
     this.s = s; this.P = null; this.blob = null; this.wiki = null; this.text = "";
     try { const v = JSON.parse(lsGet("petalog.pt." + s.id) || "null"); if (v) { this.text = v.text || ""; this.wiki = v.wiki || null; } } catch (_) {}
     const d = this.el || (this.el = document.createElement("div")); d.className = "pview prt"; if (!d.parentNode) document.body.appendChild(d); d.hidden = false;
-    d.innerHTML = `<div class="pv-top"><div class="pv-t">印刷用（2L判）</div><button class="btn small" type="button" id="pcX">閉じる</button></div>
-      <div class="pc-body"><div class="pc-store"><span>印刷するお店</span><div class="seg" role="group" aria-label="印刷するお店"><button type="button" data-ps="seven" aria-pressed="${this.store() === "seven"}">セブン‐イレブン</button><button type="button" data-ps="sharp" aria-pressed="${this.store() === "sharp"}">ローソン・ファミマ</button></div></div>
-        <div class="pc-prev"><img id="pcImg" alt="印刷用の画像（長押しでも保存できます）"><div class="pc-wait" id="pcWait"><span class="spin"></span> つくっています…</div></div>
+    d.innerHTML = `<div class="pv-top"><div class="pv-t">印刷用（はがき・実寸）</div><button class="btn small" type="button" id="pcX">閉じる</button></div>
+      <div class="pc-body"><div class="pc-prev"><img id="pcImg" alt="印刷用の画像（長押しでも保存できます）"><div class="pc-wait" id="pcWait"><span class="spin"></span> つくっています…</div></div>
         <label class="pc-l">裏面の解説<textarea id="pcText" rows="6" placeholder="この場所やスタンプのこと"></textarea></label>
         <div class="pc-st" id="pcSt"></div>
-        <div class="row2"><button class="btn small" type="button" id="pcRe">解説を調べ直す</button><button class="btn primary" type="button" id="pcSave">画像を保存</button></div>
-        <ol class="pc-how"><li>印刷するお店を選んで「画像を保存」（うまく開かないときは、上の画像を長押し →「写真に保存」）</li><li>セブン‐イレブン：「ネットプリント」で <b>写真・2L</b>（100円）<br>ローソン・ファミマ：「ネットワークプリント」で <b>写真・2L・フチなし</b>（80円）</li><li>下のものさしが100mmになっていれば原寸です（ずれていたら教えてください）</li><li>印刷面が外になるように、まん中の点線で山折りして、内側を両面テープかスプレーのりで貼り合わせる</li><li>表の線にそって4辺を切る（折り線側の余白も一緒に切り落とします）</li></ol></div>`;
+        <div class="row2"><button class="btn small" type="button" id="pcRe">解説を調べ直す</button><button class="btn primary" type="button" id="pcSave">画像を保存</button><button class="btn" type="button" id="pcPdf">PDFを保存</button></div>
+        <ol class="pc-how"><li><b>コンビニで印刷：</b>「画像を保存」→ セブン‐イレブンは「ネットプリント」、ローソン・ファミマは「ネットワークプリント」で、用紙を <b>はがき・カラー</b> にして印刷（実寸で出ます）</li><li><b>家のプリンターで印刷：</b>「PDFを保存」→ 無地のはがき用紙に <b>実際のサイズ（100%）</b> で印刷。「用紙に合わせる」などの拡大・縮小はオフに</li><li>右のものさしが50mmなら実寸です</li><li>コンビニのはがきは裏に郵便番号の枠があり、光に透かすとうっすら見えます（ふつうに持つぶんにはほぼ見えません）</li><li>作り方は紙の四隅にも書いてあります：山折り → テープのりで貼る → ①を先に切って押さえる → ②③④を切る</li></ol></div>`;
     $("#pcX").onclick = () => { d.hidden = true; this.s = null; this.gen++; this.blob = null; if (this.burl) { URL.revokeObjectURL(this.burl); this.burl = null; } if (this.cv) { this.cv.width = this.cv.height = 0; this.cv = null; } d.innerHTML = ""; };
     const ta = $("#pcText"); ta.value = this.text;
     ta.oninput = () => { this.text = ta.value; lsSet("petalog.pt." + s.id, JSON.stringify({ text: this.text, wiki: this.wiki })); clearTimeout(this.tm); this.tm = setTimeout(() => this.render(), 450); };
     $("#pcRe").onclick = () => this.research();
-    d.querySelectorAll("[data-ps]").forEach(b => b.onclick = () => { lsSet("petalog.printStore", b.dataset.ps); d.querySelectorAll("[data-ps]").forEach(x => x.setAttribute("aria-pressed", x === b)); this.render(); });
-    $("#pcSave").onclick = () => this.save();
+    $("#pcSave").onclick = () => this.save("jpg"); $("#pcPdf").onclick = () => this.save("pdf");
     try { this.P = await this.assets(s); } catch (e) { $("#pcWait").textContent = "画像を読み込めませんでした。通信を確かめてもう一度どうぞ"; return; }
     if (this.s !== s) return;
     await this.render(); const w = $("#pcWait"); if (w) w.hidden = true;
