@@ -5367,8 +5367,8 @@ const PrintCard = {
     const m = this.PX, W = Math.round(148 * m), H = Math.round(100 * m);
     let cv = this.cv; if (!cv || cv.width !== H || cv.height !== W) { if (cv) cv.width = cv.height = 0; cv = this.cv = mkCanvas(H, W); }
     const x = cv.getContext("2d"); x.setTransform(1, 0, 0, 1, 0, 0); x.fillStyle = "#fff"; x.fillRect(0, 0, H, W); x.setTransform(0, 1, -1, 0, H, 0);
-    const cw = Math.round(63 * m), ch = Math.round(88 * m), G = Math.round(3 * m), off = Math.round(0.6 * m);
-    const fx = Math.round((W - 2 * cw - 2 * G - off) / 2), fy = Math.round((H - ch) / 2), fold = fx + cw + G, bx = fold + G + off;   // 裏は折り線から0.6mm遠く（試し刷りで裏が左＝折り目側へ寄っていたぶんを打ち消す）
+    const cw = Math.round(63 * m), ch = Math.round(88 * m), G = Math.round(3 * m), off = Math.round(0.3 * m);
+    const fx = Math.round((W - 2 * cw - 2 * G - off) / 2), fy = Math.round((H - ch) / 2), fold = fx + cw + G, bx = fold + G + off;   // 裏は折り線から0.3mm遠く（試し刷り: 0mmだと裏が左＝折り目側へ、0.6mmだと右へ約0.3mm寄った → あいだを取る）
     x.save(); x.translate(fx, fy); this.front(x, s, P, cw, ch, Math.round(1.5 * m)); x.restore();
     x.save(); x.translate(bx, fy); this.back(x, s, P, cw, ch); x.restore();
     // 切り取り線: 63×88mmの境目のまん中に引く（線を消すように切るとちょうど63×88mm）。緑などの額縁で見えるよう白（重ね押しは金）
