@@ -5273,8 +5273,8 @@ const PrintCard = {
     // 解説（ルビ付き。欄が埋まる大きさに自動でそろえる）
     const TX = 4.6 * m, TW = 53.8 * m, T0 = 41.6 * m, TMAX = 69.6 * m, units = this.ruby(String((txt != null ? txt : this.text) || "").trim() || this.fallback(s));
     let f = 2.4 * m, lines = [], lh = 0;
-    const layout = f => { const rf = f * 0.46, out = [[]]; let w = 0; const NO = "、。，．）」』】〉》ー…・！？!?,.)]%ぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮヵヶ々", OPEN = "「『（【〈《(［";
-      for (const u of units) { if (u.t === "\n") { out.push([]); w = 0; continue; } x.font = `500 ${f}px ${UI}`; const bw = x.measureText(u.t).width; let uw = bw; if (u.r) { x.font = `500 ${rf}px ${UI}`; uw = Math.max(bw, x.measureText(u.r).width); }
+    const layout = (f, us = units) => { const rf = f * 0.46, out = [[]]; let w = 0; const NO = "、。，．）」』】〉》ー…・！？!?,.)]%ぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮヵヶ々", OPEN = "「『（【〈《(［";
+      for (const u of us) { if (u.t === "\n") { out.push([]); w = 0; continue; } x.font = `500 ${f}px ${UI}`; const bw = x.measureText(u.t).width; let uw = bw; if (u.r) { x.font = `500 ${rf}px ${UI}`; uw = Math.max(bw, x.measureText(u.r).width); }
         const line = out[out.length - 1], cur = { ...u, w: uw, bw };
         if (line.length && w + uw > TW) {   // 枠からはみ出すときは改行。行頭に来てはいけない字（。、ゃ など）は前の字といっしょに次の行へ送る
           const carry = [cur]; while (line.length > 1 && (NO.includes(carry[0].t) || OPEN.includes(line[line.length - 1].t))) carry.unshift(line.pop());
@@ -5283,8 +5283,15 @@ const PrintCard = {
         line.push(cur); w += uw; }
       return out; };
     for (; f >= 1.6 * m; f -= 0.05 * m) { lh = f * 1.78; lines = layout(f); if (T0 + lines.length * lh <= TMAX) break; }
+    let maxL = Math.max(1, Math.floor((TMAX - T0) / lh));
+    if (lines.length > maxL) {   // いちばん小さい字でも入りきらないときは、入る範囲の最後の「。」で切る（文の途中で「…」にしない）
+      const shown = lines.slice(0, maxL).reduce((t, l) => t + l.length, 0); let cut = -1;
+      for (let i = 0, k = 0; i < units.length && k < shown; i++) { if (units[i].t !== "\n") k++; if (units[i].t === "。") cut = i; }
+      if (cut > 0) { const us = units.slice(0, cut + 1); for (f = 2.4 * m; f >= 1.6 * m; f -= 0.05 * m) { lh = f * 1.78; lines = layout(f, us); if (T0 + lines.length * lh <= TMAX) break; } maxL = Math.max(1, Math.floor((TMAX - T0) / lh)); }
+    }
+    f = lh / 1.78;   // 描く字の大きさを、折り返しを計算した大きさにそろえる
     this._lines = { lines, TW };   // 確認用
-    const maxL = Math.max(1, Math.floor((TMAX - T0) / lh)); if (lines.length > maxL) { lines = lines.slice(0, maxL); const last = lines[maxL - 1]; while (last.length > 1 && last.reduce((t, u) => t + u.w, 0) > TW - f) last.pop(); last.push({ t: "…", w: f, bw: f }); }
+    if (lines.length > maxL) { lines = lines.slice(0, maxL); const last = lines[maxL - 1]; while (last.length > 1 && last.reduce((t, u) => t + u.w, 0) > TW - f) last.pop(); last.push({ t: "…", w: f, bw: f }); }
     const rf = f * 0.46; x.save(); x.shadowColor = "rgba(0,0,0,.28)"; x.shadowBlur = 0.12 * m; x.shadowOffsetY = 0.08 * m; x.textAlign = "center"; x.textBaseline = "middle";
     lines.forEach((ln, i) => { const y = T0 + (i + 0.62) * lh; let cx = TX; for (const u of ln) { x.font = `500 ${f}px ${UI}`; x.fillStyle = "#fff"; x.fillText(u.t, cx + u.w / 2, y);
       if (u.r) { x.font = `500 ${rf}px ${UI}`; x.fillStyle = "rgba(255,255,255,.9)"; x.fillText(u.r, cx + u.w / 2, y - f * 0.5 - rf * 0.62); } cx += u.w; } });
