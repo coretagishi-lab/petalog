@@ -5200,6 +5200,8 @@ const PrintCard = {
     const tw = TC.tabW * m, th = TC.tabH * m, tx = wx + (ww - tw) / 2, ty = wy - 0.1 * m;
     const tab = () => { x.beginPath(); x.moveTo(tx, ty); x.lineTo(tx + tw, ty); x.lineTo(tx + tw * 0.91, ty + th); x.lineTo(tx + tw * 0.09, ty + th); x.closePath(); };
     x.save(); this.rr(x, wx, wy, ww, wh, wr); x.clip(); x.shadowColor = "rgba(0,0,0,.3)"; x.shadowBlur = 0.25 * m; x.shadowOffsetY = 0.2 * m; tab(); x.fillStyle = fr; x.fill(); x.restore();
+    // 窓のふちの境目（wy）は切り抜きのぼかしで金のふちがうっすら透けて線に見える → タブを額縁まで少し上にのばして、切り抜かずにもう一度ぬる
+    { const y0 = wy - 0.6 * m; x.beginPath(); x.moveTo(tx, y0); x.lineTo(tx + tw, y0); x.lineTo(tx + tw, ty); x.lineTo(tx + tw * 0.91, ty + th); x.lineTo(tx + tw * 0.09, ty + th); x.lineTo(tx, ty); x.closePath(); x.fillStyle = fr; x.fill(); }
     // 金の細い横線は0.2mmほどだとプリンタで点線っぽくなるので、タブのふちと名前の下の線は0.3mm（線はピクセルにそろえる）
     x.strokeStyle = gold; x.lineWidth = 0.3 * m; x.beginPath(); x.moveTo(tx, ty + 0.1 * m); x.lineTo(tx + tw * 0.09, ty + th); x.lineTo(tx + tw * 0.91, ty + th); x.lineTo(tx + tw, ty + 0.1 * m); x.stroke();
     const gname = catNorm(s.cat), isz = 2.7 * m; x.font = `700 ${2.7 * m}px ${MIN}`; const gtw = this.spaced(x, gname, 0.2 * 2.7 * m), tot = isz + 1 * m + gtw, sx = tx + (tw - tot) / 2, cy = ty + th / 2 - 0.3 * m;
