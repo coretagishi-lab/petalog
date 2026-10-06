@@ -21,8 +21,9 @@ const GLOBAL_DAILY = Math.max(1, Number(Deno.env.get("AI_GLOBAL_DAILY") ?? 100) 
 const MONTHLY = Math.max(0, Number(Deno.env.get("AI_MONTHLY") ?? 600) || 0);
 const MODEL_MAIN = Deno.env.get("AI_MODEL_MAIN") ?? "claude-haiku-4-5-20251001";
 const MODEL_QUICK = Deno.env.get("AI_MODEL_QUICK") ?? "claude-haiku-4-5-20251001";
-// 裏面のプチ情報: みんなで使い回すので、少し賢いモデル＋ウェブ検索で事実を確かめる
-const MODEL_TRIVIA = Deno.env.get("AI_MODEL_TRIVIA") ?? "claude-sonnet-5";
+// 裏面のプチ情報: ふだんは安いモデル・検索なしで1回0.5円前後（AI_TRIVIA_SEARCH=1 でウェブ検索して確かめる。そのぶん数円〜高くなる）
+const MODEL_TRIVIA = Deno.env.get("AI_MODEL_TRIVIA") ?? MODEL_MAIN;
+const TRIVIA_SEARCH = Deno.env.get("AI_TRIVIA_SEARCH") === "1";
 const TRIVIA_DAILY = Math.max(1, Number(Deno.env.get("AI_TRIVIA_DAILY") ?? 30) || 30);
 
 const CORS = {
@@ -120,14 +121,14 @@ function ham(a: string, b: string): number {
 }
 const SAME = 14;   // 64ビット中これ以下の差なら「同じデザイン」
 
-function triviaPrompt(a: Record<string, string>, digital: boolean) {
+function triviaPrompt(a: Record<string, string>, digital: boolean, search: boolean) {
   return `あなたは日本各地の記念スタンプと、その土地の歴史・名物・豆知識に詳しい旅の案内人です。
 添付の画像は「${a.name}」${a.place && a.place !== a.name ? `（場所: ${a.place}）` : ""}${a.pref ? `、${a.pref}` : ""}で押した${digital ? "デジタルスタンプ" : "スタンプ"}です（ジャンル: ${a.cat || "不明"}${a.event ? `、イベント: ${a.event}` : ""}）。
 このスタンプを手に入れた人だけが読める、トレカの裏面に載せる「プチ情報」を書いてください。
 
 書き方:
 - まず、スタンプに描かれている図柄（建物・名物・キャラクター・文字など）が何かを画像から読み取り、それに触れる。読み取れないものを作り話にしない。
-- その場所ならではの歴史・名前の由来・名物・意外な豆知識を、ウェブ検索で確かめた事実だけで書く。数字・年・名前は確かなものだけ。あいまいなら書かない。
+- その場所ならではの歴史・名前の由来・名物・意外な豆知識を、${search ? "ウェブ検索で確かめた事実だけで" : "広く知られた確かな事実だけで"}書く。数字・年・人名は確実なものだけ。少しでも自信がなければ書かず、図柄や土地の魅力の話にする。
 - 読んだ人が「行ってよかった」「また行きたい」と思える、熱のこもった語り口（です・ます調）。百科事典の書き写しのような文にしない。
 - その土地の方言や呼び名があれば、ひとつ添えると楽しい（無理に入れない）。
 - 長さは150〜190字（ふりがなを除く）。改行なし。絵文字・記号の飾り・出典番号は入れない。
@@ -145,7 +146,7 @@ async function askClaude(key: string, model: string, content: unknown[], search:
     const r = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model, max_tokens: 1500, messages, ...(tools ? { tools } : {}) }),
+      body: JSON.stringify({ model, max_tokens: search ? 1500 : 800, messages, ...(tools ? { tools } : {}) }),
     });
     if (!r.ok) return { ok: false as const, status: r.status, detail: (await r.text().catch(() => "")).slice(0, 400) };
     const j = await r.json();
@@ -194,12 +195,12 @@ async function trivia(uid: string, body: Record<string, unknown>) {
   if (left === -2) return json({ error: "global_limit" }, 429);
   const refund = () => admin.rpc("trivia_refund", { p_user: uid });
 
-  const content = [{ type: "image", source: { type: "base64", media_type: images[0].type, data: images[0].data } }, { type: "text", text: triviaPrompt(a, a0.digital === true) }];
+  const content = [{ type: "image", source: { type: "base64", media_type: images[0].type, data: images[0].data } }, { type: "text", text: triviaPrompt(a, a0.digital === true, TRIVIA_SEARCH) }];
   let res; let model = MODEL_TRIVIA;
   try {
-    res = await askClaude(key, model, content, true);
-    if (!res.ok && (res.status === 400 || res.status === 404) && /model/i.test(res.detail)) { model = MODEL_MAIN; res = await askClaude(key, model, content, true); }
-    if (!res.ok && res.status === 400) res = await askClaude(key, model, content, false);   // ウェブ検索が使えないときは知識だけで
+    res = await askClaude(key, model, content, TRIVIA_SEARCH);
+    if (!res.ok && (res.status === 400 || res.status === 404) && /model/i.test(res.detail) && model !== MODEL_MAIN) { model = MODEL_MAIN; res = await askClaude(key, model, content, TRIVIA_SEARCH); }
+    if (!res.ok && res.status === 400 && TRIVIA_SEARCH) res = await askClaude(key, model, content, false);   // ウェブ検索が使えないときは知識だけで
   } catch {
     await refund(); return json({ error: "network" }, 502);
   }

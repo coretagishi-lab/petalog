@@ -5591,6 +5591,11 @@ const Trivia = {
     for (let r = 0; r < 8; r++) for (let k = 0; k < 8; k += 4) { let n = 0; for (let j = 0; j < 4; j++) n = n * 2 + (L(r * 9 + k + j) > L(r * 9 + k + j + 1) ? 1 : 0); h += n.toString(16); }
     return h;
   },
+  async shrink(b, edge) {
+    const bm = await createImageBitmap(b); const k = Math.min(1, edge / Math.max(bm.width, bm.height)); const c = mkCanvas(bm.width * k, bm.height * k), x = c.getContext("2d");
+    x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.drawImage(bm, 0, 0, c.width, c.height); if (bm.close) bm.close();
+    return new Promise(res => c.toBlob(res, "image/jpeg", 0.85));
+  },
   get(s) {   // → Promise<string>。できた文章はスタンプに保存（ほかの端末でも同じ文章になる）
     if (s.trivia) return Promise.resolve(s.trivia);
     if (this.wait.has(s.id)) return this.wait.get(s.id);
@@ -5598,7 +5603,8 @@ const Trivia = {
     const p = (async () => {
       const r0 = await fetch(s.cut); if (!r0.ok) throw { code: "network" }; const b = await r0.blob();
       let dh = ""; try { dh = await this.dhash(b); } catch (_) {}
-      const r = await PetalogCloud.ai("trivia", { name: s.name || "", place: s.place || "", pref: s.pref || (typeof prefAt === "function" ? prefAt(s.lat, s.lng) : "") || "", cat: catNorm(s.cat), event: s.event || "", digital: isDigi(s), lat: s.lat, lng: s.lng, dh }, [b]);
+      let small = b; try { small = await this.shrink(b, 512) || b; } catch (_) {}   // 小さい画像で送る＝AIの費用が安い
+      const r = await PetalogCloud.ai("trivia", { name: s.name || "", place: s.place || "", pref: s.pref || (typeof prefAt === "function" ? prefAt(s.lat, s.lng) : "") || "", cat: catNorm(s.cat), event: s.event || "", digital: isDigi(s), lat: s.lat, lng: s.lng, dh }, [small]);
       const t = r && String(r.text || "").trim(); if (!t) throw { code: "error" };
       const cur = findStamp(s.id) || s; cur.trivia = t; s.trivia = t;
       try { await Store.saveStamp(cur); } catch (_) {}
