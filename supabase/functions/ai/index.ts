@@ -165,12 +165,12 @@ function cleanTrivia(raw: string): string {
 async function askClaude(key: string, model: string, content: unknown[], uses: number) {
   const tools = uses > 0 ? [{ type: "web_search_20250305", name: "web_search", max_uses: uses, user_location: { type: "approximate", country: "JP", timezone: "Asia/Tokyo" } }] : undefined;
   const messages: unknown[] = [{ role: "user", content }];
-  let out = "", all = "";
+  let out = "", all = "", info = "";
   for (let turn = 0; turn < 3; turn++) {
     const r = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model, max_tokens: uses > 0 ? 1500 : 800, messages, ...(tools ? { tools } : {}) }),
+      body: JSON.stringify({ model, max_tokens: uses > 0 ? 4000 : 1000, messages, ...(tools ? { tools } : {}) }),
     });
     if (!r.ok) return { ok: false as const, status: r.status, detail: (await r.text().catch(() => "")).slice(0, 400) };
     const j = await r.json();
@@ -179,10 +179,11 @@ async function askClaude(key: string, model: string, content: unknown[], uses: n
     const tail = blocks.slice(last + 1).filter((x) => x.type === "text").map((x) => x.text ?? "").join("");   // 検索のあとに書いた本文だけ（「調べます」などの前置きは入れない）
     all += blocks.filter((x) => x.type === "text").map((x) => x.text ?? "").join("");
     if (tail.trim()) out = tail;
+    info += `${j.stop_reason}:${blocks.map((x) => x.type).join(",")}:${j.usage?.output_tokens ?? "?"} `;   // うまくいかないときの調査用
     if (j.stop_reason !== "pause_turn") break;   // 検索が長いときは続きを頼む
     messages.push({ role: "assistant", content: j.content });
   }
-  return { ok: true as const, text: out || all };
+  return { ok: true as const, text: out || all, info };
 }
 
 async function trivia(uid: string, body: Record<string, unknown>) {
@@ -237,12 +238,12 @@ async function trivia(uid: string, body: Record<string, unknown>) {
 
   const content = [{ type: "image", source: { type: "base64", media_type: images[0].type, data: images[0].data } }, { type: "text", text: triviaPrompt(a, a0.digital === true, TRIVIA_SEARCH, fixNote) }];
   let model = MODEL_TRIVIA, t = "";
-  for (let attempt = 0; attempt < 2 && !t; attempt++) {   // うまくいかなかったら、もう1回だけ作り直す
-    let res;
+  for (let attempt = 0; attempt < 2 && !t; attempt++) {   // うまくいかなかったら、もう1回だけ作り直す（2回目は検索なしで確実に書く）
+    let res; const u = attempt ? 0 : uses;
     try {
-      res = await askClaude(key, model, content, uses);
-      if (!res.ok && (res.status === 400 || res.status === 404) && /model/i.test(res.detail) && model !== MODEL_MAIN) { model = MODEL_MAIN; res = await askClaude(key, model, content, uses); }
-      if (!res.ok && res.status === 400 && uses) res = await askClaude(key, model, content, 0);   // ウェブ検索が使えないときは知識だけで
+      res = await askClaude(key, model, content, u);
+      if (!res.ok && (res.status === 400 || res.status === 404) && /model/i.test(res.detail) && model !== MODEL_MAIN) { model = MODEL_MAIN; res = await askClaude(key, model, content, u); }
+      if (!res.ok && res.status === 400 && u) res = await askClaude(key, model, content, 0);   // ウェブ検索が使えないときは知識だけで
     } catch (e) {
       console.error("trivia network", String(e)); continue;
     }
@@ -253,7 +254,7 @@ async function trivia(uid: string, body: Record<string, unknown>) {
       await new Promise((r) => setTimeout(r, 1500)); continue;
     }
     t = cleanTrivia(res.text);
-    if (!t) console.error("trivia parse", JSON.stringify(res.text.slice(0, 300)));
+    if (!t) console.error("trivia parse", u, res.info, JSON.stringify(res.text.slice(0, 300)));
   }
   if (!t) { await refund(); return json({ error: "parse" }, 502); }
   const motif = "";
