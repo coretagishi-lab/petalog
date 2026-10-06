@@ -5200,7 +5200,8 @@ const PrintCard = {
     const tw = TC.tabW * m, th = TC.tabH * m, tx = wx + (ww - tw) / 2, ty = wy - 0.1 * m;
     const tab = () => { x.beginPath(); x.moveTo(tx, ty); x.lineTo(tx + tw, ty); x.lineTo(tx + tw * 0.91, ty + th); x.lineTo(tx + tw * 0.09, ty + th); x.closePath(); };
     x.save(); this.rr(x, wx, wy, ww, wh, wr); x.clip(); x.shadowColor = "rgba(0,0,0,.3)"; x.shadowBlur = 0.25 * m; x.shadowOffsetY = 0.2 * m; tab(); x.fillStyle = fr; x.fill(); x.restore();
-    x.strokeStyle = gold; x.lineWidth = 0.22 * m; x.beginPath(); x.moveTo(tx, ty + 0.1 * m); x.lineTo(tx + tw * 0.09, ty + th); x.lineTo(tx + tw * 0.91, ty + th); x.lineTo(tx + tw, ty + 0.1 * m); x.stroke();
+    // 金の細い横線は0.2mmほどだとプリンタで点線っぽくなるので、タブのふちと名前の下の線は0.3mm（線はピクセルにそろえる）
+    x.strokeStyle = gold; x.lineWidth = 0.3 * m; x.beginPath(); x.moveTo(tx, ty + 0.1 * m); x.lineTo(tx + tw * 0.09, ty + th); x.lineTo(tx + tw * 0.91, ty + th); x.lineTo(tx + tw, ty + 0.1 * m); x.stroke();
     const gname = catNorm(s.cat), isz = 2.7 * m; x.font = `700 ${2.7 * m}px ${MIN}`; const gtw = this.spaced(x, gname, 0.2 * 2.7 * m), tot = isz + 1 * m + gtw, sx = tx + (tw - tot) / 2, cy = ty + th / 2 - 0.3 * m;
     x.save(); x.shadowColor = "rgba(0,0,0,.4)"; x.shadowBlur = 0.15 * m; x.shadowOffsetY = 0.12 * m; x.fillStyle = cream;
     x.save(); x.translate(sx, cy - isz / 2); x.scale(isz / 24, isz / 24); x.fill(new Path2D(gicon(gname))); x.restore();
@@ -5224,7 +5225,7 @@ const PrintCard = {
     let fs = L.fs * m; x.font = `700 ${fs}px ${MIN}`; const nm = s.name || "名前未設定"; while (this.spaced(x, nm, 0.04 * fs) > 52.6 * m && fs > 2 * m) { fs -= 0.1 * m; x.font = `700 ${fs}px ${MIN}`; }
     x.fillStyle = "#1E2433"; x.textBaseline = "middle"; const nw = this.spaced(x, nm, 0.04 * fs); this.spaced(x, nm, 0.04 * fs, wx + (ww - nw) / 2, wy + TC.nameTop * m + fs * 0.6);
     const rg = x.createLinearGradient(wx + 3.4 * m, 0, wx + ww - 3.4 * m, 0); rg.addColorStop(0, "rgba(201,162,74,0)"); rg.addColorStop(0.15, gold); rg.addColorStop(0.85, gold); rg.addColorStop(1, "rgba(201,162,74,0)");
-    x.fillStyle = rg; x.fillRect(wx + 3.4 * m, wy + TC.ruleY * m, ww - 6.8 * m, Math.max(2, 0.2 * m));
+    x.fillStyle = rg; x.fillRect(wx + 3.4 * m, Math.round(wy + TC.ruleY * m), ww - 6.8 * m, Math.max(2, Math.round(0.3 * m)));
     const fy = wy + TC.factsY * m, gap = 1.6 * m; x.font = `600 ${2.5 * m}px ${MIN}`; const dt = fmtDate(s.date), pf = s.pref || "", dw = x.measureText(dt).width, pw = pf ? x.measureText(pf).width : 0;
     x.font = `700 ${1.8 * m}px ${UI}`; const cw = L.real ? this.spaced(x, "実寸大", 0.12 * 1.8 * m) + 2.4 * m : 0;
     const total = dw + (L.real ? gap + cw : 0) + (pf ? gap + pw : 0); let cx = wx + (ww - total) / 2;
