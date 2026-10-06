@@ -831,6 +831,10 @@ select.sortsel{-webkit-appearance:none;appearance:none;padding-right:26px;backgr
 .tcv-edit[hidden]{display:none}
 html.tcv-on #toast{z-index:95}
 .prt .linkbtn{background:none;border:0;padding:0;color:#9FD3FF;font:inherit;text-decoration:underline;cursor:pointer}.prt .linkbtn[hidden]{display:none}
+.tcv-fix{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 54px);transform:translateX(-50%);z-index:3;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;font:600 13px var(--f-ui);border-radius:99px;padding:8px 16px;opacity:0;pointer-events:none;transition:opacity .3s;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.tcv.bk .tcv-fix{opacity:1;pointer-events:auto}
+.ptcur{font-size:13px;line-height:1.75;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;max-height:32vh;overflow:auto;white-space:pre-wrap}
+.prt .linkbtn+.linkbtn{margin-left:10px}
 </style>
 
 <div id="app">
@@ -5358,7 +5362,7 @@ const PrintCard = {
     d.innerHTML = `<div class="pv-top"><div class="pv-t">印刷用（はがき・実寸）</div><button class="btn small" type="button" id="pcX">閉じる</button></div>
       <div class="pc-body"><div class="pc-prev"><img id="pcImg" alt="印刷用の画像（長押しでも保存できます）"><div class="pc-wait" id="pcWait"><span class="spin"></span> つくっています…</div></div>
         <label class="pc-l">裏面の解説<textarea id="pcText" rows="7" placeholder="この場所やスタンプのプチ情報"></textarea><small class="pc-rb">むずかしい読みは 首里城《しゅりじょう》 のように書くとルビになります</small></label>
-        <div class="pc-st"><span id="pcSt"></span> <button class="linkbtn" type="button" id="pcAi" hidden>AIのプチ情報にもどす</button><button class="linkbtn" type="button" id="pcRe" hidden>もう一度つくる</button></div>
+        <div class="pc-st"><span id="pcSt"></span> <button class="linkbtn" type="button" id="pcAi" hidden>AIのプチ情報にもどす</button><button class="linkbtn" type="button" id="pcRe" hidden>もう一度つくる</button><button class="linkbtn" type="button" id="pcFix" hidden>まちがいを直す</button></div>
         <div class="row2"><button class="btn primary" type="button" id="pcSave">画像を保存</button><button class="btn" type="button" id="pcPdf">PDFを保存</button></div>
         <ol class="pc-how"><li><b>コンビニで印刷：</b>「画像を保存」→ セブン‐イレブンは「ネットプリント」、ローソン・ファミマは「ネットワークプリント」で、用紙を <b>はがき・カラー</b> にして印刷（実寸で出ます）</li><li><b>家のプリンターで印刷：</b>「PDFを保存」→ 無地のはがき用紙に <b>実際のサイズ（100%）</b> で印刷。「用紙に合わせる」などの拡大・縮小はオフに</li><li>右のものさしが50mmなら実寸です</li><li>コンビニのはがきは裏に郵便番号の枠があり、光に透かすとうっすら見えます（ふつうに持つぶんにはほぼ見えません）</li><li>作り方：点線で山折り → 内側をテープのりで貼る（水のりは乾かないので×） → 折り目側の線を先に切って、上から押さえて貼り直す → 残りの3辺を切る</li><li>切るときは白い線（重ね押しは金の線）を消すように線の上を切ると、ちょうど63×88mmになります。外の黒いトンボが目印です</li></ol></div>`;
     $("#pcX").onclick = () => { d.hidden = true; this.s = null; this.gen++; this.blob = null; if (this.burl) { URL.revokeObjectURL(this.burl); this.burl = null; } if (this.cv) { this.cv.width = this.cv.height = 0; this.cv = null; } d.innerHTML = ""; };
@@ -5369,7 +5373,8 @@ const PrintCard = {
     if (this.s !== s) return;
     await this.render(); const w = $("#pcWait"); if (w) w.hidden = true;
     const st = t => { const e = $("#pcSt"); if (e && this.s === s) e.textContent = t; };
-    const useAi = t => { if (this.s !== s || this.edited) return; this.text = t; ta.value = t; st("AIが書いたこの場所のプチ情報です（同じスタンプを持つ人と共通）。書きかえると、あなたのトレカだけ変わります。"); this.render(); };
+    const fx = $("#pcFix"); fx.onclick = () => { $("#pcX").click(); openTriviaFix(s, () => PrintCard.open(s)); };
+    const useAi = t => { if (this.s !== s || this.edited) return; this.text = t; ta.value = t; fx.hidden = !Trivia.can(s); st("AIが書いたこの場所のプチ情報です（同じスタンプを持つ人と共通）。書きかえると、あなたのトレカだけ変わります。"); this.render(); };
     const rb = $("#pcAi"); rb.hidden = !(own && s.trivia);
     rb.onclick = () => { try { localStorage.removeItem("petalog.pt." + s.id); } catch (_) {} this.edited = false; rb.hidden = true; useAi(s.trivia); };
     if (own) st("あなたが書いた解説です。書きかえるとすぐ反映されます。");
@@ -5467,6 +5472,7 @@ const CardView = {
       <div class="tcv-slide" id="tcvSlide"><div class="tcv-shadow" id="tcvShadow"></div><div class="tcv-card" id="tcvCard">
         <div class="tcv-face tcv-front" id="tcvFront"></div><div class="tcv-face tcv-back" id="tcvBack"></div></div></div>
       <button class="tcv-nav next" type="button" id="tcvNext" aria-label="次のトレカ"><svg viewBox="0 0 24 24"><path d="m9 4 8 8-8 8"/></svg></button>
+      <button class="tcv-fix" type="button" id="tcvFix">プチ情報を直す</button>
       <div class="tcv-hint" id="tcvHint">タップで裏返す ・ 指でかたむける ・ 外をタップでもどる</div>`;
     document.body.appendChild(d); this.el = d;
     const card = d.querySelector("#tcvCard");
@@ -5478,7 +5484,9 @@ const CardView = {
       if (!g.moved) { this.noDragUntil = this.last + 350; if (this.front) { this.vy += 9; if (!this.toldFront) { this.toldFront = true; toast("裏面は、このスタンプをゲットした人だけのおたのしみです", 3200); } return; } this.base += 180; this.flipped(); return; }
       this.noDragUntil = this.last + 350; if (this.front) { this.base = 0; return; } const proj = g.ry + clamp(g.v, -2.5, 2.5) * 0.55 * 150, b = Math.round(proj / 180) * 180; this.base = clamp(b, g.b0 - 180, g.b0 + 180); this.flipped(); };
     card.addEventListener("pointerup", up); card.addEventListener("pointercancel", up);
-    d.addEventListener("click", e => { if (performance.now() < this.noDragUntil) return; if (e.target.closest(".tcv-card,.tcv-nav,.tcv-top")) return; this.close(); });
+    d.addEventListener("click", e => { if (performance.now() < this.noDragUntil) return; if (e.target.closest(".tcv-card,.tcv-nav,.tcv-top,.tcv-fix")) return; this.close(); });
+    d.querySelector("#tcvFix").onclick = () => { const s = this.items[this.i]; if (!s || this.front || !Trivia.can(s)) return; const items = this.items; this.close(true); CardGrid.close(true);
+      openTriviaFix(findStamp(s.id) || s, () => { CardView.open(s.id, { items }); CardView.base = 180; }); };
     d.querySelector("#tcvPrev").onclick = () => this.go(-1); d.querySelector("#tcvNext").onclick = () => this.go(1);
     d.querySelector("#tcvEdit").onclick = () => { const s = this.items[this.i]; if (!s) return; if (s._pub) { this.close(true); CardGrid.close(true); openPub(s._pub); return; } if (this.front) return; this.close(true); CardGrid.close(true); openStamp("edit", findStamp(s.id) || s); };
     addEventListener("keydown", e => { if (!this.el || this.el.hidden) return; if (e.key === "Escape") this.close(); if (e.key === "ArrowLeft") this.go(-1); if (e.key === "ArrowRight") this.go(1); });
@@ -5513,6 +5521,7 @@ const CardView = {
     if (!this.el || this.el.hidden) return;
     const g = this.drag, idle = t - this.last;
     if (!g && idle > 7000 && Math.round(this.base / 180) % 2 !== 0) { this.base -= 180; this.last = t; }   // しばらくさわらないと表にもどる
+    const bk = !this.front && Math.round(this.base / 180) % 2 !== 0 && Trivia.can(this.items[this.i]); if (bk !== this._bk) { this._bk = bk; this.el.classList.toggle("bk", bk); }   // 裏を見ているときだけ「直す」
     const wob = g ? 0 : Math.min(1, idle / 1200);
     const ty = g ? g.ry : this.base + Math.sin(t / 1700) * 6 * wob, tx = g ? g.rx : Math.sin(t / 2300 + 1) * 3.5 * wob;
     const k = g ? 0.32 : 0.075, damp = g ? 0.62 : 0.8;
@@ -5599,11 +5608,11 @@ const Trivia = {
     x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.drawImage(bm, 0, 0, c.width, c.height); if (bm.close) bm.close();
     return new Promise(res => c.toBlob(res, "image/jpeg", 0.85));
   },
-  async once(s) {   // サーバーにプチ情報をたのむ（1回分）
+  async once(s, extra) {   // サーバーにプチ情報をたのむ（1回分）。extra: 書き直しのヒントなど
       const r0 = await fetch(s.cut); if (!r0.ok) throw { code: "network" }; const b = await r0.blob();
       let dh = ""; try { dh = await this.dhash(b); } catch (_) {}
       let small = b; try { small = await this.shrink(b, 512) || b; } catch (_) {}   // 小さい画像で送る＝AIの費用が安い
-      const r = await PetalogCloud.ai("trivia", { name: s.name || "", place: s.place || "", pref: s.pref || (typeof prefAt === "function" ? prefAt(s.lat, s.lng) : "") || "", cat: catNorm(s.cat), event: s.event || "", digital: isDigi(s), lat: s.lat, lng: s.lng, dh }, [small]);
+      const r = await PetalogCloud.ai("trivia", { name: s.name || "", place: s.place || "", pref: s.pref || (typeof prefAt === "function" ? prefAt(s.lat, s.lng) : "") || "", cat: catNorm(s.cat), event: s.event || "", digital: isDigi(s), lat: s.lat, lng: s.lng, dh, ...(extra || {}) }, [small]);
       const t = r && String(r.text || "").trim(); if (!t) throw { code: "error" };
       const cur = findStamp(s.id) || s; cur.trivia = t; s.trivia = t;
       try { await Store.saveStamp(cur); } catch (_) {}
@@ -5618,12 +5627,37 @@ const Trivia = {
     this.wait.set(s.id, q); q.then(() => this.err.delete(s.id), e => this.err.set(s.id, { code: (e && e.code) || "error", at: Date.now() })).finally(() => this.wait.delete(s.id));
     return q;
   },
+  async fix(s, hint) {   // 「ここがちがう」を伝えてAIに書き直してもらう（同じスタンプのみんなの文章も直る）
+    const t = await this.once(s, { fix: true, hint, bad: this.text(s) || s.trivia || "" });
+    try { localStorage.removeItem("petalog.pt." + s.id); } catch (_) {}
+    this.err.delete(s.id); return t;
+  },
   soft(e) { const c = e && e.code; return !c || c === "error" || c === "network" || c === "rate_limited"; },   // やり直せば直るかもしれない失敗
   blocked(s) {   // 失敗したあと、もう一度たのむまでの待ち時間（上限・準備中は10分、それ以外は8秒）
     const e = this.err.get(s.id); if (!e) return false; return Date.now() - e.at < (this.soft(e) ? 8000 : 600000);
   },
   msg(e) { const c = e && e.code; return c === "not_configured" ? "AIのプチ情報は準備中です（サーバーの設定待ち）" : c === "user_limit" ? "今日のAIのプチ情報は使い切りました。明日また作れます" : c === "global_limit" || c === "month_limit" ? "いまはAIのプチ情報を作れません（アプリ全体の上限）" : c === "network" ? "通信できませんでした" : "AIのプチ情報を作れませんでした"; }
 };
+
+/* ---------- プチ情報を直す（AIがトンチンカンなことを書いたとき） ---------- */
+function openTriviaFix(s, after) {
+  const cur = PrintCard.ruby(Trivia.text(s) || "").map(u => u.t).join("");
+  openSheet(`<div class="sheet-head"><h2>プチ情報を直す</h2></div>
+    <p class="cap" style="margin:0 0 6px">いまの文章</p>
+    <div class="ptcur">${esc(cur || "（まだありません）")}</div>
+    <label class="fld" style="margin-top:12px"><span>ちがうところ・本当に描かれているもの</span><textarea id="ptHint" rows="3" maxlength="120" placeholder="例: シーサーは描かれていない。描かれているのは飛行機と管制塔だけ"></textarea></label>
+    <button class="btn primary" type="button" id="ptGo" style="width:100%;margin-top:10px">AIに書き直してもらう</button>
+    <p class="cap" style="margin:8px 0 0">書き直した文章は、同じスタンプを持つほかの人のトレカにも使われます。</p>
+    <div class="row2" style="margin-top:14px"><button class="btn small" type="button" id="ptOwn">自分で書きかえる</button><button class="btn small ghost" type="button" data-close>閉じる</button></div>`);
+  const go = $("#ptGo");
+  go.onclick = async () => {
+    const h = $("#ptHint").value.trim(); if (!h) { toast("ちがうところを書いてください"); $("#ptHint").focus(); return; }
+    go.disabled = true; go.innerHTML = `<span class="spin"></span> 書き直しています…（少しかかります）`;
+    try { await Trivia.fix(s, h); if (!$("#ptGo")) return; closeSheet(); toast("プチ情報を書き直しました"); if (after) after(); }
+    catch (e) { if (!$("#ptGo")) return; go.disabled = false; go.textContent = "もう一度たのむ"; toast(Trivia.msg(e)); }
+  };
+  $("#ptOwn").onclick = () => { closeSheet(); PrintCard.open(s); };
+}
 
 /* ================= boot ================= */
 addEventListener("resize", () => { Book.layout(); if (view === "fall") { Fall.dirty = true; Fall.stop(); Fall.start(); } if (view === "map") MapV.draw(); });
