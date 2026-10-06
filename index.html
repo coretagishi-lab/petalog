@@ -5358,7 +5358,7 @@ const PrintCard = {
     d.innerHTML = `<div class="pv-top"><div class="pv-t">印刷用（はがき・実寸）</div><button class="btn small" type="button" id="pcX">閉じる</button></div>
       <div class="pc-body"><div class="pc-prev"><img id="pcImg" alt="印刷用の画像（長押しでも保存できます）"><div class="pc-wait" id="pcWait"><span class="spin"></span> つくっています…</div></div>
         <label class="pc-l">裏面の解説<textarea id="pcText" rows="7" placeholder="この場所やスタンプのプチ情報"></textarea><small class="pc-rb">むずかしい読みは 首里城《しゅりじょう》 のように書くとルビになります</small></label>
-        <div class="pc-st"><span id="pcSt"></span> <button class="linkbtn" type="button" id="pcAi" hidden>AIのプチ情報にもどす</button></div>
+        <div class="pc-st"><span id="pcSt"></span> <button class="linkbtn" type="button" id="pcAi" hidden>AIのプチ情報にもどす</button><button class="linkbtn" type="button" id="pcRe" hidden>もう一度つくる</button></div>
         <div class="row2"><button class="btn primary" type="button" id="pcSave">画像を保存</button><button class="btn" type="button" id="pcPdf">PDFを保存</button></div>
         <ol class="pc-how"><li><b>コンビニで印刷：</b>「画像を保存」→ セブン‐イレブンは「ネットプリント」、ローソン・ファミマは「ネットワークプリント」で、用紙を <b>はがき・カラー</b> にして印刷（実寸で出ます）</li><li><b>家のプリンターで印刷：</b>「PDFを保存」→ 無地のはがき用紙に <b>実際のサイズ（100%）</b> で印刷。「用紙に合わせる」などの拡大・縮小はオフに</li><li>右のものさしが50mmなら実寸です</li><li>コンビニのはがきは裏に郵便番号の枠があり、光に透かすとうっすら見えます（ふつうに持つぶんにはほぼ見えません）</li><li>作り方：点線で山折り → 内側をテープのりで貼る（水のりは乾かないので×） → 折り目側の線を先に切って、上から押さえて貼り直す → 残りの3辺を切る</li><li>切るときは白い線（重ね押しは金の線）を消すように線の上を切ると、ちょうど63×88mmになります。外の黒いトンボが目印です</li></ol></div>`;
     $("#pcX").onclick = () => { d.hidden = true; this.s = null; this.gen++; this.blob = null; if (this.burl) { URL.revokeObjectURL(this.burl); this.burl = null; } if (this.cv) { this.cv.width = this.cv.height = 0; this.cv = null; } d.innerHTML = ""; };
@@ -5376,7 +5376,10 @@ const PrintCard = {
     else if (s.trivia) useAi(s.trivia);
     else {
       this.text = this.fallback(s); ta.value = this.text; this.render();
-      if (Trivia.can(s)) { st("この場所のプチ情報をAIが書いています…（少しかかります）"); Trivia.get(s).then(useAi).catch(e => { if (!this.edited) st(Trivia.msg(e) + "。いまは記録から作った文章です。自由に書きかえられます。"); }); }
+      const re = $("#pcRe");
+      const ask = () => { re.hidden = true; st("この場所のプチ情報をAIが書いています…（少しかかります）"); Trivia.get(s).then(useAi).catch(e => { if (this.edited || this.s !== s) return; st(Trivia.msg(e) + "。いまは記録から作った文章です。自由に書きかえられます。"); re.hidden = !Trivia.soft(e); }); };
+      re.onclick = () => { Trivia.err.delete(s.id); ask(); };
+      if (Trivia.can(s)) ask();
       else st("記録から文章を作りました。自由に書きかえられます。");
     }
   },
@@ -5444,10 +5447,10 @@ const CardView = {
   },
   flipped() {   // 裏を向いたとき、まだプチ情報がなければAIに書いてもらう（同じスタンプの文章があればすぐ出る）
     const s = this.items[this.i]; if (this.front || !s || Math.round(this.base / 180) % 2 === 0) return;
-    if (Trivia.text(s) || !Trivia.can(s) || Trivia.err.has(s.id)) return;
+    if (Trivia.text(s) || !Trivia.can(s) || Trivia.blocked(s)) return;
     const my = this.seq; let told = false; const tm = setTimeout(() => { told = true; toast("裏面のプチ情報をAIが書いています…（少しかかります）", 4000); }, 900);
     Trivia.get(s).then(() => { clearTimeout(tm); if (my === this.seq && !this.el.hidden) { this.paintBack(s, my); if (told) toast("プチ情報ができました"); } })
-      .catch(e => { clearTimeout(tm); if (told || (e && e.code !== "not_configured")) toast(Trivia.msg(e)); });
+      .catch(e => { clearTimeout(tm); if (told || (e && e.code !== "not_configured")) toast(Trivia.msg(e) + (Trivia.soft(e) ? "。もう一度裏返すと作り直します" : ""), 3600); });
   },
   async backURL(s) {
     const txt = this.noteOf(s), key = [s.id, (s.scenes || []).join(","), s.hasPhoto ? 1 : 0, txt, s.name, s.place, s.date, s.cat, s.sizeMm, s.lat].join("|");
@@ -5596,11 +5599,7 @@ const Trivia = {
     x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.drawImage(bm, 0, 0, c.width, c.height); if (bm.close) bm.close();
     return new Promise(res => c.toBlob(res, "image/jpeg", 0.85));
   },
-  get(s) {   // → Promise<string>。できた文章はスタンプに保存（ほかの端末でも同じ文章になる）
-    if (s.trivia) return Promise.resolve(s.trivia);
-    if (this.wait.has(s.id)) return this.wait.get(s.id);
-    this.err.delete(s.id);
-    const p = (async () => {
+  async once(s) {   // サーバーにプチ情報をたのむ（1回分）
       const r0 = await fetch(s.cut); if (!r0.ok) throw { code: "network" }; const b = await r0.blob();
       let dh = ""; try { dh = await this.dhash(b); } catch (_) {}
       let small = b; try { small = await this.shrink(b, 512) || b; } catch (_) {}   // 小さい画像で送る＝AIの費用が安い
@@ -5609,9 +5608,19 @@ const Trivia = {
       const cur = findStamp(s.id) || s; cur.trivia = t; s.trivia = t;
       try { await Store.saveStamp(cur); } catch (_) {}
       return t;
-    })();
-    this.wait.set(s.id, p); p.catch(e => this.err.set(s.id, e || {})).finally(() => this.wait.delete(s.id));
-    return p;
+  },
+  get(s) {   // → Promise<string>。できた文章はスタンプに保存（ほかの端末でも同じ文章になる）
+    if (s.trivia) return Promise.resolve(s.trivia);
+    if (this.wait.has(s.id)) return this.wait.get(s.id);
+    const p = this.once(s);
+    // 通信の失敗やAIの返事が読めなかったときは、少し待って自動でもう1回だけやり直す
+    const q = p.catch(async e => { if (!this.soft(e)) throw e; await new Promise(r => setTimeout(r, 2500)); return this.once(s); });
+    this.wait.set(s.id, q); q.then(() => this.err.delete(s.id), e => this.err.set(s.id, { code: (e && e.code) || "error", at: Date.now() })).finally(() => this.wait.delete(s.id));
+    return q;
+  },
+  soft(e) { const c = e && e.code; return !c || c === "error" || c === "network" || c === "rate_limited"; },   // やり直せば直るかもしれない失敗
+  blocked(s) {   // 失敗したあと、もう一度たのむまでの待ち時間（上限・準備中は10分、それ以外は8秒）
+    const e = this.err.get(s.id); if (!e) return false; return Date.now() - e.at < (this.soft(e) ? 8000 : 600000);
   },
   msg(e) { const c = e && e.code; return c === "not_configured" ? "AIのプチ情報は準備中です（サーバーの設定待ち）" : c === "user_limit" ? "今日のAIのプチ情報は使い切りました。明日また作れます" : c === "global_limit" || c === "month_limit" ? "いまはAIのプチ情報を作れません（アプリ全体の上限）" : c === "network" ? "通信できませんでした" : "AIのプチ情報を作れませんでした"; }
 };

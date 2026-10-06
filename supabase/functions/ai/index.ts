@@ -139,8 +139,23 @@ function triviaPrompt(a: Record<string, string>, digital: boolean, search: boole
 文体の見本（内容はまねしない。書き出し・調子・密度だけ参考にする）:
 描かれているのは首里城《しゅりじょう》の正殿《せいでん》。正面の弓なりの屋根は本土なら「唐破風《からはふ》」ですが、琉球《りゅうきゅう》では「破」の字を縁起が悪いと嫌い「唐玻豊《からはふう》」と書きます。屋根の両端でにらみをきかせる龍は「龍頭棟飾《りゅうとうむなかざり》」。首里城は記録に残るだけで5回焼け落ち、そのたびに再建されてきました。
 
-最後に、次の形のJSONだけを返してください（前後に説明を書かない）:
-{"text":"本文","motif":"図柄の短い説明（20字まで）"}`;
+最後に、本文だけを返してください（前置き・見出し・かぎかっこでくくる・JSONは不要）。`;
+}
+
+// AIの返事から本文だけを取り出す（JSONで返ってきても、前置きがついていても読めるように）
+function cleanTrivia(raw: string): string {
+  let s = String(raw ?? "").replace(/```(?:json)?/gi, "").trim();
+  const m = s.match(/\{[\s\S]*\}/);
+  if (m && /"text"/.test(m[0])) {
+    try { const o = JSON.parse(m[0]); if (o && typeof o.text === "string") s = o.text; }
+    catch { const k = m[0].match(/"text"\s*:\s*"([\s\S]*?)"\s*(?:,\s*"motif"|\})/); if (k) s = k[1].replace(/\\n/g, "").replace(/\\"/g, '"'); }
+  }
+  s = s.replace(/\[\d+\]|【\d+】/g, "").replace(/<\/?cite[^>]*>/g, "").replace(/\s*\n\s*/g, "").trim();
+  s = s.replace(/^(本文|プチ情報)\s*[:：]\s*/, "").trim();
+  if (/^".*"$/.test(s)) s = s.slice(1, -1).trim();
+  if (/^「[^「]*」$/.test(s)) s = s.slice(1, -1).trim();
+  const i = s.indexOf("描かれているのは"); if (i > 0 && i < 60) s = s.slice(i);   // 「以下が〜です」などの前置きを落とす
+  return s.length >= 60 ? s.slice(0, 400) : "";
 }
 
 async function askClaude(key: string, model: string, content: unknown[], search: boolean) {
@@ -201,24 +216,27 @@ async function trivia(uid: string, body: Record<string, unknown>) {
   const refund = () => admin.rpc("trivia_refund", { p_user: uid });
 
   const content = [{ type: "image", source: { type: "base64", media_type: images[0].type, data: images[0].data } }, { type: "text", text: triviaPrompt(a, a0.digital === true, TRIVIA_SEARCH) }];
-  let res; let model = MODEL_TRIVIA;
-  try {
-    res = await askClaude(key, model, content, TRIVIA_SEARCH);
-    if (!res.ok && (res.status === 400 || res.status === 404) && /model/i.test(res.detail) && model !== MODEL_MAIN) { model = MODEL_MAIN; res = await askClaude(key, model, content, TRIVIA_SEARCH); }
-    if (!res.ok && res.status === 400 && TRIVIA_SEARCH) res = await askClaude(key, model, content, false);   // ウェブ検索が使えないときは知識だけで
-  } catch {
-    await refund(); return json({ error: "network" }, 502);
+  let model = MODEL_TRIVIA, t = "";
+  for (let attempt = 0; attempt < 2 && !t; attempt++) {   // うまくいかなかったら、もう1回だけ作り直す
+    let res;
+    try {
+      res = await askClaude(key, model, content, TRIVIA_SEARCH);
+      if (!res.ok && (res.status === 400 || res.status === 404) && /model/i.test(res.detail) && model !== MODEL_MAIN) { model = MODEL_MAIN; res = await askClaude(key, model, content, TRIVIA_SEARCH); }
+      if (!res.ok && res.status === 400 && TRIVIA_SEARCH) res = await askClaude(key, model, content, false);   // ウェブ検索が使えないときは知識だけで
+    } catch (e) {
+      console.error("trivia network", String(e)); continue;
+    }
+    if (!res.ok) {
+      console.error("anthropic trivia", res.status, res.detail);
+      if (res.status === 401) { await refund(); return json({ error: "bad_key" }, 502); }
+      if (res.status === 400) break;
+      await new Promise((r) => setTimeout(r, 1500)); continue;
+    }
+    t = cleanTrivia(res.text);
+    if (!t) console.error("trivia parse", JSON.stringify(res.text.slice(0, 300)));
   }
-  if (!res.ok) {
-    await refund(); console.error("anthropic trivia", res.status, res.detail);
-    return json({ error: res.status === 401 ? "bad_key" : res.status === 429 ? "busy" : "upstream" }, 502);
-  }
-  const m = res.text.match(/\{[\s\S]*"text"[\s\S]*\}/);
-  let t = "", motif = "";
-  try { const o = JSON.parse(m ? m[0] : ""); t = String(o.text ?? ""); motif = clip(o.motif, 40); } catch { /* */ }
-  t = t.replace(/\[\d+\]|【\d+】/g, "").replace(/\s*\n\s*/g, "").replace(/<\/?cite[^>]*>/g, "").trim();
-  if (t.length < 40) { await refund(); return json({ error: "parse" }, 502); }
-  t = t.slice(0, 400);
+  if (!t) { await refund(); return json({ error: "parse" }, 502); }
+  const motif = "";
   await admin.from("trivia").insert({ pkey, dh, lat: hasLL ? lat : null, lng: hasLL ? lng : null, name: a.name, place: a.place, pref: a.pref, text: t, motif, model, created_by: uid });
   return json({ ok: true, result: { text: t, motif, cached: false }, remaining: left });
 }
