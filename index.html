@@ -830,6 +830,7 @@ select.sortsel{-webkit-appearance:none;appearance:none;padding-right:26px;backgr
 .tc-no.tag{font:700 calc(var(--u) * 2.3)/1 var(--f-ui);letter-spacing:.02em;max-width:60%;overflow:hidden;text-overflow:ellipsis}
 .tcv-edit[hidden]{display:none}
 html.tcv-on #toast{z-index:95}
+.prt .linkbtn{background:none;border:0;padding:0;color:#9FD3FF;font:inherit;text-decoration:underline;cursor:pointer}.prt .linkbtn[hidden]{display:none}
 </style>
 
 <div id="app">
@@ -3964,6 +3965,7 @@ async function commitSave(c, d) {
     if ((c.mode === "add" || c.mode === "update") && c.photoUrl) { try { await Store.putPhoto("ph_" + d.id, c.photoUrl); d.hasPhoto = true; } catch { if (c.mode === "add") d.hasPhoto = false; } }
     for (const n of c.newScenes) { try { await Store.putPhoto("sc_" + d.id + "_" + n.k, n.url); d.scenes.push(n.k); } catch { toast("保存できない写真がありました"); } }
     for (const k of c.delScenes) { d.scenes = d.scenes.filter(x => x !== k); Store.delPhoto("sc_" + d.id + "_" + k).catch(() => {}); }
+    if (c.mode !== "add") { const o = findStamp(d.id); if (o && d.trivia && (o.cut !== d.cut || o.name !== d.name || o.place !== d.place)) delete d.trivia; }
     d.share = wantShare(d); await Store.saveStamp(d);
   } catch (e) {
     if (btn) { btn.disabled = false; btn.textContent = "もう一度保存"; }
@@ -5094,8 +5096,9 @@ const PrintCard = {
   no(s) { return Numbers.of(s); },
   // ルビ: 「首里城《しゅりじょう》」または「｜那覇空港《なはくうこう》」の書き方
   ruby(t) { const out = [], re = /(?:｜([^｜《》\n]+)|([㐀-䶿一-鿿々〆ヶ]+))《([^》\n]+)》/g; let i = 0, mm;
-    while ((mm = re.exec(t))) { for (const ch of t.slice(i, mm.index)) out.push({ t: ch }); out.push({ t: mm[1] || mm[2], r: mm[3] }); i = re.lastIndex; }
-    for (const ch of t.slice(i)) out.push({ t: ch });
+    const lone = x => x.replace(/《([^》\n]*)》/g, "（$1）");   // 漢字のあとでない《》（方言の意味など）は（）で見せる
+    while ((mm = re.exec(t))) { for (const ch of lone(t.slice(i, mm.index))) out.push({ t: ch }); out.push({ t: mm[1] || mm[2], r: mm[3] }); i = re.lastIndex; }
+    for (const ch of lone(t.slice(i))) out.push({ t: ch });
     const g = []; for (const u of out) { const p = g[g.length - 1]; if (!u.r && p && !p.r && /^[0-9A-Za-z.,%°'"]+$/.test(p.t + u.t)) p.t += u.t; else g.push({ ...u }); } return g; },   // 数字や英字のつながりは改行で分けない
   plain(t) { return this.ruby(String(t || "")).map(u => u.t + (u.r || "")).join(""); },
   fallback(s) {
@@ -5350,23 +5353,32 @@ const PrintCard = {
   },
   async open(s) {
     this.s = s; this.P = null; this.blob = null; this.wiki = null; this.text = "";
-    try { const v = JSON.parse(lsGet("petalog.pt." + s.id) || "null"); if (v && !v.wiki) this.text = v.text || ""; } catch (_) {}   // 以前のWikipediaの解説は使わない
+    const own = Trivia.own(s); this.text = own || s.trivia || ""; this.edited = false;
     const d = this.el || (this.el = document.createElement("div")); d.className = "pview prt"; if (!d.parentNode) document.body.appendChild(d); d.hidden = false;
     d.innerHTML = `<div class="pv-top"><div class="pv-t">印刷用（はがき・実寸）</div><button class="btn small" type="button" id="pcX">閉じる</button></div>
       <div class="pc-body"><div class="pc-prev"><img id="pcImg" alt="印刷用の画像（長押しでも保存できます）"><div class="pc-wait" id="pcWait"><span class="spin"></span> つくっています…</div></div>
         <label class="pc-l">裏面の解説<textarea id="pcText" rows="7" placeholder="この場所やスタンプのプチ情報"></textarea><small class="pc-rb">むずかしい読みは 首里城《しゅりじょう》 のように書くとルビになります</small></label>
-        <div class="pc-st" id="pcSt"></div>
+        <div class="pc-st"><span id="pcSt"></span> <button class="linkbtn" type="button" id="pcAi" hidden>AIのプチ情報にもどす</button></div>
         <div class="row2"><button class="btn primary" type="button" id="pcSave">画像を保存</button><button class="btn" type="button" id="pcPdf">PDFを保存</button></div>
         <ol class="pc-how"><li><b>コンビニで印刷：</b>「画像を保存」→ セブン‐イレブンは「ネットプリント」、ローソン・ファミマは「ネットワークプリント」で、用紙を <b>はがき・カラー</b> にして印刷（実寸で出ます）</li><li><b>家のプリンターで印刷：</b>「PDFを保存」→ 無地のはがき用紙に <b>実際のサイズ（100%）</b> で印刷。「用紙に合わせる」などの拡大・縮小はオフに</li><li>右のものさしが50mmなら実寸です</li><li>コンビニのはがきは裏に郵便番号の枠があり、光に透かすとうっすら見えます（ふつうに持つぶんにはほぼ見えません）</li><li>作り方：点線で山折り → 内側をテープのりで貼る（水のりは乾かないので×） → 折り目側の線を先に切って、上から押さえて貼り直す → 残りの3辺を切る</li><li>切るときは白い線（重ね押しは金の線）を消すように線の上を切ると、ちょうど63×88mmになります。外の黒いトンボが目印です</li></ol></div>`;
     $("#pcX").onclick = () => { d.hidden = true; this.s = null; this.gen++; this.blob = null; if (this.burl) { URL.revokeObjectURL(this.burl); this.burl = null; } if (this.cv) { this.cv.width = this.cv.height = 0; this.cv = null; } d.innerHTML = ""; };
     const ta = $("#pcText"); ta.value = this.text;
-    ta.oninput = () => { this.text = ta.value; lsSet("petalog.pt." + s.id, JSON.stringify({ text: this.text })); clearTimeout(this.tm); this.tm = setTimeout(() => this.render(), 450); };
+    ta.oninput = () => { this.edited = true; const rb = $("#pcAi"); if (rb) rb.hidden = !s.trivia; this.text = ta.value; lsSet("petalog.pt." + s.id, JSON.stringify({ text: this.text })); clearTimeout(this.tm); this.tm = setTimeout(() => this.render(), 450); };
     $("#pcSave").onclick = () => this.save("jpg"); $("#pcPdf").onclick = () => this.save("pdf");
     try { this.P = await this.assets(s); } catch (e) { $("#pcWait").textContent = "画像を読み込めませんでした。通信を確かめてもう一度どうぞ"; return; }
     if (this.s !== s) return;
     await this.render(); const w = $("#pcWait"); if (w) w.hidden = true;
-    if (!this.text) { this.text = this.fallback(s); ta.value = this.text; $("#pcSt").textContent = "いまは記録から文章を作っています（AIのプチ情報はこのあと対応）。自由に書きかえられます。"; this.render(); }
-    else $("#pcSt").textContent = "前に作った解説です。書きかえるとすぐ反映されます。";
+    const st = t => { const e = $("#pcSt"); if (e && this.s === s) e.textContent = t; };
+    const useAi = t => { if (this.s !== s || this.edited) return; this.text = t; ta.value = t; st("AIが書いたこの場所のプチ情報です（同じスタンプを持つ人と共通）。書きかえると、あなたのトレカだけ変わります。"); this.render(); };
+    const rb = $("#pcAi"); rb.hidden = !(own && s.trivia);
+    rb.onclick = () => { try { localStorage.removeItem("petalog.pt." + s.id); } catch (_) {} this.edited = false; rb.hidden = true; useAi(s.trivia); };
+    if (own) st("あなたが書いた解説です。書きかえるとすぐ反映されます。");
+    else if (s.trivia) useAi(s.trivia);
+    else {
+      this.text = this.fallback(s); ta.value = this.text; this.render();
+      if (Trivia.can(s)) { st("この場所のプチ情報をAIが書いています…（少しかかります）"); Trivia.get(s).then(useAi).catch(e => { if (!this.edited) st(Trivia.msg(e) + "。いまは記録から作った文章です。自由に書きかえられます。"); }); }
+      else st("記録から文章を作りました。自由に書きかえられます。");
+    }
   },
 };
 
@@ -5425,7 +5437,18 @@ async function renderCard(s, no) {
 /* ---------- さわれるトレカ: 一覧のトレカをタップすると全面に開く（かたむけ・裏返し・ゆらぎ） ---------- */
 const CardView = {
   el: null, ids: [], i: 0, rx: 0, ry: 0, vx: 0, vy: 0, base: 0, drag: null, last: 0, raf: 0, cache: new Map(), noDragUntil: 0, seq: 0,
-  noteOf(s) { try { const v = JSON.parse(lsGet("petalog.pt." + s.id) || "null"); if (v && !v.wiki && v.text) return v.text; } catch (_) {} return PrintCard.fallback(s); },
+  noteOf(s) { return Trivia.text(s) || PrintCard.fallback(s); },
+  paintBack(s, my) {
+    const bk = this.el.querySelector("#tcvBack");
+    bk.innerHTML = `<div class="tcv-wait"><span class="spin"></span></div>`; this.backURL(s).then(u => { if (my === this.seq) bk.innerHTML = `<img src="${u}" alt="裏面">`; }).catch(() => { if (my === this.seq) bk.innerHTML = `<div class="tcv-wait">裏面を読み込めませんでした</div>`; });
+  },
+  flipped() {   // 裏を向いたとき、まだプチ情報がなければAIに書いてもらう（同じスタンプの文章があればすぐ出る）
+    const s = this.items[this.i]; if (this.front || !s || Math.round(this.base / 180) % 2 === 0) return;
+    if (Trivia.text(s) || !Trivia.can(s) || Trivia.err.has(s.id)) return;
+    const my = this.seq; let told = false; const tm = setTimeout(() => { told = true; toast("裏面のプチ情報をAIが書いています…（少しかかります）", 4000); }, 900);
+    Trivia.get(s).then(() => { clearTimeout(tm); if (my === this.seq && !this.el.hidden) { this.paintBack(s, my); if (told) toast("プチ情報ができました"); } })
+      .catch(e => { clearTimeout(tm); if (told || (e && e.code !== "not_configured")) toast(Trivia.msg(e)); });
+  },
   async backURL(s) {
     const txt = this.noteOf(s), key = [s.id, (s.scenes || []).join(","), s.hasPhoto ? 1 : 0, txt, s.name, s.place, s.date, s.cat, s.sizeMm, s.lat].join("|");
     if (this.cache.has(key)) return this.cache.get(key);
@@ -5449,8 +5472,8 @@ const CardView = {
       const now = performance.now(), dt = Math.max(1, now - g.lt); g.v = g.v * 0.6 + ((e.clientX - g.lx) / dt) * 0.4; g.lx = e.clientX; g.lt = now;
       g.ry = g.b0 + (this.front ? clamp(dx * 0.3, -40, 40) : dx * 0.55); g.rx = clamp(-dy * 0.28, -24, 24); this.last = now; });
     const up = () => { const g = this.drag; if (!g) return; this.drag = null; this.last = performance.now();
-      if (!g.moved) { this.noDragUntil = this.last + 350; if (this.front) { this.vy += 9; if (!this.toldFront) { this.toldFront = true; toast("裏面は、このスタンプをゲットした人だけのおたのしみです", 3200); } return; } this.base += 180; return; }
-      this.noDragUntil = this.last + 350; if (this.front) { this.base = 0; return; } const proj = g.ry + clamp(g.v, -2.5, 2.5) * 0.55 * 150, b = Math.round(proj / 180) * 180; this.base = clamp(b, g.b0 - 180, g.b0 + 180); };
+      if (!g.moved) { this.noDragUntil = this.last + 350; if (this.front) { this.vy += 9; if (!this.toldFront) { this.toldFront = true; toast("裏面は、このスタンプをゲットした人だけのおたのしみです", 3200); } return; } this.base += 180; this.flipped(); return; }
+      this.noDragUntil = this.last + 350; if (this.front) { this.base = 0; return; } const proj = g.ry + clamp(g.v, -2.5, 2.5) * 0.55 * 150, b = Math.round(proj / 180) * 180; this.base = clamp(b, g.b0 - 180, g.b0 + 180); this.flipped(); };
     card.addEventListener("pointerup", up); card.addEventListener("pointercancel", up);
     d.addEventListener("click", e => { if (performance.now() < this.noDragUntil) return; if (e.target.closest(".tcv-card,.tcv-nav,.tcv-top")) return; this.close(); });
     d.querySelector("#tcvPrev").onclick = () => this.go(-1); d.querySelector("#tcvNext").onclick = () => this.go(1);
@@ -5476,7 +5499,7 @@ const CardView = {
     d.querySelector("#tcvFront").innerHTML = cardHTML(s, s._no != null ? s._no : PrintCard.no(s), { tag: s._tag }).replace(/^<button type="button"/, "<div").replace(/<\/button>$/, "</div>");
     const bk = d.querySelector("#tcvBack"); bk.style.setProperty("--g", gcol(catNorm(s.cat)));
     if (this.front) bk.innerHTML = "";
-    else { bk.innerHTML = `<div class="tcv-wait"><span class="spin"></span></div>`; this.backURL(s).then(u => { if (my === this.seq) bk.innerHTML = `<img src="${u}" alt="裏面">`; }).catch(() => { if (my === this.seq) bk.innerHTML = `<div class="tcv-wait">裏面を読み込めませんでした</div>`; }); }
+    else this.paintBack(s, my);
     const ed = d.querySelector("#tcvEdit"); ed.hidden = this.front && !s._pub; ed.textContent = s._pub ? "置き場所" : "編集";
     d.querySelector("#tcvCount").textContent = `${this.i + 1} / ${this.ids.length}`;
     d.querySelector("#tcvPrev").disabled = this.i <= 0; d.querySelector("#tcvNext").disabled = this.i >= this.ids.length - 1;
@@ -5553,6 +5576,39 @@ async function pubCards(P) {
   return Promise.all(P.map(async p => { let w = 1, h = 1; try { if (p.thumb) { const im = await loadImg(p.thumb); w = im.naturalWidth || 1; h = im.naturalHeight || 1; } } catch (_) {}
     return { id: "pub:" + p._id, _pub: p._id, _tag: p.nick || "名無しのコレクター", _no: null, name: p.name, place: p.place, pref: p.pref, cat: p.cat, date: p.date, lat: p.lat, lng: p.lng, sizeMm: p.sizeMm, cut: p.thumb || "", cw: w, ch: h, type: p.type, other: true }; }));
 }
+
+/* ---------- 裏面のプチ情報（AI）: このスタンプをゲットした人だけが読める小話 ----------
+   同じ場所・同じデザインのスタンプなら、サーバーでみんなと同じ文章を使い回す（画像の指紋 dh で見分ける） */
+const Trivia = {
+  wait: new Map(), err: new Map(),
+  own(s) { try { const v = JSON.parse(lsGet("petalog.pt." + s.id) || "null"); if (v && !v.wiki && v.text) return v.text; } catch (_) {} return ""; },   // 自分で書きかえた文章
+  text(s) { return (s && (this.own(s) || s.trivia)) || ""; },
+  can(s) { return !!(s && !s.sample && !s.other && !s._pub && s.cut && (s.name || s.place) && window.PetalogCloud && PetalogCloud.loggedIn && PetalogCloud.loggedIn() && !(PetalogCloud.isOffline && PetalogCloud.isOffline())); },
+  async dhash(b) {   // 64ビットの差分ハッシュ（白い紙の上に置いて、9×8に縮めて明るさの左右差をとる）
+    const bm = await createImageBitmap(b); const c1 = mkCanvas(72, 64), x1 = c1.getContext("2d"); x1.fillStyle = "#fff"; x1.fillRect(0, 0, 72, 64); x1.imageSmoothingQuality = "high"; x1.drawImage(bm, 0, 0, 72, 64); if (bm.close) bm.close();
+    const c = mkCanvas(9, 8), x = c.getContext("2d"); x.imageSmoothingQuality = "high"; x.drawImage(c1, 0, 0, 9, 8); const d = x.getImageData(0, 0, 9, 8).data;
+    const L = i => d[i * 4] * 0.299 + d[i * 4 + 1] * 0.587 + d[i * 4 + 2] * 0.114; let h = "";
+    for (let r = 0; r < 8; r++) for (let k = 0; k < 8; k += 4) { let n = 0; for (let j = 0; j < 4; j++) n = n * 2 + (L(r * 9 + k + j) > L(r * 9 + k + j + 1) ? 1 : 0); h += n.toString(16); }
+    return h;
+  },
+  get(s) {   // → Promise<string>。できた文章はスタンプに保存（ほかの端末でも同じ文章になる）
+    if (s.trivia) return Promise.resolve(s.trivia);
+    if (this.wait.has(s.id)) return this.wait.get(s.id);
+    this.err.delete(s.id);
+    const p = (async () => {
+      const r0 = await fetch(s.cut); if (!r0.ok) throw { code: "network" }; const b = await r0.blob();
+      let dh = ""; try { dh = await this.dhash(b); } catch (_) {}
+      const r = await PetalogCloud.ai("trivia", { name: s.name || "", place: s.place || "", pref: s.pref || (typeof prefAt === "function" ? prefAt(s.lat, s.lng) : "") || "", cat: catNorm(s.cat), event: s.event || "", digital: isDigi(s), lat: s.lat, lng: s.lng, dh }, [b]);
+      const t = r && String(r.text || "").trim(); if (!t) throw { code: "error" };
+      const cur = findStamp(s.id) || s; cur.trivia = t; s.trivia = t;
+      try { await Store.saveStamp(cur); } catch (_) {}
+      return t;
+    })();
+    this.wait.set(s.id, p); p.catch(e => this.err.set(s.id, e || {})).finally(() => this.wait.delete(s.id));
+    return p;
+  },
+  msg(e) { const c = e && e.code; return c === "not_configured" ? "AIのプチ情報は準備中です（サーバーの設定待ち）" : c === "user_limit" ? "今日のAIのプチ情報は使い切りました。明日また作れます" : c === "global_limit" || c === "month_limit" ? "いまはAIのプチ情報を作れません（アプリ全体の上限）" : c === "network" ? "通信できませんでした" : "AIのプチ情報を作れませんでした"; }
+};
 
 /* ================= boot ================= */
 addEventListener("resize", () => { Book.layout(); if (view === "fall") { Fall.dirty = true; Fall.stop(); Fall.start(); } if (view === "map") MapV.draw(); });

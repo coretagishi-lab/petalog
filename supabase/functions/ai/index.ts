@@ -21,6 +21,9 @@ const GLOBAL_DAILY = Math.max(1, Number(Deno.env.get("AI_GLOBAL_DAILY") ?? 100) 
 const MONTHLY = Math.max(0, Number(Deno.env.get("AI_MONTHLY") ?? 600) || 0);
 const MODEL_MAIN = Deno.env.get("AI_MODEL_MAIN") ?? "claude-haiku-4-5-20251001";
 const MODEL_QUICK = Deno.env.get("AI_MODEL_QUICK") ?? "claude-haiku-4-5-20251001";
+// 裏面のプチ情報: みんなで使い回すので、少し賢いモデル＋ウェブ検索で事実を確かめる
+const MODEL_TRIVIA = Deno.env.get("AI_MODEL_TRIVIA") ?? "claude-sonnet-5";
+const TRIVIA_DAILY = Math.max(1, Number(Deno.env.get("AI_TRIVIA_DAILY") ?? 30) || 30);
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -106,6 +109,114 @@ JSONだけを返す: {"summary":"まとめ"}`,
   return null;
 }
 
+/* ---------- 裏面のプチ情報（トレカをゲットした人だけが読める小話） ----------
+   同じ場所で、同じデザインのスタンプなら、だれが押しても同じ文章を使い回す（AIを呼ばない＝回数も減らない）。
+   同じ場所でもデザインがちがえば（画像の指紋 dh が離れていれば）、別の文章を作る。 */
+const normKey = (v: unknown) => String(v ?? "").normalize("NFKC").toLowerCase().replace(/[\s・･,.、。()（）「」『』\[\]【】〈〉<>"'’‘“”!！?？~〜ー\-_/／|｜:：]/g, "");
+const hexBits = [0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4];
+function ham(a: string, b: string): number {
+  if (!/^[0-9a-f]{16}$/.test(a) || !/^[0-9a-f]{16}$/.test(b)) return 99;
+  let d = 0; for (let i = 0; i < 16; i++) d += hexBits[parseInt(a[i], 16) ^ parseInt(b[i], 16)]; return d;
+}
+const SAME = 14;   // 64ビット中これ以下の差なら「同じデザイン」
+
+function triviaPrompt(a: Record<string, string>, digital: boolean) {
+  return `あなたは日本各地の記念スタンプと、その土地の歴史・名物・豆知識に詳しい旅の案内人です。
+添付の画像は「${a.name}」${a.place && a.place !== a.name ? `（場所: ${a.place}）` : ""}${a.pref ? `、${a.pref}` : ""}で押した${digital ? "デジタルスタンプ" : "スタンプ"}です（ジャンル: ${a.cat || "不明"}${a.event ? `、イベント: ${a.event}` : ""}）。
+このスタンプを手に入れた人だけが読める、トレカの裏面に載せる「プチ情報」を書いてください。
+
+書き方:
+- まず、スタンプに描かれている図柄（建物・名物・キャラクター・文字など）が何かを画像から読み取り、それに触れる。読み取れないものを作り話にしない。
+- その場所ならではの歴史・名前の由来・名物・意外な豆知識を、ウェブ検索で確かめた事実だけで書く。数字・年・名前は確かなものだけ。あいまいなら書かない。
+- 読んだ人が「行ってよかった」「また行きたい」と思える、熱のこもった語り口（です・ます調）。百科事典の書き写しのような文にしない。
+- その土地の方言や呼び名があれば、ひとつ添えると楽しい（無理に入れない）。
+- 長さは150〜190字（ふりがなを除く）。改行なし。絵文字・記号の飾り・出典番号は入れない。
+- 小学生には読みにくい漢字の語・地名には、直後に《よみ》の形でふりがなを付ける（例: 首里城《しゅりじょう》）。《》は漢字の直後だけに使い、同じ語は最初の1回だけ。付けすぎない。方言の意味は「めんそーれ（ようこそ）」のように（）で添える。
+
+最後に、次の形のJSONだけを返してください（前後に説明を書かない）:
+{"text":"本文","motif":"図柄の短い説明（20字まで）"}`;
+}
+
+async function askClaude(key: string, model: string, content: unknown[], search: boolean) {
+  const tools = search ? [{ type: "web_search_20250305", name: "web_search", max_uses: 3, user_location: { type: "approximate", country: "JP", timezone: "Asia/Tokyo" } }] : undefined;
+  const messages: unknown[] = [{ role: "user", content }];
+  let out = "";
+  for (let turn = 0; turn < 3; turn++) {
+    const r = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
+      body: JSON.stringify({ model, max_tokens: 1500, messages, ...(tools ? { tools } : {}) }),
+    });
+    if (!r.ok) return { ok: false as const, status: r.status, detail: (await r.text().catch(() => "")).slice(0, 400) };
+    const j = await r.json();
+    out += (j.content ?? []).filter((x: { type?: string }) => x.type === "text").map((x: { text?: string }) => x.text ?? "").join("");
+    if (j.stop_reason !== "pause_turn") break;   // 検索が長いときは続きを頼む
+    messages.push({ role: "assistant", content: j.content });
+  }
+  return { ok: true as const, text: out };
+}
+
+async function trivia(uid: string, body: Record<string, unknown>) {
+  const a0 = (body.args ?? {}) as Record<string, unknown>;
+  const a = { name: clip(a0.name, 80).trim(), place: clip(a0.place, 80).trim(), pref: clip(a0.pref, 10).trim(), cat: clip(a0.cat, 20).trim(), event: clip(a0.event, 60).trim() };
+  const dh = /^[0-9a-f]{16}$/.test(String(a0.dh ?? "")) ? String(a0.dh) : "";
+  const lat = Number(a0.lat), lng = Number(a0.lng), hasLL = isFinite(lat) && isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180 && !(lat === 0 && lng === 0);
+  const pkey = normKey(a.place || a.name) + "|" + normKey(a.pref);
+  if (!a.name && !a.place) return json({ error: "bad_request" }, 400);
+
+  // 1) すでにある文章をさがす（同じ場所名、または近く300mくらい）
+  const cand: Record<string, unknown>[] = [];
+  const q1 = await admin.from("trivia").select("id, dh, text, motif, pkey").eq("pkey", pkey).limit(50);
+  if (q1.data) cand.push(...q1.data);
+  if (hasLL) {
+    const q2 = await admin.from("trivia").select("id, dh, text, motif, pkey").gte("lat", lat - 0.003).lte("lat", lat + 0.003).gte("lng", lng - 0.0035).lte("lng", lng + 0.0035).limit(50);
+    if (q2.data) cand.push(...q2.data);
+  }
+  let best: Record<string, unknown> | null = null, bd = 99;
+  for (const c of cand) {
+    const d = dh ? ham(dh, String(c.dh ?? "")) : (!c.dh && c.pkey === pkey ? 0 : 99);
+    if (d < bd) { bd = d; best = c; }
+  }
+  if (best && bd <= SAME) {
+    await admin.rpc("trivia_used", { p_id: best.id });
+    return json({ ok: true, result: { text: best.text, motif: best.motif ?? "", cached: true } });
+  }
+
+  // 2) なければ AI に書いてもらう
+  const images = cleanImages(body.images, 1);
+  if (!images.length) return json({ error: "bad_request" }, 400);
+  const key = Deno.env.get("ANTHROPIC_API_KEY");
+  if (!key) return json({ error: "not_configured" }, 503);
+  const { data: left, error: qe } = await admin.rpc("trivia_take", { p_user: uid, p_limit: TRIVIA_DAILY, p_global: GLOBAL_DAILY, p_month: MONTHLY });
+  if (qe) return json({ error: "server" }, 500);
+  if (left === -3) return json({ error: "month_limit" }, 429);
+  if (left === -1) return json({ error: "user_limit", limit: TRIVIA_DAILY }, 429);
+  if (left === -2) return json({ error: "global_limit" }, 429);
+  const refund = () => admin.rpc("trivia_refund", { p_user: uid });
+
+  const content = [{ type: "image", source: { type: "base64", media_type: images[0].type, data: images[0].data } }, { type: "text", text: triviaPrompt(a, a0.digital === true) }];
+  let res; let model = MODEL_TRIVIA;
+  try {
+    res = await askClaude(key, model, content, true);
+    if (!res.ok && (res.status === 400 || res.status === 404) && /model/i.test(res.detail)) { model = MODEL_MAIN; res = await askClaude(key, model, content, true); }
+    if (!res.ok && res.status === 400) res = await askClaude(key, model, content, false);   // ウェブ検索が使えないときは知識だけで
+  } catch {
+    await refund(); return json({ error: "network" }, 502);
+  }
+  if (!res.ok) {
+    await refund(); console.error("anthropic trivia", res.status, res.detail);
+    return json({ error: res.status === 401 ? "bad_key" : res.status === 429 ? "busy" : "upstream" }, 502);
+  }
+  const m = res.text.match(/\{[\s\S]*"text"[\s\S]*\}/);
+  let t = "", motif = "";
+  try { const o = JSON.parse(m ? m[0] : ""); t = String(o.text ?? ""); motif = clip(o.motif, 40); } catch { /* */ }
+  t = t.replace(/\[\d+\]|【\d+】/g, "").replace(/\s*\n\s*/g, "").replace(/<\/?cite[^>]*>/g, "").trim();
+  if (t.length < 40) { await refund(); return json({ error: "parse" }, 502); }
+  t = t.slice(0, 400);
+  await admin.from("trivia").insert({ pkey, dh, lat: hasLL ? lat : null, lng: hasLL ? lng : null, name: a.name, place: a.place, pref: a.pref, text: t, motif, model, created_by: uid });
+  return json({ ok: true, result: { text: t, motif, cached: false }, remaining: left });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ error: "method" }, 405);
@@ -127,6 +238,8 @@ Deno.serve(async (req) => {
     const { data: mu } = await admin.rpc("ai_month_used");
     return json({ ok: true, used: data?.count ?? 0, limit: USER_DAILY, month_used: mu ?? 0, month_limit: MONTHLY, ready: !!Deno.env.get("ANTHROPIC_API_KEY") });
   }
+
+  if (task === "trivia") return await trivia(uid, body);
 
   const job = buildTask(task, (body.args ?? {}) as Record<string, unknown>, cleanImages(body.images, 2));
   if (!job) return json({ error: "bad_request" }, 400);
