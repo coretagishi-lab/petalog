@@ -831,10 +831,28 @@ select.sortsel{-webkit-appearance:none;appearance:none;padding-right:26px;backgr
 .tcv-edit[hidden]{display:none}
 html.tcv-on #toast{z-index:95}
 .prt .linkbtn{background:none;border:0;padding:0;color:#9FD3FF;font:inherit;text-decoration:underline;cursor:pointer}.prt .linkbtn[hidden]{display:none}
-.tcv-fix{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 54px);transform:translateX(-50%);z-index:3;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;font:600 13px var(--f-ui);border-radius:99px;padding:8px 16px;opacity:0;pointer-events:none;transition:opacity .3s;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.tcv-fix{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 54px);transform:translateX(-50%);z-index:3;display:flex;gap:8px;opacity:0;pointer-events:none;transition:opacity .3s;white-space:nowrap}
+.tcv-fix button{border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;font:600 13px var(--f-ui);border-radius:99px;padding:8px 16px;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.tcv-fix button[hidden]{display:none}
 .tcv.bk .tcv-fix{opacity:1;pointer-events:auto}
 .ptcur{font-size:13px;line-height:1.75;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;max-height:32vh;overflow:auto;white-space:pre-wrap}
 .prt .linkbtn+.linkbtn{margin-left:10px}
+
+.bcv{position:fixed;inset:0;z-index:92;display:flex;flex-direction:column;background:#12151C;color:#fff;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+.bcv[hidden]{display:none}
+.bcv-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px}
+.bcv-top b{font:700 16px var(--f-ui)}
+.bcv-top .btn:not(.primary){background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3);color:#fff}
+.bcv-stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:6px 16px;position:relative}
+.bcv-stage canvas{max-width:100%;max-height:100%;width:auto;height:auto;aspect-ratio:63/88;touch-action:none;border-radius:6px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.bcv-stage .tcv-wait{position:absolute}
+.bcv-ctl{padding:8px 16px 14px;display:flex;flex-direction:column;gap:8px}
+.bcv-tabs{display:flex;gap:6px;flex-wrap:wrap}.bcv-tabs:empty{display:none}
+.bcv-tabs button{border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.08);color:#fff;border-radius:99px;padding:5px 12px;font:600 13px var(--f-ui)}
+.bcv-tabs button[aria-pressed=true]{background:#FFD54A;color:#1B2130;border-color:#FFD54A}
+.bcv-z{display:flex;align-items:center;gap:10px;font-size:13px}.bcv-z input{flex:1}
+.bcv-hint{margin:0;font-size:12px;color:rgba(255,255,255,.65)}
+.bcv .linkbtn{background:none;border:0;padding:0;color:#9FD3FF;font:inherit;font-size:13px;text-decoration:underline;align-self:flex-start}
 </style>
 
 <div id="app">
@@ -5114,9 +5132,9 @@ const PrintCard = {
     const A = artOf(s), front = await loadImg(A.url), cut = A.sheet ? await loadImg(s.cut) : front;
     // 裏の写真: 追加した写真（新しい順に最大4枚）。なければスタンプの元になった写真
     const keys = (s.scenes || []).slice(-4), added = [];
-    for (const k of keys) { const u = await Store.getPhoto("sc_" + s.id + "_" + k).catch(() => null); if (u) { const im = await loadImg(u).catch(() => null); if (im) added.push(im); } }
+    for (const k of keys) { const u = await Store.getPhoto("sc_" + s.id + "_" + k).catch(() => null); if (u) { const im = await loadImg(u).catch(() => null); if (im) { im._key = "sc:" + k; added.push(im); } } }
     let photos = added;
-    if (!photos.length) { let u = s.hasPhoto ? await Store.getPhoto("ph_" + s.id, s.id).catch(() => null) : null; if (!u && s._sheet) u = s._sheet; const im = u ? await loadImg(u).catch(() => null) : null; photos = im ? [im] : []; }
+    if (!photos.length) { let u = s.hasPhoto ? await Store.getPhoto("ph_" + s.id, s.id).catch(() => null) : null, key = "ph"; if (!u && s._sheet) { u = s._sheet; key = "sh"; } const im = u ? await loadImg(u).catch(() => null) : null; if (im) im._key = key; photos = im ? [im] : []; }
     if (!window.qrcode) await new Promise(res => { const sc = document.createElement("script"); sc.src = "vendor/qrcode.js"; sc.onload = sc.onerror = res; document.head.appendChild(sc); });
     // QRコード: その場所のGoogleマップ（見た人がそのまま行ける）。場所が未登録ならQRなし
     let qr = null; if (s.lat != null && s.lng != null && !isNaN(s.lat)) { try { qr = qrcode(0, "M"); qr.addData(`https://www.google.com/maps/search/?api=1&query=${(+s.lat).toFixed(6)},${(+s.lng).toFixed(6)}`); qr.make(); } catch (_) { qr = null; } }
@@ -5140,6 +5158,22 @@ const PrintCard = {
     if (line) out.push(line); return out;
   },
   rr(x, X, Y, W, H, R) { x.beginPath(); x.moveTo(X + R, Y); x.arcTo(X + W, Y, X + W, Y + H, R); x.arcTo(X + W, Y + H, X, Y + H, R); x.arcTo(X, Y + H, X, Y, R); x.arcTo(X, Y, X + W, Y, R); x.closePath(); },
+  wordStarts(str) {   // 文字（コードポイント）の位置のうち、単語の始まりになる所の集合
+    const chars = [...str], set = new Set([0]);
+    try { const seg = new Intl.Segmenter("ja", { granularity: "word" }); for (const p of seg.segment(str)) set.add([...str.slice(0, p.index)].length); }
+    catch (_) { const kind = c => /[\u3040-\u309f]/.test(c) ? 1 : /[\u30a0-\u30ff]/.test(c) ? 2 : /[\u3400-\u9fff々]/.test(c) ? 3 : /[0-9A-Za-z]/.test(c) ? 4 : 5; for (let i = 1; i < chars.length; i++) if (kind(chars[i]) !== kind(chars[i - 1])) set.add(i); }
+    // カタカナのつながりは、辞書の単語（センター・スタンプ・ラリー…）の切れ目でだけ切る（「インフォ/メーション」のような変な切れ目を防ぐ）
+    const isK = c => /[\u30a0-\u30ff]/.test(c) && c !== "・";
+    for (let i = 0; i < chars.length;) { if (!isK(chars[i])) { i++; continue; } let j = i; while (j < chars.length && isK(chars[j])) j++;
+      if (j - i >= 2) { const run = chars.slice(i, j).join(""), cuts = new Set();
+        for (const wd of KATA_WORDS) { let at = run.indexOf(wd); while (at >= 0) { cuts.add(at); cuts.add(at + wd.length); at = run.indexOf(wd, at + 1); } }
+        for (let k = i + 1; k < j; k++) if (cuts.size || j - i <= 12) { if (!cuts.has(k - i)) set.delete(k); else set.add(k); } }
+      i = j; }
+    // 1文字の漢字の後ろ付け（駅・内・前・店…）は前の言葉にくっつける
+    for (let i = 1; i < chars.length; i++) if ("駅内前店館口線町市区村橋港園通側跡".includes(chars[i]) && !/[\u3400-\u9fff々]/.test(chars[i + 1] || "")) { set.delete(i); if (i + 1 < chars.length) set.add(i + 1); }
+    for (let i = 1; i < chars.length; i++) if (/[\s　・／/（(「『]/.test(chars[i - 1]) || /[\s　]/.test(chars[i])) set.add(i);
+    return set;
+  },
   fit(im, X, Y, W, H, cover) { const r = (cover ? Math.max : Math.min)(W / im.width, H / im.height), w = im.width * r, h = im.height * r; return [X + (W - w) / 2, Y + (H - h) / 2, w, h]; },
   shrink(x, t, maxW) { if (x.measureText(t).width <= maxW) return t; while (t.length > 1 && x.measureText(t + "…").width > maxW) t = t.slice(0, -1); return t + "…"; },
   front(x, s, P, W, H, bleed) {   // スタンプトレカの表（一覧のトレカと同じデザイン）。単位はmm（m = 1mmのpx）
@@ -5218,6 +5252,7 @@ const PrintCard = {
     x.strokeStyle = "rgba(201,162,74,.85)"; x.lineWidth = Math.max(2, 0.22 * m); this.rr(x, X + x.lineWidth / 2, Y + x.lineWidth / 2, w - x.lineWidth, h - x.lineWidth, r); x.stroke();
   },
   back(x, s, P, W, H, txt) {   // 裏: 白いふち＋色の板（表と同じ光と影）。写真は枚数でレイアウトを変える
+    this._slots = [];
     const m = W / 63, g = gcol(catNorm(s.cat)), dk = mixHex(g, "#000000", 0.38), lt = mixHex(g, "#ffffff", 0.18), gold = "#C9A24A", cream = "#F3E2B0", ink = "#1E2433";
     const MIN = '"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif', UI = '"Zen Kaku Gothic New","Hiragino Sans",sans-serif', MONO = '"IBM Plex Mono",ui-monospace,monospace';
     x.fillStyle = "#FFFFFF"; x.fillRect(0, 0, W, H);
@@ -5232,14 +5267,18 @@ const PrintCard = {
     const sp = f => (title.length > 12 ? 0.03 : 0.08) * f;
     let tl = null, fs = 4.6 * m;
     for (; fs >= 3.2 * m; fs -= 0.1 * m) { x.font = `700 ${fs}px ${MIN}`; if (this.spaced(x, title, sp(fs)) <= TWD) { tl = [title]; break; } }
-    if (!tl) { const ch = [...title];
+    if (!tl) { const ch = [...title], ws = this.wordStarts(title);
+      const kindAt = i => { const c = ch[i] || ""; return /[\u30a0-\u30ff]/.test(c) ? "k" : /[\u3400-\u9fff々]/.test(c) ? "h" : /[\u3040-\u309f]/.test(c) ? "g" : "o"; };
       for (fs = 3.0 * m; fs >= 2.1 * m; fs -= 0.1 * m) { x.font = `700 ${fs}px ${MIN}`; let best = null;
         for (let k = 1; k < ch.length; k++) { if (NO.includes(ch[k])) continue; const a = ch.slice(0, k).join("").trim(), b = ch.slice(k).join("").trim(); if (!a || !b) continue;
           const wa = this.spaced(x, a, sp(fs)), wb = this.spaced(x, b, sp(fs)); if (wa > TWD || wb > TWD) continue;
-          const cost = Math.max(wa, wb) - (/[\s　]/.test(ch[k - 1] + ch[k]) ? 3 * m : 0); if (!best || cost < best.c) best = { c: cost, l: [a, b] }; }
+          // 単語の途中は大きく減点、スペース（自分で入れた区切り）は大きく加点、カタカナ→漢字などの切り替わりは少し加点
+          const cost = Math.max(wa, wb) + (ws.has(k) ? 0 : 30 * m) - (/[\s　]/.test(ch[k - 1] + ch[k]) ? 12 * m : 0) - (kindAt(k - 1) !== kindAt(k) ? 1.2 * m : 0);
+          if (!best || cost < best.c) best = { c: cost, l: [a, b] }; }
         if (best) { tl = best.l; break; } }
       if (!tl) { fs = 2.1 * m; x.font = `700 ${fs}px ${MIN}`; let a = "", k = 0; while (k < ch.length && this.spaced(x, a + ch[k], sp(fs)) <= TWD) a += ch[k++]; let b = ch.slice(k).join(""); while (b && this.spaced(x, b + "…", sp(fs)) > TWD) b = b.slice(0, -1); tl = [a, b + "…"]; } }
     x.save(); x.shadowColor = "rgba(0,0,0,.35)"; x.shadowBlur = 0.15 * m; x.shadowOffsetY = 0.12 * m; x.fillStyle = cream; x.textBaseline = "middle"; x.font = `700 ${fs}px ${MIN}`;
+    this._title = tl;   // 確認用
     const lhT = fs * 1.18; tl.forEach((t, k) => { const tw = this.spaced(x, t, sp(fs)); this.spaced(x, t, sp(fs), (W - tw) / 2, (tl.length > 1 ? 7.2 : 6.8) * m + (k - (tl.length - 1) / 2) * lhT); }); x.restore();
     if (tl.length === 1) {
     const oy = 10.6 * m, ow = 12 * m; for (const sgn of [-1, 1]) { const g2 = x.createLinearGradient(W / 2 + sgn * 1.2 * m, 0, W / 2 + sgn * (1.2 * m + ow), 0); g2.addColorStop(0, gold); g2.addColorStop(1, "rgba(201,162,74,0)"); x.fillStyle = g2; x.fillRect(Math.min(W / 2 + sgn * 1.2 * m, W / 2 + sgn * (1.2 * m + ow)), oy - 0.08 * m, ow, Math.max(1.5, 0.15 * m)); }
@@ -5253,8 +5292,11 @@ const PrintCard = {
     const stamp = (l, t, w, h) => { const im = P.cut; x.save(); if (!isDigi(s)) x.globalCompositeOperation = "multiply"; x.drawImage(im, ...this.fit(im, BX + B(l), BY + B(t), B(w), B(h))); x.restore(); };
     const photo = (im, l, t, w, h) => { const X = BX + B(l), Y = BY + B(t), pad = 0.5 * m;
       x.save(); x.shadowColor = "rgba(40,30,10,.26)"; x.shadowBlur = 0.25 * m; x.shadowOffsetY = 0.15 * m; x.fillStyle = "#fff"; x.fillRect(X, Y, B(w), B(h)); x.restore();
-      x.save(); x.beginPath(); x.rect(X + pad, Y + pad, B(w) - 2 * pad, B(h) - 2 * pad); x.clip(); const iw = B(w) - 2 * pad, ih = B(h) - 2 * pad, k = Math.max(iw / im.width, ih / im.height), dw = im.width * k, dh = im.height * k;
-      x.drawImage(im, X + pad + (iw - dw) / 2, Y + pad + (ih - dh) * (im.height > im.width ? 0.4 : 0.5), dw, dh); x.restore(); };
+      const iw = B(w) - 2 * pad, ih = B(h) - 2 * pad, c = (s.bcrop || {})[im._key], z = c ? clamp(+c.z || 1, 1, 5) : 1, k = Math.max(iw / im.width, ih / im.height) * z, dw = im.width * k, dh = im.height * k;
+      // 位置: 指定があればその点が真ん中に来るように（はみ出さない範囲で）。なければ真ん中（縦長は少し上）
+      const ox = c ? clamp(iw / 2 - c.x * dw, iw - dw, 0) : (iw - dw) / 2, oy = c ? clamp(ih / 2 - c.y * dh, ih - dh, 0) : (ih - dh) * (im.height > im.width ? 0.4 : 0.5);
+      x.save(); x.beginPath(); x.rect(X + pad, Y + pad, iw, ih); x.clip(); x.drawImage(im, X + pad + ox, Y + pad + oy, dw, dh); x.restore();
+      (this._slots || (this._slots = [])).push({ key: im._key, X: X + pad, Y: Y + pad, W: iw, H: ih, dw, dh, ox, oy }); };
     const text = (t, cxm, tm, fsz, font = MIN, w = 600, col = "#3A3F4B") => { x.font = `${w} ${fsz * m}px ${font}`; x.fillStyle = col; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(t, BX + B(cxm), BY + B(tm)); };
     const kv = (l, t, rows) => rows.forEach(([k, v], i) => { const yy = BY + B(t + i * 3.4); x.textAlign = "left"; x.textBaseline = "middle"; x.font = `500 ${1.9 * m}px ${UI}`; x.fillStyle = "#7A7F89"; this.spaced(x, k, 0.1 * 1.9 * m, BX + B(l), yy); x.font = `700 ${2.2 * m}px ${MIN}`; x.fillStyle = ink; x.fillText(v, BX + B(l + 9.6), yy); });
     const rows = [["ジャンル", catNorm(s.cat)], ...(s.sizeMm ? [["横　幅", fmtCm(wmm)], ["高　さ", fmtCm(hmm)]] : s.pref ? [["場　所", s.pref]] : [])];
@@ -5272,12 +5314,18 @@ const PrintCard = {
       for (const [p, c] of parts) { x.fillStyle = c; x.fillText(p, cx, BY + B(25.6)); cx += x.measureText(p).width + gap; } }
     // 解説（ルビ付き。欄が埋まる大きさに自動でそろえる）
     const TX = 4.6 * m, TW = 53.8 * m, T0 = 41.6 * m, TMAX = 69.6 * m, units = this.ruby(String((txt != null ? txt : this.text) || "").trim() || this.fallback(s));
+    const wsU = (() => { const ws = this.wordStarts(units.map(u => u.t).join("")), out = []; let off = 0; for (const u of units) { out.push(ws.has(off)); off += [...u.t].length; } return out; })();
     let f = 2.4 * m, lines = [], lh = 0;
     const layout = (f, us = units) => { const rf = f * 0.46, out = [[]]; let w = 0; const NO = "、。，．）」』】〉》ー…・！？!?,.)]%ぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮヵヶ々", OPEN = "「『（【〈《(［";
-      for (const u of us) { if (u.t === "\n") { out.push([]); w = 0; continue; } x.font = `500 ${f}px ${UI}`; const bw = x.measureText(u.t).width; let uw = bw; if (u.r) { x.font = `500 ${rf}px ${UI}`; uw = Math.max(bw, x.measureText(u.r).width); }
-        const line = out[out.length - 1], cur = { ...u, w: uw, bw };
+      for (let ui = 0; ui < us.length; ui++) { const u = us[ui]; if (u.t === "\n") { out.push([]); w = 0; continue; } x.font = `500 ${f}px ${UI}`; const bw = x.measureText(u.t).width; let uw = bw; if (u.r) { x.font = `500 ${rf}px ${UI}`; uw = Math.max(bw, x.measureText(u.r).width); }
+        const line = out[out.length - 1], cur = { ...u, w: uw, bw, ui };
         if (line.length && w + uw > TW) {   // 枠からはみ出すときは改行。行頭に来てはいけない字（。、ゃ など）は前の字といっしょに次の行へ送る
-          const carry = [cur]; while (line.length > 1 && (NO.includes(carry[0].t) || OPEN.includes(line[line.length - 1].t))) carry.unshift(line.pop());
+          let carry = [cur]; while (line.length > 1 && (NO.includes(carry[0].t) || OPEN.includes(line[line.length - 1].t))) carry.unshift(line.pop());
+          // 単語の途中なら、行が4分の3以上うまっている限り、その単語ごと次の行へ（長い単語はそのまま切る）
+          if (!wsU[carry[0].ui]) { let p = line.length; while (p > 0 && !wsU[line[p - 1].ui]) p--; p--;
+            let rest = 0; for (let q = carry[carry.length - 1].ui + 1; q < us.length && !wsU[q] && us[q].t !== "\n"; q++) rest++;
+            const moved = line.length - p, keep = line.slice(0, Math.max(0, p)).reduce((t, c) => t + c.w, 0);
+            if (p > 0 && moved + carry.length + rest <= 9 && keep >= TW * 0.75) { carry = line.splice(p).concat(carry); while (line.length > 1 && OPEN.includes(line[line.length - 1].t)) carry.unshift(line.pop()); } }
           out.push(carry); w = carry.reduce((t, c) => t + c.w, 0); continue;
         }
         line.push(cur); w += uw; }
@@ -5378,7 +5426,7 @@ const PrintCard = {
     d.innerHTML = `<div class="pv-top"><div class="pv-t">印刷用（はがき・実寸）</div><button class="btn small" type="button" id="pcX">閉じる</button></div>
       <div class="pc-body"><div class="pc-prev"><img id="pcImg" alt="印刷用の画像（長押しでも保存できます）"><div class="pc-wait" id="pcWait"><span class="spin"></span> つくっています…</div></div>
         <label class="pc-l">裏面の解説<textarea id="pcText" rows="7" placeholder="この場所やスタンプのプチ情報"></textarea><small class="pc-rb">むずかしい読みは 首里城《しゅりじょう》 のように書くとルビになります</small></label>
-        <div class="pc-st"><span id="pcSt"></span> <button class="linkbtn" type="button" id="pcAi" hidden>AIのプチ情報にもどす</button><button class="linkbtn" type="button" id="pcRe" hidden>もう一度つくる</button><button class="linkbtn" type="button" id="pcFix" hidden>まちがいを直す</button></div>
+        <div class="pc-st"><span id="pcSt"></span> <button class="linkbtn" type="button" id="pcAi" hidden>AIのプチ情報にもどす</button><button class="linkbtn" type="button" id="pcRe" hidden>もう一度つくる</button><button class="linkbtn" type="button" id="pcFix" hidden>まちがいを直す</button><button class="linkbtn" type="button" id="pcCrop" hidden>写真の位置</button></div>
         <div class="row2"><button class="btn primary" type="button" id="pcSave">画像を保存</button><button class="btn" type="button" id="pcPdf">PDFを保存</button></div>
         <ol class="pc-how"><li><b>コンビニで印刷：</b>「画像を保存」→ セブン‐イレブンは「ネットプリント」、ローソン・ファミマは「ネットワークプリント」で、用紙を <b>はがき・カラー</b> にして印刷（実寸で出ます）</li><li><b>家のプリンターで印刷：</b>「PDFを保存」→ 無地のはがき用紙に <b>実際のサイズ（100%）</b> で印刷。「用紙に合わせる」などの拡大・縮小はオフに</li><li>右のものさしが50mmなら実寸です</li><li>コンビニのはがきは裏に郵便番号の枠があり、光に透かすとうっすら見えます（ふつうに持つぶんにはほぼ見えません）</li><li>作り方：点線で山折り → 内側をテープのりで貼る（水のりは乾かないので×） → 折り目側の線を先に切って、上から押さえて貼り直す → 残りの3辺を切る</li><li>切るときは白い線（重ね押しは金の線）を消すように線の上を切ると、ちょうど63×88mmになります。外の黒いトンボが目印です</li></ol></div>`;
     $("#pcX").onclick = () => { d.hidden = true; this.s = null; this.gen++; this.blob = null; if (this.burl) { URL.revokeObjectURL(this.burl); this.burl = null; } if (this.cv) { this.cv.width = this.cv.height = 0; this.cv = null; } d.innerHTML = ""; };
@@ -5390,6 +5438,7 @@ const PrintCard = {
     await this.render(); const w = $("#pcWait"); if (w) w.hidden = true;
     const st = t => { const e = $("#pcSt"); if (e && this.s === s) e.textContent = t; };
     const fx = $("#pcFix"); fx.onclick = () => { $("#pcX").click(); openTriviaFix(s, () => PrintCard.open(s)); };
+    const cb = $("#pcCrop"); cb.hidden = !((s.scenes && s.scenes.length) || s.hasPhoto || s.sheet); cb.onclick = () => { $("#pcX").click(); BackCrop.open(s, () => PrintCard.open(s)); };
     const useAi = t => { if (this.s !== s || this.edited) return; this.text = t; ta.value = t; fx.hidden = !Trivia.can(s); st("AIが書いたこの場所のプチ情報です（同じスタンプを持つ人と共通）。書きかえると、あなたのトレカだけ変わります。"); this.render(); };
     const rb = $("#pcAi"); rb.hidden = !(own && s.trivia);
     rb.onclick = () => { try { localStorage.removeItem("petalog.pt." + s.id); } catch (_) {} this.edited = false; rb.hidden = true; useAi(s.trivia); };
@@ -5474,7 +5523,7 @@ const CardView = {
       .catch(e => { clearTimeout(tm); if (told || (e && e.code !== "not_configured")) toast(Trivia.msg(e) + (Trivia.soft(e) ? "。もう一度裏返すと作り直します" : ""), 3600); });
   },
   async backURL(s) {
-    const txt = this.noteOf(s), key = [s.id, (s.scenes || []).join(","), s.hasPhoto ? 1 : 0, txt, s.name, s.place, s.date, s.cat, s.sizeMm, s.lat].join("|");
+    const txt = this.noteOf(s), key = [s.id, (s.scenes || []).join(","), s.hasPhoto ? 1 : 0, txt, s.name, s.place, s.date, s.cat, s.sizeMm, s.lat, JSON.stringify(s.bcrop || {})].join("|");
     if (this.cache.has(key)) return this.cache.get(key);
     const P = await PrintCard.assets(s); await PrintCard.fonts(`${s.name || ""}${s.place || ""}${s.pref || ""}${PrintCard.plain(txt)}No.0123456789押した日ジャンル横幅高さ場所ぺたろぐスタンプトレカ°'"NSEW${catNorm(s.cat)}`);
     const K = 16, cv = mkCanvas(63 * K, 88 * K); PrintCard.back(cv.getContext("2d"), s, P, cv.width, cv.height, txt);
@@ -5488,7 +5537,7 @@ const CardView = {
       <div class="tcv-slide" id="tcvSlide"><div class="tcv-shadow" id="tcvShadow"></div><div class="tcv-card" id="tcvCard">
         <div class="tcv-face tcv-front" id="tcvFront"></div><div class="tcv-face tcv-back" id="tcvBack"></div></div></div>
       <button class="tcv-nav next" type="button" id="tcvNext" aria-label="次のトレカ"><svg viewBox="0 0 24 24"><path d="m9 4 8 8-8 8"/></svg></button>
-      <button class="tcv-fix" type="button" id="tcvFix">プチ情報を直す</button>
+      <div class="tcv-fix"><button type="button" id="tcvFix">プチ情報を直す</button><button type="button" id="tcvCrop">写真の位置</button></div>
       <div class="tcv-hint" id="tcvHint">タップで裏返す ・ 指でかたむける ・ 外をタップでもどる</div>`;
     document.body.appendChild(d); this.el = d;
     const card = d.querySelector("#tcvCard");
@@ -5501,6 +5550,8 @@ const CardView = {
       this.noDragUntil = this.last + 350; if (this.front) { this.base = 0; return; } const proj = g.ry + clamp(g.v, -2.5, 2.5) * 0.55 * 150, b = Math.round(proj / 180) * 180; this.base = clamp(b, g.b0 - 180, g.b0 + 180); this.flipped(); };
     card.addEventListener("pointerup", up); card.addEventListener("pointercancel", up);
     d.addEventListener("click", e => { if (performance.now() < this.noDragUntil) return; if (e.target.closest(".tcv-card,.tcv-nav,.tcv-top,.tcv-fix")) return; this.close(); });
+    d.querySelector("#tcvCrop").onclick = () => { const s = this.items[this.i]; if (!s || this.front) return; const items = this.items; this.close(true); CardGrid.close(true);
+      BackCrop.open(findStamp(s.id) || s, () => { CardView.open(s.id, { items }); CardView.base = 180; }); };
     d.querySelector("#tcvFix").onclick = () => { const s = this.items[this.i]; if (!s || this.front || !Trivia.can(s)) return; const items = this.items; this.close(true); CardGrid.close(true);
       openTriviaFix(findStamp(s.id) || s, () => { CardView.open(s.id, { items }); CardView.base = 180; }); };
     d.querySelector("#tcvPrev").onclick = () => this.go(-1); d.querySelector("#tcvNext").onclick = () => this.go(1);
@@ -5537,7 +5588,9 @@ const CardView = {
     if (!this.el || this.el.hidden) return;
     const g = this.drag, idle = t - this.last;
     if (!g && idle > 7000 && Math.round(this.base / 180) % 2 !== 0) { this.base -= 180; this.last = t; }   // しばらくさわらないと表にもどる
-    const bk = !this.front && Math.round(this.base / 180) % 2 !== 0 && Trivia.can(this.items[this.i]); if (bk !== this._bk) { this._bk = bk; this.el.classList.toggle("bk", bk); }   // 裏を見ているときだけ「直す」
+    const cs = this.items[this.i], bk = !this.front && !!cs && !cs.other && !cs._pub && Math.round(this.base / 180) % 2 !== 0;
+    if (bk !== this._bk || cs !== this._bks) { this._bk = bk; this._bks = cs; this.el.classList.toggle("bk", bk);   // 裏を見ているときだけ「直す」「写真の位置」
+      if (cs) { this.el.querySelector("#tcvFix").hidden = !Trivia.can(cs); this.el.querySelector("#tcvCrop").hidden = !((cs.scenes && cs.scenes.length) || cs.hasPhoto || cs.sheet); } }
     const wob = g ? 0 : Math.min(1, idle / 1200);
     const ty = g ? g.ry : this.base + Math.sin(t / 1700) * 6 * wob, tx = g ? g.rx : Math.sin(t / 2300 + 1) * 3.5 * wob;
     const k = g ? 0.32 : 0.075, damp = g ? 0.62 : 0.8;
@@ -5674,6 +5727,60 @@ function openTriviaFix(s, after) {
   };
   $("#ptOwn").onclick = () => { closeSheet(); PrintCard.open(s); };
 }
+
+// カタカナ語の区切りに使う単語（長い順に当てる）
+const KATA_WORDS = ["インフォメーション", "ステーション", "ターミナル", "ゲートウェイ", "ミュージアム", "スカイライナー", "ポケモン", "スタンプ", "ラリー", "センター", "スクエア", "ストア", "ショップ", "カフェ", "ホテル", "モール", "プラザ", "ランド", "ワールド", "タワー", "パーク", "ホール", "ビル", "ハウス", "ギャラリー", "ガーデン", "マーケット", "キャンペーン", "コラボ", "フェア", "フェス", "イベント", "ツアー", "デジタル", "スターバックス", "コーヒー", "エアポート", "エアライン", "ライナー", "ロープウェイ", "ケーブルカー", "モノレール", "トンネル", "ブリッジ", "テラス", "シティ", "ストリート", "アベニュー", "ポート", "ベイ", "ヒルズ", "グランスタ", "エキナカ", "エキュート", "ルミネ", "アトレ", "ディズニー", "サンリオ", "ジブリ", "ハリー", "ポッター", "トイ", "ストーリー", "ミライドン", "ピカチュウ"];
+
+/* ---------- 裏の写真の位置（トリミング）: 指で動かす・2本指で拡大 ---------- */
+const BackCrop = {
+  el: null,
+  async open(s, after) {
+    const d = this.el || (this.el = document.createElement("div")); d.className = "bcv"; if (!d.parentNode) document.body.appendChild(d); d.hidden = false;
+    d.innerHTML = `<div class="bcv-top"><button class="btn small" type="button" id="bcX">やめる</button><b>裏の写真の位置</b><button class="btn small primary" type="button" id="bcOk">保存</button></div>
+      <div class="bcv-stage"><canvas id="bcCv" aria-label="裏面"></canvas><div class="tcv-wait" id="bcWait"><span class="spin"></span></div></div>
+      <div class="bcv-ctl"><div class="bcv-tabs" id="bcTabs"></div>
+        <label class="bcv-z"><span>大きさ</span><input type="range" id="bcZ" min="1" max="4" step="0.01" value="1"></label>
+        <p class="bcv-hint">写真を指で動かして位置を合わせます。2本指で広げると拡大できます。</p>
+        <button class="linkbtn" type="button" id="bcReset">この写真を元にもどす</button></div>`;
+    document.documentElement.classList.add("tcv-on");
+    const close = () => { d.hidden = true; d.innerHTML = ""; if ((!CardView.el || CardView.el.hidden) && (!CardGrid.el || CardGrid.el.hidden)) document.documentElement.classList.remove("tcv-on"); };
+    $("#bcX").onclick = () => { close(); if (after) after(); };
+    let P; try { P = await PrintCard.assets(s); await CardView.backURL(s); } catch (_) { toast("写真を読み込めませんでした"); close(); return; }
+    if (!$("#bcCv")) return;
+    if (!P.photos.length) { toast("裏に載せる写真がありません"); close(); if (after) after(); return; }
+    const crop = JSON.parse(JSON.stringify(s.bcrop || {})), txt = CardView.noteOf(s);
+    let sel = P.photos[0]._key, slots = [], raf = 0;
+    const cv = $("#bcCv"), K = 10, W = 63 * K, H = 88 * K; cv.width = W; cv.height = H; const x = cv.getContext("2d"); $("#bcWait").hidden = true;
+    const slot = () => slots.find(q => q.key === sel);
+    const draw = () => { raf = 0; PrintCard.back(x, { ...s, bcrop: crop }, P, W, H, txt); slots = (PrintCard._slots || []).slice();
+      const sl = slot(); if (sl) { x.save(); x.strokeStyle = "#FFD54A"; x.lineWidth = 4; x.setLineDash([12, 7]); x.strokeRect(sl.X + 2, sl.Y + 2, sl.W - 4, sl.H - 4); x.restore(); } };
+    const redraw = () => { if (!raf) raf = requestAnimationFrame(draw); };
+    const cur = () => { if (!crop[sel]) { const sl = slot(); crop[sel] = sl ? { x: (sl.W / 2 - sl.ox) / sl.dw, y: (sl.H / 2 - sl.oy) / sl.dh, z: 1 } : { x: 0.5, y: 0.5, z: 1 }; } return crop[sel]; };
+    const keep = c => { const sl = slot(); if (!sl) return; const z0 = (crop[sel] && crop[sel].z) || 1, dw = sl.dw * (c.z || 1) / z0, dh = sl.dh * (c.z || 1) / z0;   // はみ出さない範囲に
+      c.x = clamp(c.x, Math.min(0.5, sl.W / 2 / dw), Math.max(0.5, 1 - sl.W / 2 / dw)); c.y = clamp(c.y, Math.min(0.5, sl.H / 2 / dh), Math.max(0.5, 1 - sl.H / 2 / dh)); };
+    const tabs = () => { $("#bcTabs").innerHTML = P.photos.length > 1 ? P.photos.map((im, i) => `<button type="button" data-k="${esc(im._key)}" aria-pressed="${im._key === sel}">写真${i + 1}</button>`).join("") : ""; $("#bcZ").value = (crop[sel] && crop[sel].z) || 1; };
+    $("#bcTabs").onclick = e => { const b = e.target.closest("[data-k]"); if (!b) return; sel = b.dataset.k; tabs(); redraw(); };
+    $("#bcZ").oninput = e => { const c = cur(); c.z = clamp(+e.target.value, 1, 4); keep(c); redraw(); };
+    $("#bcReset").onclick = () => { delete crop[sel]; tabs(); redraw(); };
+    const pts = new Map(); let pinch = null;
+    const toCv = e => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * W / r.width, (e.clientY - r.top) * H / r.height]; };
+    cv.addEventListener("pointerdown", e => { e.preventDefault(); try { cv.setPointerCapture(e.pointerId); } catch (_) {} const p = toCv(e);
+      if (!pts.size) { const hit = slots.find(q => p[0] >= q.X && p[0] <= q.X + q.W && p[1] >= q.Y && p[1] <= q.Y + q.H); if (hit && hit.key !== sel) { sel = hit.key; tabs(); redraw(); } }
+      pts.set(e.pointerId, p); if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch = { d: Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, z: cur().z || 1 }; } });
+    cv.addEventListener("pointermove", e => { if (!pts.has(e.pointerId)) return; const p = toCv(e), o = pts.get(e.pointerId); pts.set(e.pointerId, p);
+      const sl = slot(); if (!sl) return; const c = cur();
+      if (pts.size >= 2 && pinch) { const [a, b] = [...pts.values()]; c.z = clamp(pinch.z * Math.hypot(a[0] - b[0], a[1] - b[1]) / pinch.d, 1, 4); $("#bcZ").value = c.z; }
+      else { c.x -= (p[0] - o[0]) / sl.dw; c.y -= (p[1] - o[1]) / sl.dh; }
+      keep(c); redraw(); });
+    const up = e => { pts.delete(e.pointerId); if (pts.size < 2) pinch = null; };
+    cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
+    cv.addEventListener("wheel", e => { e.preventDefault(); const c = cur(); c.z = clamp((c.z || 1) * (e.deltaY < 0 ? 1.08 : 1 / 1.08), 1, 4); $("#bcZ").value = c.z; keep(c); redraw(); }, { passive: false });
+    $("#bcOk").onclick = async () => { const b = $("#bcOk"); b.disabled = true; const st = findStamp(s.id) || s; st.bcrop = crop; s.bcrop = crop;
+      try { await Store.saveStamp(st); } catch (_) { toast("保存できませんでした。通信を確かめてもう一度どうぞ"); b.disabled = false; return; }
+      close(); toast("写真の位置を保存しました"); if (after) after(); };
+    tabs(); draw();
+  }
+};
 
 /* ================= boot ================= */
 addEventListener("resize", () => { Book.layout(); if (view === "fall") { Fall.dirty = true; Fall.stop(); Fall.start(); } if (view === "map") MapV.draw(); });
