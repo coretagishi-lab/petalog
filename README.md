@@ -1,7 +1,6 @@
-# ぺたろぐ
+# ぺたろぐ（引っ越しました）
 
-押した記念スタンプ（駅スタンプ・御朱印など）を写真から切り抜いて、トレカ・スタンプ帳・地図で集めるWebアプリ。
+ぺたろぐは **https://petalog-stamp.github.io/** に引っ越しました。
 
-- 公開URL: https://coretagishi-lab.github.io/petalog/
-- 画面: `index.html`（アプリ本体）、`cloud.js`（ログインとアカウント保存）、`vendor/supabase.js`
-- サーバー: Supabase（`supabase/` にテーブル定義とサーバー関数の控え）
+ソースは https://github.com/petalog-stamp/petalog-stamp.github.io にあります。
+このページは旧アドレスからの案内（ログイン状態・端末内の記録の引き継ぎ）だけを置いています。
