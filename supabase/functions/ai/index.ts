@@ -38,6 +38,8 @@ const json = (body: unknown, status = 200) =>
 
 const GENRES = ["駅", "空港", "道の駅", "インターチェンジ", "イベント", "施設"];
 const REFS = "500円玉=2.65cm、100円玉=2.26cm、10円玉=2.35cm、1円玉=2cm、カード（横の長さ）=8.56cm、カード（縦の長さ）=5.4cm";
+// Sonnet 5 などは「考える（thinking）」が最初から入っていて、そのぶん出力が増えて高くなる・本文が出ないことがある。短い文章には不要なので切る
+const noThink = (model: string) => (/haiku/i.test(model) ? {} : { thinking: { type: "disabled" } });
 const clip = (v: unknown, n: number) => String(v ?? "").replace(/[\u0000-\u001f]/g, " ").slice(0, n);
 
 type Img = { type: string; data: string };
@@ -170,7 +172,7 @@ async function askClaude(key: string, model: string, content: unknown[], uses: n
     const r = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model, max_tokens: uses > 0 ? 4000 : 1000, messages, ...(tools ? { tools } : {}) }),
+      body: JSON.stringify({ model, max_tokens: uses > 0 ? 2000 : 1000, messages, ...noThink(model), ...(tools ? { tools } : {}) }),
     });
     if (!r.ok) return { ok: false as const, status: r.status, detail: (await r.text().catch(() => "")).slice(0, 400) };
     const j = await r.json();
@@ -307,7 +309,7 @@ Deno.serve(async (req) => {
     r = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: job.model, max_tokens: 500, messages: [{ role: "user", content }] }),
+      body: JSON.stringify({ model: job.model, max_tokens: 500, messages: [{ role: "user", content }], ...noThink(job.model) }),
     });
   } catch {
     await admin.rpc("ai_refund", { p_user: uid });
