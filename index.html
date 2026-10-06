@@ -9,6 +9,10 @@ a,button{display:inline-block;margin-top:14px;padding:12px 22px;border-radius:99
 <p><b>ぺたろぐは新しいアドレスに引っ越しました</b><br>petalog-stamp.github.io</p>
 <p id="m">移動しています…</p>
 <div id="box" hidden><p>この端末だけに保存している記録があります。<br>ボタンを押すと新しいアドレスへ記録ごと引っ越します。</p><button id="go" type="button">記録ごと引っ越す</button></div>
+<div id="hs" hidden style="text-align:left;max-width:340px;margin:0 auto"><p><b>ホーム画面のアイコンを作り直してください（1回だけ）</b></p>
+<ol style="padding-left:1.3em;margin:0"><li>下の「新しいぺたろぐを開く」を押す</li><li>開いた画面の<b>右下のコンパスのマーク</b>を押して、Safariで開く</li><li>Safariの共有ボタン（□に↑）から<b>「ホーム画面に追加」</b></li><li>今のアイコンは長押しして削除</li></ol>
+<p style="font-size:14px;color:#555">新しいアイコンから開くと、上と下のバーなしで使えます。</p></div>
+<button id="hsGo" type="button" hidden>新しいぺたろぐを開く</button>
 <a id="lnk" href="https://petalog-stamp.github.io/">新しいぺたろぐを開く</a>
 </div>
 <script>
@@ -18,6 +22,15 @@ a,button{display:inline-block;margin-top:14px;padding:12px 22px;border-radius:99
    - 「この端末だけに保存」の記録（IndexedDB）があるときは、ボタンで新アドレスを開いて postMessage で渡す */
 (function () {
   var NEW = "https://petalog-stamp.github.io", m = document.getElementById("m");
+  // ホーム画面のアイコン（前のアドレス）から開いたときは、新しいアドレスはアプリの外あつかいになり上下にバーが出る → 作り直し方を先に見せる
+  var standalone = navigator.standalone === true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
+  if (standalone && !/access_token|refresh_token/.test(location.hash)) {
+    m.textContent = ""; document.getElementById("hs").hidden = false; document.getElementById("lnk").hidden = true;
+    var g = document.getElementById("hsGo"); g.hidden = false; g.onclick = function () { g.disabled = true; m.textContent = "移動しています…"; run(); };
+    return;
+  }
+  run();
+  function run() {
   if ("serviceWorker" in navigator) navigator.serviceWorker.getRegistrations().then(function (rs) { rs.forEach(function (r) { r.unregister(); }); }).catch(function () {});
   function go(u) { location.replace(u); }
   var q = location.search, h = location.hash;
@@ -54,6 +67,7 @@ a,button{display:inline-block;margin-top:14px;padding:12px 22px;border-radius:99
       if (e.data === "petalog-done") { mark(); document.getElementById("box").hidden = true; m.textContent = "引っ越し完了！新しいタブのぺたろぐをお使いください"; }
     });
     document.getElementById("go").onclick = function () { sent = false; w = window.open(NEW + "/migrate.html?popup=1", "_blank"); if (!w) m.textContent = "新しいタブが開けませんでした。ポップアップを許可してもう一度押してください"; };
+  }
   }
 })();
 </script></body></html>
