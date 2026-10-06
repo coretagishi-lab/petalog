@@ -816,6 +816,20 @@ select.sortsel{-webkit-appearance:none;appearance:none;padding-right:26px;backgr
 .vac-t{font:700 calc(var(--u) * 3.2)/1 var(--f-ui)}
 .vac-s{font:500 calc(var(--u) * 2.6)/1 var(--f-ui);color:var(--ai)}
 .tc-win{overflow:hidden}
+/* トレカを3列で並べて見る */
+.cgv{position:fixed;inset:0;z-index:85;display:flex;flex-direction:column;background:radial-gradient(ellipse at 50% 30%,rgba(40,46,60,.96),rgba(8,10,16,.98));opacity:0;transition:opacity .22s;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+.cgv.show{opacity:1}
+.cgv[hidden]{display:none}
+.cgv-head{display:flex;align-items:center;gap:10px;padding:14px 16px 6px;color:#fff}
+.cgv-t{flex:1;min-width:0}.cgv-t b{display:block;font:700 18px var(--f-ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cgv-t small{color:rgba(255,255,255,.65);font-size:12.5px}
+.cgv-acts{display:flex;gap:8px;flex-wrap:wrap;padding:4px 16px 10px}
+.cgv-acts .btn:not(.primary){background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3);color:#fff}
+.cgv-body{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:4px 4px 30px}
+.cgv-body .cards{padding:4px 10px 10px}
+.cgv-note{color:rgba(255,255,255,.55);font-size:12px;text-align:center;margin:6px 0 0}
+.tc-no.tag{font:700 calc(var(--u) * 2.3)/1 var(--f-ui);letter-spacing:.02em;max-width:60%;overflow:hidden;text-overflow:ellipsis}
+.tcv-edit[hidden]{display:none}
+html.tcv-on #toast{z-index:95}
 </style>
 
 <div id="app">
@@ -1350,7 +1364,7 @@ function cardHTML(s, no, o = {}) {   // スタンプトレカ（印刷の表と�
   const dms = (v, p, q) => { const z = Math.abs(v), d = Math.floor(z), mf = (z - d) * 60, mi = Math.floor(mf); return `${d}°${String(mi).padStart(2, "0")}'${String(Math.round((mf - mi) * 60) % 60).padStart(2, "0")}"${v >= 0 ? p : q}`; };
   const geo = s.lat != null && s.lng != null && !isNaN(s.lat) ? `${dms(+s.lat, "N", "S")} ${dms(+s.lng, "E", "W")}` : "";
   return `<button type="button" class="${cls}" data-open="${esc(s.id)}" style="--g:${gcol(g)}"><span class="pick" aria-hidden="true">✓</span>
-    <span class="tc-hd"><span class="tc-k">ぺたろぐ</span><span class="tc-no">No.${String(no || 0).padStart(4, "0")}</span></span>
+    <span class="tc-hd"><span class="tc-k">ぺたろぐ</span>${o.tag ? `<span class="tc-no tag">${esc(o.tag)}</span>` : `<span class="tc-no">${no ? "No." + String(no).padStart(4, "0") : ""}</span>`}</span>
     <span class="tc-win"><span class="tc-tab"><span class="tc-tabf"></span><svg viewBox="0 0 214 52" preserveAspectRatio="none" aria-hidden="true"><path d="M0 1 L19.5 51 L194.5 51 L214 1" fill="none" stroke="#C9A24A" stroke-width="2.4"/></svg><span class="tc-tabt"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${gicon(g)}"/></svg>${esc(g)}</span></span>
       ${s.overlap || isDigi(s) ? `<span class="tc-badges">${s.overlap ? '<span class="tc-badge">重ね押し</span>' : ""}${isDigi(s) ? '<span class="tc-badge dgs">デジスタ</span>' : ""}</span>` : ""}
       <span class="tc-art${L.A.sheet ? " sh" : ""}" style="left:${u(L.x)};top:${u(L.y)};width:${u(L.w)};height:${u(L.h)}"><img src="${L.A.url}" alt="" loading="lazy" draggable="false" data-ck="${esc(s.id)}"></span>
@@ -1731,7 +1745,7 @@ const MapV = {
       boxes.push([px - pinR - 3, py - 12 - pinR * 2 - 3, px + pinR + 3, py]); this.pinHits.push({ px, py: py - 12 - pinR, ...hit });
     };
     if (!this.pick) {
-      if (this.mode === "all" && this.pubs) this.pubs.forEach(p => { if (p.lat != null && p.by !== Store.uid && !p.miss) drawPin(+p.lat, +p.lng, p.thumb, C.shu, { pub: p._id }); });
+      if (this.mode === "all" && this.pubs) pubGroups(this.pubs).forEach(g => drawPin(g.lat, g.lng, g.top.thumb, C.shu, g.n > 1 ? { pgrp: g.ids } : { pub: g.top._id }, g.n));
       pinGroups().forEach(g => drawPin(g.lat, g.lng, g.top.cut, C.ai, g.n > 1 ? { grp: g.ids } : { id: g.top.id }, g.n));
     }
     if (this.me) { const [wx, wy] = W(this.me.lat, this.me.lng); const px = X(wx), py = Y(wy); x.beginPath(); x.arc(px, py, 14, 0, 7); x.fillStyle = "rgba(10,132,255,.18)"; x.fill(); x.beginPath(); x.arc(px, py, 7, 0, 7); x.fillStyle = "#0A84FF"; x.fill(); x.lineWidth = 2.5; x.strokeStyle = "#fff"; x.stroke(); }
@@ -1815,7 +1829,7 @@ const MapV = {
   },
   tap(px, py) {
     this.pickName = "";
-    if (!this.pick) for (const h of [...this.pinHits].reverse()) if (Math.hypot(px - h.px, py - h.py) < 20) { if (h.pub) openPub(h.pub); else if (h.grp) this.showGroup(h.grp); else openStamp("edit", findStamp(h.id)); return; }
+    if (!this.pick) for (const h of [...this.pinHits].reverse()) if (Math.hypot(px - h.px, py - h.py) < 20) { if (h.pub || h.pgrp) this.openPubs(h.pgrp || [h.pub]); else this.openMine(h.grp || [h.id]); return; }
     let best = null, bd = 20; for (const h of this.stHits) { const d = Math.hypot(px - h.px, py - h.py); if (d < bd) { bd = d; best = h; } }
     if (!best) { this.closeCard(); return; }
     const o = best.s || best.f;
@@ -1837,6 +1851,18 @@ const MapV = {
     card.querySelectorAll("[data-open]").forEach(b => b.onclick = () => openStamp("edit", findStamp(b.dataset.open)));
     $("#mcAdd").onclick = () => { const name = it.kind === "st" ? o.n + "駅" : o.n; const pre = { name, place: name, cat: it.kind === "st" ? "駅" : o.k === "air" ? "空港" : /道の駅/.test(o.n) ? "道の駅" : "施設", lat: +o.lat.toFixed(6), lng: +o.lng.toFixed(6), pref: prefAt(o.lat, o.lng) || "", locSrc: it.kind === "st" ? "駅の位置" : "施設の位置" }; this.closeCard(); openStamp("add", null, pre); };
     const mr = $("#mcRally"); if (mr) mr.onclick = () => { const r = rallyChoices(o)[0]; if (!r) return; Rally.cur = r.id; Rally.hl = o.n; show("rally"); Rally.render(); };
+  },
+  openMine(ids) {   // 自分のピン: 1まいならそのトレカ、何まいもあれば3列のトレカ（順番はばらばら）
+    const ss = ids.map(findStamp).filter(Boolean); if (!ss.length) return; const top = ss[0];
+    if (ss.length === 1) { CardView.open(top.id, { items: ss }); return; }
+    const nm = top.place || top.name;
+    CardGrid.open({ title: nm, items: shuffled(ss), at: top.lat != null ? { lat: +top.lat, lng: +top.lng } : null, add: { name: nm, place: top.place || nm, cat: catNorm(top.cat), lat: +(+top.lat).toFixed(6), lng: +(+top.lng).toFixed(6), pref: top.pref || prefAt(top.lat, top.lng) || "", locSrc: "地図で検索" } });
+  },
+  async openPubs(ids) {   // みんなのピン: 表だけのトレカ。何まいもあれば3列（順番はばらばら）
+    const P = ids.map(id => (this.pubs || []).find(p => p._id === id)).filter(Boolean); if (!P.length) return;
+    const cards = await pubCards(P);
+    if (cards.length === 1) { CardView.open(cards[0].id, { items: cards, front: true }); return; }
+    CardGrid.open({ title: P[0].place || P[0].name, items: shuffled(cards), front: true, pubs: true, at: { lat: +P[0].lat, lng: +P[0].lng } });
   },
   showGroup(ids) {
     const ss = ids.map(findStamp).filter(Boolean); if (!ss.length) return; const top = ss[0], card = $("#mapCard"), nm = top.place || top.name;
@@ -4326,7 +4352,7 @@ const PlacePick = {
 /* ---------- 公開設定 ---------- */
 const Privacy = {
   public: true, place: true, date: true, event: true, photo: false, memo: false, saved: false,
-  keys: [["place", "場所"], ["date", "日付"], ["event", "イベント・路線"], ["photo", "写真"], ["memo", "メモ"]],
+  keys: [["place", "場所"], ["date", "日付"], ["event", "イベント・路線"]],
   async load() {
     if (Store.mode !== "cloud") return;
     try { const p = await Store.getMeta("privacy"); if (p) { this.saved = true; for (const k of ["public", ...this.keys.map(x => x[0])]) if (typeof p[k] === "boolean") this[k] = p[k]; } } catch {}
@@ -4529,7 +4555,7 @@ const Others = {
   renderUser() {
     const box = this.box(); const r = this.user; if (!box || !r) return; const me = r.user_id === Store.uid;
     const L = [...this.stamps].sort((p, q) => (q.date || "").localeCompare(p.date || "") || (q.created || 0) - (p.created || 0));
-    const numOf = new Map([...this.stamps].sort((p, q) => (p.date || "9999").localeCompare(q.date || "9999") || (p.created || 0) - (q.created || 0)).map((s, i) => [s.id, +s.no > 0 ? +s.no : i + 1]));
+    const numOf = new Map([...this.stamps].sort((p, q) => (p.date || "9999").localeCompare(q.date || "9999") || (p.created || 0) - (q.created || 0)).map((s, i) => [s.id, +s.no > 0 ? +s.no : i + 1])); this.stamps.forEach(s => { s._no = numOf.get(s.id); });
     box.innerHTML = `<div class="ouser"><button class="btn small" type="button" id="oBack">‹ ランキング</button><div class="oname"><b>${esc(r.nick || "名無しのコレクター")}</b>${me ? "<em>あなた</em>" : ""}<small>${this.uLoading ? "" : L.length + " まい"}</small></div></div>
       <div class="subbar"><div class="seg" id="oTab" role="group" aria-label="表示"><button type="button" data-t="cards" aria-pressed="${this.tab === "cards"}">トレカ</button><button type="button" data-t="books" aria-pressed="${this.tab === "books"}">スタンプ帳</button></div></div>
       <div id="oBody"></div>`;
@@ -4542,7 +4568,7 @@ const Others = {
     if (this.tab === "cards") {
       const nOv = L.filter(s => s.overlap).length;
       body.innerHTML = L.length ? `${nOv ? `<p class="cap" style="padding:0 16px;margin:0 0 8px">重ね押し ${nOv} まい</p>` : ""}<div class="cards c${Grid.cols}" style="--cols:${Grid.cols}">${L.map(s => cardHTML(s, numOf.get(s.id), { cols: Grid.cols, other: true })).join("")}</div>` : `<div class="empty">公開しているトレカはありません。</div>`;
-      body.onclick = e => { const c = e.target.closest("[data-open]"); if (c) openOtherStamp(this.byId.get(c.dataset.open)); };
+      body.onclick = e => { const c = e.target.closest("[data-open]"); if (!c) return; const items = [...body.querySelectorAll("[data-open]")].map(el => this.byId.get(el.dataset.open)).filter(Boolean); CardView.open(c.dataset.open, { items, front: true }); };
     } else this.renderBooks(body);
   },
   async renderBooks(body) {
@@ -5040,10 +5066,13 @@ const YahooLS = {
 
 /* ---------- 地図: 同じ場所のスタンプをまとめる（30m以内、または同じ場所名で300m以内） ---------- */
 let _pg = { sig: "", groups: [] };
-function pinGroups() {
-  const L = list().filter(s => s.lat != null && s.lng != null && !isNaN(s.lat) && !isNaN(s.lng));
-  const sig = L.length + ":" + L.map(s => s.id + "," + s.lat + "," + s.lng + "," + (s.date || "") + "," + (s.cut || "").length + "," + (s.place || "")).join("|");
-  if (sig === _pg.sig) return _pg.groups;
+function pinGroups() { return groupNear(list(), _pg, s => s.id); }
+let _pbg = { sig: "", groups: [] };
+function pubGroups(P) { return groupNear(P.filter(p => p.lat != null && p.by !== Store.uid && !p.miss), _pbg, p => p._id); }
+function groupNear(src, cache, idOf) {
+  const L = src.filter(s => s.lat != null && s.lng != null && !isNaN(s.lat) && !isNaN(s.lng));
+  const sig = L.length + ":" + L.map(s => idOf(s) + "," + s.lat + "," + s.lng + "," + (s.date || "") + "," + (s.cut || s.thumb || "").length + "," + (s.place || "")).join("|");
+  if (sig === cache.sig) return cache.groups;
   const rk = s => (s.date || "") + "|" + String(s.created || 0).padStart(15, "0");
   const ord = [...L].sort((a, b) => rk(b) < rk(a) ? -1 : rk(b) > rk(a) ? 1 : 0);
   const m = (a, b) => { const dy = (a.lat - b.lat) * 110540, dx = (a.lng - b.lng) * 111320 * Math.cos(a.lat * Math.PI / 180); return Math.hypot(dx, dy); };
@@ -5051,10 +5080,10 @@ function pinGroups() {
   for (const s of ord) {
     const p = { lat: +s.lat, lng: +s.lng }, pn = norm(s.place || "");
     const g = groups.find(g => { const d = m(g, p); return d < 30 || (pn && g.pn === pn && d < 300); });
-    if (g) { g.ids.push(s.id); g.n++; } else groups.push({ lat: p.lat, lng: p.lng, pn, top: s, ids: [s.id], n: 1 });
+    if (g) { g.ids.push(idOf(s)); g.n++; } else groups.push({ lat: p.lat, lng: p.lng, pn, top: s, ids: [idOf(s)], n: 1 });
   }
-  _pg = { sig, groups: groups.reverse() };
-  return _pg.groups;
+  cache.sig = sig; cache.groups = groups.reverse();
+  return cache.groups;
 }
 
 /* ---------- 印刷用L判: 左に表（いまのトレカ）、右に裏（マンホールカード風の解説）、まん中に折り線 ---------- */
@@ -5418,34 +5447,37 @@ const CardView = {
     card.addEventListener("pointerdown", e => { e.preventDefault(); try { card.setPointerCapture(e.pointerId); } catch (_) {} this.drag = { x0: e.clientX, y0: e.clientY, b0: this.base, moved: false, ry: this.base, rx: 0, lx: e.clientX, lt: performance.now(), v: 0 }; this.last = performance.now(); });
     card.addEventListener("pointermove", e => { const g = this.drag; if (!g) return; const dx = e.clientX - g.x0, dy = e.clientY - g.y0; if (Math.abs(dx) + Math.abs(dy) > 7) g.moved = true;
       const now = performance.now(), dt = Math.max(1, now - g.lt); g.v = g.v * 0.6 + ((e.clientX - g.lx) / dt) * 0.4; g.lx = e.clientX; g.lt = now;
-      g.ry = g.b0 + dx * 0.55; g.rx = clamp(-dy * 0.28, -24, 24); this.last = now; });
+      g.ry = g.b0 + (this.front ? clamp(dx * 0.3, -40, 40) : dx * 0.55); g.rx = clamp(-dy * 0.28, -24, 24); this.last = now; });
     const up = () => { const g = this.drag; if (!g) return; this.drag = null; this.last = performance.now();
-      if (!g.moved) { this.base += 180; this.noDragUntil = this.last + 350; return; }
-      this.noDragUntil = this.last + 350; const proj = g.ry + clamp(g.v, -2.5, 2.5) * 0.55 * 150, b = Math.round(proj / 180) * 180; this.base = clamp(b, g.b0 - 180, g.b0 + 180); };
+      if (!g.moved) { this.noDragUntil = this.last + 350; if (this.front) { this.vy += 9; if (!this.toldFront) { this.toldFront = true; toast("裏面は、このスタンプをゲットした人だけのおたのしみです", 3200); } return; } this.base += 180; return; }
+      this.noDragUntil = this.last + 350; if (this.front) { this.base = 0; return; } const proj = g.ry + clamp(g.v, -2.5, 2.5) * 0.55 * 150, b = Math.round(proj / 180) * 180; this.base = clamp(b, g.b0 - 180, g.b0 + 180); };
     card.addEventListener("pointerup", up); card.addEventListener("pointercancel", up);
     d.addEventListener("click", e => { if (performance.now() < this.noDragUntil) return; if (e.target.closest(".tcv-card,.tcv-nav,.tcv-top")) return; this.close(); });
     d.querySelector("#tcvPrev").onclick = () => this.go(-1); d.querySelector("#tcvNext").onclick = () => this.go(1);
-    d.querySelector("#tcvEdit").onclick = () => { const s = findStamp(this.ids[this.i]); this.close(true); if (s) openStamp("edit", s); };
+    d.querySelector("#tcvEdit").onclick = () => { const s = this.items[this.i]; if (!s) return; if (s._pub) { this.close(true); CardGrid.close(true); openPub(s._pub); return; } if (this.front) return; this.close(true); CardGrid.close(true); openStamp("edit", findStamp(s.id) || s); };
     addEventListener("keydown", e => { if (!this.el || this.el.hidden) return; if (e.key === "Escape") this.close(); if (e.key === "ArrowLeft") this.go(-1); if (e.key === "ArrowRight") this.go(1); });
     return d;
   },
-  open(id) {
-    const items = (Grid.items && Grid.items.length ? Grid.items : list()).map(s => s.id); this.ids = items.includes(id) ? items : [id]; this.i = this.ids.indexOf(id);
+  open(id, opts = {}) {   // opts.items: 並べるトレカ（なければ一覧の並び） / opts.front: 表だけ（みんなのトレカ）
+    let items = opts.items || (Grid.items && Grid.items.length ? Grid.items : list()); if (!items.some(x => x.id === id)) { const s0 = findStamp(id); items = s0 ? [s0] : items; }
+    this.items = items; this.front = !!opts.front; this.i = Math.max(0, items.findIndex(x => x.id === id)); this.ids = items.map(x => x.id);
     const d = this.ensure(); d.hidden = false; document.documentElement.classList.add("tcv-on"); requestAnimationFrame(() => d.classList.add("show"));
-    if (!lsGet("petalog.tcvHint")) { lsSet("petalog.tcvHint", "1"); d.querySelector("#tcvHint").classList.add("on"); setTimeout(() => d.querySelector("#tcvHint").classList.remove("on"), 4200); }
+    if (!lsGet("petalog.tcvHint")) { lsSet("petalog.tcvHint", "1"); d.querySelector("#tcvHint").textContent = this.front ? "指でかたむける ・ 外をタップでもどる" : "タップで裏返す ・ 指でかたむける ・ 外をタップでもどる"; d.querySelector("#tcvHint").classList.add("on"); setTimeout(() => d.querySelector("#tcvHint").classList.remove("on"), 4200); }
     this.show(0); this.rx = 8; this.ry = -18; this.vx = this.vy = 0; this.last = performance.now();
     if (!this.raf) { const tick = t => { this.step(t); this.raf = requestAnimationFrame(tick); }; this.raf = requestAnimationFrame(tick); }
   },
   close(quick) {
-    const d = this.el; if (!d || d.hidden) return; d.classList.remove("show"); document.documentElement.classList.remove("tcv-on");
+    const d = this.el; if (!d || d.hidden) return; d.classList.remove("show"); if (!CardGrid.el || CardGrid.el.hidden) document.documentElement.classList.remove("tcv-on");
     setTimeout(() => { d.hidden = true; cancelAnimationFrame(this.raf); this.raf = 0; }, quick ? 0 : 260);
   },
   go(dir) { const j = this.i + dir; if (j < 0 || j >= this.ids.length) return; this.i = j; this.show(dir); },
   show(dir) {
-    const s = findStamp(this.ids[this.i]); if (!s) return; const d = this.el, my = ++this.seq;
-    d.querySelector("#tcvFront").innerHTML = cardHTML(s, PrintCard.no(s)).replace(/^<button type="button"/, "<div").replace(/<\/button>$/, "</div>");
-    const bk = d.querySelector("#tcvBack"); bk.innerHTML = `<div class="tcv-wait"><span class="spin"></span></div>`; bk.style.setProperty("--g", gcol(catNorm(s.cat)));
-    this.backURL(s).then(u => { if (my === this.seq) bk.innerHTML = `<img src="${u}" alt="裏面">`; }).catch(() => { if (my === this.seq) bk.innerHTML = `<div class="tcv-wait">裏面を読み込めませんでした</div>`; });
+    const s = this.items[this.i]; if (!s) return; const d = this.el, my = ++this.seq;
+    d.querySelector("#tcvFront").innerHTML = cardHTML(s, s._no != null ? s._no : PrintCard.no(s), { tag: s._tag }).replace(/^<button type="button"/, "<div").replace(/<\/button>$/, "</div>");
+    const bk = d.querySelector("#tcvBack"); bk.style.setProperty("--g", gcol(catNorm(s.cat)));
+    if (this.front) bk.innerHTML = "";
+    else { bk.innerHTML = `<div class="tcv-wait"><span class="spin"></span></div>`; this.backURL(s).then(u => { if (my === this.seq) bk.innerHTML = `<img src="${u}" alt="裏面">`; }).catch(() => { if (my === this.seq) bk.innerHTML = `<div class="tcv-wait">裏面を読み込めませんでした</div>`; }); }
+    const ed = d.querySelector("#tcvEdit"); ed.hidden = this.front && !s._pub; ed.textContent = s._pub ? "置き場所" : "編集";
     d.querySelector("#tcvCount").textContent = `${this.i + 1} / ${this.ids.length}`;
     d.querySelector("#tcvPrev").disabled = this.i <= 0; d.querySelector("#tcvNext").disabled = this.i >= this.ids.length - 1;
     this.base = 0; this.drag = null; this.last = performance.now(); this.fv = null;
@@ -5497,6 +5529,30 @@ const Numbers = {
     } catch (_) {} finally { this.busy = false; }
   }
 };
+
+/* ---------- トレカを3列で並べて見る（地図で同じ場所に何枚もあるとき・みんなのピン） ---------- */
+const shuffled = a => { const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+const CardGrid = {
+  el: null, items: [], opts: {},
+  open(o) {   // o: { title, items, front, at: {lat,lng}, add: preset, pubs }
+    this.opts = o; this.items = o.items;
+    const d = this.el || (this.el = document.createElement("div")); d.className = "cgv"; if (!d.parentNode) document.body.appendChild(d);
+    d.innerHTML = `<div class="cgv-head"><div class="cgv-t"><b>${esc(o.title || "")}</b><small>${o.items.length}まい${o.front ? "・みんなのトレカ" : ""}</small></div><button class="tcv-edit" type="button" id="cgvX">閉じる</button></div>
+      <div class="cgv-acts">${o.at ? `<a class="btn small" href="${gmapsDir(o.at.lat, o.at.lng)}" target="_blank" rel="noopener">道案内</a>` : ""}${o.pubs ? `<button class="btn small" type="button" id="cgvInfo">置き場所・情報</button>` : ""}${o.add ? `<button class="btn small primary" type="button" id="cgvAdd">＋ ここのスタンプを追加</button>` : ""}</div>
+      <div class="cgv-body"><div class="cards c3" style="--cols:3">${o.items.map(s => cardHTML(s, s._no != null ? s._no : PrintCard.no(s), { cols: 3, tag: s._tag })).join("")}</div>${o.front ? `<p class="cgv-note">裏面は、このスタンプをゲットした人だけのおたのしみ</p>` : ""}</div>`;
+    d.hidden = false; document.documentElement.classList.add("tcv-on"); requestAnimationFrame(() => d.classList.add("show"));
+    d.querySelector("#cgvX").onclick = () => this.close();
+    const inf = d.querySelector("#cgvInfo"); if (inf) inf.onclick = () => { const p = o.items[0]; this.close(true); if (p && p._pub) openPub(p._pub); };
+    const ad = d.querySelector("#cgvAdd"); if (ad) ad.onclick = () => { this.close(true); openStamp("add", null, o.add); };
+    d.querySelector(".cgv-body").onclick = e => { const c = e.target.closest("[data-open]"); if (c) CardView.open(c.dataset.open, { items: this.items, front: !!o.front }); else if (e.target.classList.contains("cgv-body")) this.close(); };
+  },
+  close(quick) { const d = this.el; if (!d || d.hidden) return; d.classList.remove("show"); if (!CardView.el || CardView.el.hidden) document.documentElement.classList.remove("tcv-on"); setTimeout(() => { d.hidden = true; }, quick ? 0 : 220); }
+};
+// みんなの記録（地図のピン）を「表だけのトレカ」にする
+async function pubCards(P) {
+  return Promise.all(P.map(async p => { let w = 1, h = 1; try { if (p.thumb) { const im = await loadImg(p.thumb); w = im.naturalWidth || 1; h = im.naturalHeight || 1; } } catch (_) {}
+    return { id: "pub:" + p._id, _pub: p._id, _tag: p.nick || "名無しのコレクター", _no: null, name: p.name, place: p.place, pref: p.pref, cat: p.cat, date: p.date, lat: p.lat, lng: p.lng, sizeMm: p.sizeMm, cut: p.thumb || "", cw: w, ch: h, type: p.type, other: true }; }));
+}
 
 /* ================= boot ================= */
 addEventListener("resize", () => { Book.layout(); if (view === "fall") { Fall.dirty = true; Fall.stop(); Fall.start(); } if (view === "map") MapV.draw(); });

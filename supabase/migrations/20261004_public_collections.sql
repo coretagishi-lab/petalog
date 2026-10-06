@@ -33,13 +33,13 @@ language sql stable security definer set search_path = '' as $$
   select s.id, s.cut_path, jsonb_strip_nulls(
       jsonb_build_object('name', s.data->'name', 'cat', s.data->'cat', 'medium', s.data->'medium', 'type', s.data->'type',
         'overlap', s.data->'overlap', 'multi', s.data->'multi', 'colors', s.data->'colors', 'shape', s.data->'shape',
-        'cw', s.data->'cw', 'ch', s.data->'ch', 'sheet', s.data->'sheet', 'sheetView', s.data->'sheetView', 'corner', s.data->'corner', 'sizeMm', s.data->'sizeMm', 'created', s.data->'created',
+        'cw', s.data->'cw', 'ch', s.data->'ch', 'sheet', s.data->'sheet', 'sheetView', s.data->'sheetView', 'corner', s.data->'corner', 'sizeMm', s.data->'sizeMm', 'created', s.data->'created', 'no', s.data->'no', 'cutRot', s.data->'cutRot',
         'nv', to_jsonb(coalesce(jsonb_array_length(case when jsonb_typeof(s.data->'visits') = 'array' then s.data->'visits' end), 0)))
       || case when (v.v->>'date')::boolean then jsonb_build_object('date', s.data->'date') else '{}'::jsonb end
       || case when (v.v->>'place')::boolean then jsonb_build_object('place', s.data->'place', 'pref', s.data->'pref', 'lat', s.data->'lat', 'lng', s.data->'lng') else '{}'::jsonb end
       || case when (v.v->>'event')::boolean then jsonb_build_object('event', s.data->'event', 'line', s.data->'line', 'rally', s.data->'rally') else '{}'::jsonb end
-      || case when (v.v->>'memo')::boolean then jsonb_build_object('memo', s.data->'memo') else '{}'::jsonb end
-      || case when (v.v->>'photo')::boolean then jsonb_build_object('hasPhoto', s.data->'hasPhoto', 'scenes', s.data->'scenes') else '{}'::jsonb end)
+  -- トレカの「表」だけ。裏の写真・メモ・解説は共有しない（ゲットした人だけのおたのしみ）
+      )
   from public.stamps s, v
   where (select auth.uid()) is not null and s.user_id = p_user
     and (v.v->>'public')::boolean
@@ -53,7 +53,7 @@ language sql stable security definer set search_path = '' as $$
     and (public.pv_of(p_user)->>'public')::boolean
 $$;
 
--- files of public collections: cut images of public cards; page backgrounds; stamp photos only when "写真" is shown
+-- files of public collections: cut images of public cards (表), sheet photos shown on the front, page backgrounds. 押した写真・追加した写真（裏）は共有しない
 create or replace function public.can_see_file(p_bucket text, p_name text) returns boolean
 language plpgsql stable security definer set search_path = '' as $$
 declare owner uuid; k text; v jsonb;
@@ -71,9 +71,7 @@ begin
     if k like 'sh\_%' then
       return exists (select 1 from public.stamps s where s.user_id = owner and k = ('sh_' || s.id) and coalesce((s.data->>'priv')::boolean, false) = false);
     end if;
-    if not (v->>'photo')::boolean then return false; end if;
-    return exists (select 1 from public.stamps s where s.user_id = owner and coalesce((s.data->>'priv')::boolean, false) = false
-      and (k = ('ph_' || s.id) or k like ('sc\_' || s.id || '\_%')));
+    return false;
   end if;
   return false;
 end $$;
